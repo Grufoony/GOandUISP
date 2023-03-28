@@ -1,10 +1,11 @@
 import pandas as pd
 # races dictionary: GoAndSwim -> dbMeeting
-styles = { ' F ':'Delfino', ' D ':'Dorso', ' R ':'Rana', ' S ':'SL'}
+styles = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
 
 input = pd.read_excel("input.xlsx")
-# keep only rows with boolean set to T (valid times)
-input.drop(input.loc[input['Boolean'] != ' T '].index, inplace=True)
+# keep only rows with boolean set to T (valid times) and strip spaces in style column
+input.drop(input.loc[input['Boolean'].str.strip() != 'T'].index, inplace=True)
+input['Style'] = input['Style'].str.strip()
 #keeping only interesting data
 input = input[['Name', 'Year', 'Sex', 'Style', 'Distance', 'Time', 'Team']]
 # replacing style names
@@ -14,14 +15,13 @@ input['Race'] = input['Distance'].astype(str) + " " + input['Style']
 input = input.groupby(['Name', 'Year', 'Sex', 'Team'])[['Race', 'Time']].agg(list)
 
 out_columns = ['Cognome', 'Nome', 'Anno', 'Sesso']
+output = pd.DataFrame(columns=out_columns)
 
 max_len = input['Race'].apply(len).max()
 for i in range(max_len):
     out_columns.append('Gara' + str(i+1))
     out_columns.append('Tempo' + str(i+1))
 out_columns.append('Societa')
-
-output = pd.DataFrame(columns=out_columns)
 
 # split name column into name and surname keeping only the first two words
 name_column = input.index.get_level_values('Name')
