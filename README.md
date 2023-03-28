@@ -1,5 +1,5 @@
 # GOandUISP
-Script Python per la conversione di file .xlsx da output GoAndSwim a input per il portale online UISP.
+Script Python per la conversione di file _.xlsx_ da output GoAndSwim a input per il portale online UISP.
 
 ## Guida rapida
 Per utilizzare il programma è necessario scaricare l'eseguibile dalla [sezione release](https://github.com/Grufoony/GOandUISP/releases) o in alternativa [qui](https://github.com/Grufoony/GOandUISP/releases/download/v1.0.0/GOandUISP.exe).
