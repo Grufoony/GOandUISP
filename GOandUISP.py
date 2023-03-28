@@ -1,8 +1,9 @@
 import pandas as pd
 # races dictionary: GoAndSwim -> dbMeeting
 styles = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
-
+in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean'] + [''] * 6
 input = pd.read_excel("input.xlsx")
+input.columns=in_columns
 # keep only rows with boolean set to T (valid times) and strip spaces in style column
 input.drop(input.loc[input['Boolean'].str.strip() != 'T'].index, inplace=True)
 input['Style'] = input['Style'].str.strip()
@@ -31,12 +32,12 @@ output['Cognome'] = name_column.get_level_values(0)
 
 output['Anno'] = input.index.get_level_values('Year')
 output['Sesso'] = input.index.get_level_values('Sex')
-output['Societa'] = input.index.get_level_values('Team')
 
 for index, race, time in zip(range(len(input['Race'])), input['Race'] , input['Time']):
     for i in range(len(race)):
         output.loc[index, 'Gara' + str(i+1)] = race[i]
         output.loc[index, 'Tempo' + str(i+1)] = time[i]
 
+output['Societa'] = input.index.get_level_values('Team')
 # print output on xlsx file
 output.to_excel("output.xlsx", index=False)
