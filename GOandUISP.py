@@ -32,7 +32,7 @@ output_file['Societa'] = input_file.index.get_level_values('Team')
 athletes = input_file.index
 
 # split name column into words and ask name/surname by input if number of words is greater than 2
-for index, full_name in zip(range(len(athletes)), athletes.get_level_values('Name')):
+for index, full_name in enumerate(athletes.get_level_values('Name')):
     if len(full_name.split()) > 2:
         print("Inserisci i dati di " + str(athletes[index]) + ": ")
         surname = input("Inserisci il cognome: ")
