@@ -31,14 +31,19 @@ output_file['Societa'] = input_file.index.get_level_values('Team')
 # get unique athletes
 athletes = input_file.index
 
-# split name column into words and ask name/surname by input if number of words is greater than 2
+# split name column into words and ask surname in input if the number of words is greater than 2
 for index, full_name in enumerate(athletes.get_level_values('Name')):
     if len(full_name.split()) > 2:
         print("Inserisci i dati di " + str(athletes[index]) + ": ")
-        surname = input("Inserisci il cognome: ")
-        name = input("Inserisci il nome: ")
-        output_file.loc[index, 'Nome'] = name.upper()
-        output_file.loc[index, 'Cognome'] = surname.upper()
+        while True:
+            surname = input("Inserisci il COGNOME: ").upper()
+            if surname in full_name.upper():
+                name = full_name.upper().replace(surname + ' ', '')
+                break
+            else:
+                print("COGNOME non presente nel nome, riprova: ")
+        output_file.loc[index, 'Nome'] = name
+        output_file.loc[index, 'Cognome'] = surname
     else:
         name_column = full_name.split()
         output_file.loc[index, 'Nome'] = name_column[1].upper()
