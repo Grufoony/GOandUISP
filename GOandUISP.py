@@ -56,3 +56,9 @@ for index, race, time in zip(range(len(input_file['Race'])), input_file['Race'] 
 
 # print output_file on xlsx file
 output_file.to_excel("output.xlsx", index=False)
+
+# now print how many athletes are in each team and the total
+print(output_file['Societa'].value_counts())
+print("TOTALE ATLETI PARTECIPANTI: " + str(len(output_file.index)))
+
+input("Premere un tasto qualsiasi per chiudere la finestra...")
