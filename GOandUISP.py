@@ -1,9 +1,24 @@
-import pandas as pd
+version = "1.2.1"
 # races dictionary: GoAndSwim -> dbMeeting
 styles = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
-in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean'] + [''] * 6
+in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
+
+print("GOandUISP v" + version + " by Gregorio Berselli.")
+print("Per informazioni su come utilizzare il programma si consulti la repository GitHub: https://github.com/Grufoony/GOandUISP\n\n")
+
+import pandas as pd
 input_file = pd.read_excel("input.xlsx")
 input_file.columns=in_columns
+
+# now print how many athletes are in each team and the total (partecipating medals)
+counter_df = input_file.drop(input_file.loc[input_file['Absent'].str.strip() == 'A'].index, inplace=False)
+counter_df = counter_df.groupby(['Name', 'Year', 'Sex', 'Team'])[['Time']].agg(list)
+
+print(counter_df.index.get_level_values('Team').value_counts())
+print("TOTALE ATLETI PARTECIPANTI: " + str(len(counter_df.index)))
+
+input("Premere un tasto qualsiasi per continuare...")
+
 # keep only rows with boolean set to T (valid times) and strip spaces in style column
 input_file.drop(input_file.loc[input_file['Boolean'].str.strip() != 'T'].index, inplace=True)
 input_file['Style'] = input_file['Style'].str.strip()
@@ -56,9 +71,3 @@ for index, race, time in zip(range(len(input_file['Race'])), input_file['Race'] 
 
 # print output_file on xlsx file
 output_file.to_excel("output.xlsx", index=False)
-
-# now print how many athletes are in each team and the total
-print(output_file['Societa'].value_counts())
-print("TOTALE ATLETI PARTECIPANTI: " + str(len(output_file.index)))
-
-input("Premere un tasto qualsiasi per chiudere la finestra...")
