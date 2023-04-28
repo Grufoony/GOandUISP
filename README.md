@@ -6,6 +6,8 @@ Script Python per la conversione di file _.xlsx_ da output GoAndSwim a input per
 ### Ottenere l'eseguibile
 Per utilizzare il programma è necessario ottenere l'eseguibile _GOandUISP.exe_: [scrivimi una mail](mailto:gregorio.berselli@studio.unibo.it).
 
+Un'alternativa all'utilizzo dell'eseguibile (che a Windows di base non piace) è [Google Collab](https://colab.research.google.com/github/Grufoony/GOandUISP/blob/main/GOandUISP.ipynb)
+
 ### Preparare il file di input
 1. Creare un file excel (_.xlsx_) chiamato _input_, e aprirlo con Excel. Questo file deve essere vuoto per il momento
 2. Una volta aperto il file _input.xlsx_, aprire il file _.GAS_ della manifestazione che si vuole convertire
