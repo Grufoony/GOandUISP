@@ -1,9 +1,9 @@
-version = "1.2.1"
+__version__ = "1.2.1"
 # races dictionary: GoAndSwim -> dbMeeting
 styles = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
 in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
 
-print("GOandUISP v" + version + " by Gregorio Berselli.")
+print("GOandUISP v" + __version__ + " by Gregorio Berselli.")
 print("Per informazioni su come utilizzare il programma si consulti la repository GitHub: https://github.com/Grufoony/GOandUISP\n\n")
 
 import pandas as pd
