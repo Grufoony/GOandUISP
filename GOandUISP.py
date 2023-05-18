@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 # races dictionary: GoAndSwim -> dbMeeting
 __styles__ = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
 __in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print("GOandUISP v" + __version__ + " by Gregorio Berselli.")
     print("Per informazioni su come utilizzare il programma si consulti la repository GitHub: https://github.com/Grufoony/GOandUISP\n\n")
     for f in os.listdir():
-        if f.endswith(".xlsx"):
+        if f.endswith(".xlsx") or f.endswith(".xls"):
             convert(f)
             print("File " + f + " convertito con successo!")
     print("Tutti i file presenti nella cartella sono stati convertiti con successo!")
