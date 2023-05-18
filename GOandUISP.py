@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 # races dictionary: GoAndSwim -> dbMeeting
 __styles__ = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
 __in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
@@ -69,7 +69,7 @@ def convert(file_name):
             output_file.loc[index, 'Tempo' + str(i+1)] = time[i]
 
     # print output_file on xlsx file
-    output_file.to_excel(file_name, index=False)
+    output_file.to_excel(os.path.splitext(file_name)[0], index=False)
 
 if __name__ == "__main__":
     print("GOandUISP v" + __version__ + " by Gregorio Berselli.")
@@ -77,5 +77,7 @@ if __name__ == "__main__":
     for f in os.listdir():
         if f.endswith(".xlsx") or f.endswith(".xls"):
             convert(f)
+            if not f.endswith(".xlsx"):
+                os.remove(f)
             print("File " + f + " convertito con successo!")
     print("Tutti i file presenti nella cartella sono stati convertiti con successo!")
