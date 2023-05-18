@@ -69,7 +69,7 @@ def convert(file_name):
             output_file.loc[index, 'Tempo' + str(i+1)] = time[i]
 
     # print output_file on xlsx file
-    output_file.to_excel(os.path.splitext(file_name)[0], index=False)
+    output_file.to_excel(os.path.splitext(file_name)[0] + '.xlsx', index=False)
 
 if __name__ == "__main__":
     print("GOandUISP v" + __version__ + " by Gregorio Berselli.")
