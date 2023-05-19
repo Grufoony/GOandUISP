@@ -1,17 +1,21 @@
 import pandas as pd
 import os
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 # races dictionary: GoAndSwim -> dbMeeting
-__styles__ = { 'F':'Delfino', 'D':'Dorso', 'R':'Rana', 'S':'SL'}
-__in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
+__styles__ = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL'}
+__in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
+    [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
+
 
 def convert(file_name):
     input_file = pd.read_excel(file_name)
-    input_file.columns=__in_columns__
+    input_file.columns = __in_columns__
 
     # now print how many athletes are in each team and the total (partecipating medals)
-    counter_df = input_file.drop(input_file.loc[input_file['Absent'].str.strip() == 'A'].index, inplace=False)
-    counter_df = counter_df.groupby(['Name', 'Year', 'Sex', 'Team'])[['Time']].agg(list)
+    counter_df = input_file.drop(
+        input_file.loc[input_file['Absent'].str.strip() == 'A'].index, inplace=False)
+    counter_df = counter_df.groupby(['Name', 'Year', 'Sex', 'Team'])[
+        ['Time']].agg(list)
 
     print(counter_df.index.get_level_values('Team').value_counts())
     print("TOTALE ATLETI PARTECIPANTI: " + str(len(counter_df.index)))
@@ -19,15 +23,19 @@ def convert(file_name):
     input("Premere un tasto qualsiasi per continuare...")
 
     # keep only rows with boolean set to T (valid times) and strip spaces in style column
-    input_file.drop(input_file.loc[input_file['Boolean'].str.strip() != 'T'].index, inplace=True)
+    input_file.drop(
+        input_file.loc[input_file['Boolean'].str.strip() != 'T'].index, inplace=True)
     input_file['Style'] = input_file['Style'].str.strip()
-    #keeping only interesting data
-    input_file = input_file[['Name', 'Year', 'Sex', 'Style', 'Distance', 'Time', 'Team']]
+    # keeping only interesting data
+    input_file = input_file[['Name', 'Year', 'Sex',
+                             'Style', 'Distance', 'Time', 'Team']]
     # replacing style names
     input_file = input_file.replace({'Style': __styles__})
-    input_file['Race'] = input_file['Distance'].astype(str) + " " + input_file['Style']
+    input_file['Race'] = input_file['Distance'].astype(
+        str) + " " + input_file['Style']
     # groupby races and times, i.e. get unique athletes
-    input_file = input_file.groupby(['Name', 'Year', 'Sex', 'Team'])[['Race', 'Time']].agg(list)
+    input_file = input_file.groupby(['Name', 'Year', 'Sex', 'Team'])[
+        ['Race', 'Time']].agg(list)
 
     # creates empty output database with columns' names
     out_columns = ['Cognome', 'Nome', 'Anno', 'Sesso']
@@ -63,13 +71,14 @@ def convert(file_name):
             output_file.loc[index, 'Nome'] = name_column[1].upper()
             output_file.loc[index, 'Cognome'] = name_column[0].upper()
 
-    for index, race, time in zip(range(len(input_file['Race'])), input_file['Race'] , input_file['Time']):
+    for index, race, time in zip(range(len(input_file['Race'])), input_file['Race'], input_file['Time']):
         for i in range(len(race)):
             output_file.loc[index, 'Gara' + str(i+1)] = race[i]
             output_file.loc[index, 'Tempo' + str(i+1)] = time[i]
 
     # print output_file on xlsx file
     output_file.to_excel(os.path.splitext(file_name)[0] + '.xlsx', index=False)
+
 
 if __name__ == "__main__":
     print("GOandUISP v" + __version__ + " by Gregorio Berselli.")
