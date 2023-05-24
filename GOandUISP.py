@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 # races dictionary: GoAndSwim -> dbMeeting
 __styles__ = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL'}
 __in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
@@ -8,7 +8,7 @@ __in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
 
 
 def convert(file_name):
-    input_file = pd.read_excel(file_name)
+    input_file = pd.read_excel(file_name, header=None)
     input_file.columns = __in_columns__
 
     # now print how many athletes are in each team and the total (partecipating medals)
