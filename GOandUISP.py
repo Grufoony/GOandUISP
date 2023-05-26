@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-__version__ = "1.3.6"
+__version__ = "1.3.7"
 # races dictionary: GoAndSwim -> dbMeeting
 _styles = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL', 'M': 'M'}
 _in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
@@ -28,6 +28,11 @@ def convert(file_name):
         new_cols = ['Name', 'Year', 'Sex', '', 'Distance', 'Team', 'Style'] + \
             [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
         input_file.columns = new_cols
+
+    # correctly format names
+    input_file['Name'] = input_file['Name'].str.strip()
+    input_file['Name'] = input_file['Name'].str.replace('  ', ' ')
+    print(input_file.head())
 
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = input_file.drop(
