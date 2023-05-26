@@ -1,19 +1,33 @@
 import pandas as pd
 import os
-__version__ = "1.3.5"
+__version__ = "1.3.6"
 # races dictionary: GoAndSwim -> dbMeeting
-__styles__ = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL'}
-__in_columns__ = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
+_styles = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL', 'M': 'M'}
+_in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
     [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
 
 
 def convert(file_name):
     input_file = pd.read_excel(file_name, header=None)
+    # drop staffette rows
+    input_file = input_file.drop(
+        input_file[input_file[2] == 0].index).reset_index(drop=True)
     # drop nomiStaffette column, if exists
     if len(input_file.columns) == 21:
         input_file.drop(input_file.columns[1], axis=1, inplace=True)
 
-    input_file.columns = __in_columns__
+    input_file.columns = _in_columns
+    # check if style column is correct
+    incorrect_styles = False
+    for style in input_file.Style.unique():
+        if style not in list(_styles.keys()):
+            incorrect_styles = True
+            break
+
+    if incorrect_styles:
+        new_cols = ['Name', 'Year', 'Sex', '', 'Distance', 'Team', 'Style'] + \
+            [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
+        input_file.columns = new_cols
 
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = input_file.drop(
@@ -34,7 +48,7 @@ def convert(file_name):
     input_file = input_file[['Name', 'Year', 'Sex',
                              'Style', 'Distance', 'Time', 'Team']]
     # replacing style names
-    input_file = input_file.replace({'Style': __styles__})
+    input_file = input_file.replace({'Style': _styles})
     input_file['Race'] = input_file['Distance'].astype(
         str) + " " + input_file['Style']
     # groupby races and times, i.e. get unique athletes
