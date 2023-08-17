@@ -1,13 +1,15 @@
 import pandas as pd
-import os
+
 
 class converter:
-    __version__ = (1,4,0)
+    __version__ = (1, 4, 1)
     # races dictionary: GoAndSwim -> dbMeeting
     _styles = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL', 'M': 'M'}
     _in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
         [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
-    
+    _in_columns_relayrace = ['Name', 'Year', 'Sex', '', 'Distance', 'Team', 'Style'] + \
+        [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
+
     '''
     This function splits a full name into name and surname.
     If the full name is composed by more than two words, it asks the user to insert the surname.
@@ -23,7 +25,7 @@ class converter:
         A tuple containing the name and the surname.
     '''
     @staticmethod
-    def _split_names(full_name : str) -> tuple:
+    def _split_names(full_name: str) -> tuple:
         if len(full_name.split()) > 2:
             print("Inserisci i dati di " + str(full_name) + ": ")
             while True:
@@ -38,7 +40,6 @@ class converter:
             name_column = full_name.split()
             return name_column[1].upper(), name_column[0].upper()
 
-    
     '''
     This function is the main function of the class. It takes a file name as input and returns a pandas dataframe.
     The output dataset has the correct column labels, the correct style names and the correct names format.
@@ -54,7 +55,7 @@ class converter:
         The converted dataframe.
     '''
     @classmethod
-    def format(cls, df : pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+    def format(cls, df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         # drop staffette rows
         df = df.drop(
             df[df[2] == 0].index).reset_index(drop=True)
@@ -71,15 +72,13 @@ class converter:
                 break
 
         if incorrect_styles:
-            new_cols = ['Name', 'Year', 'Sex', '', 'Distance', 'Team', 'Style'] + \
-                [''] * 3 + ['Time'] + [''] * 2 + ['Boolean', 'Absent'] + [''] * 5
-            df.columns = new_cols
+            df.columns = cls._in_columns_relayrace
 
         df['Name'] = df['Name'].str.strip()
         df['Name'] = df['Name'].str.replace('  ', ' ')
 
         return df
-    
+
     '''
     This function prints how many athletes are in each team and the total (partecipating medals).
 
@@ -93,16 +92,16 @@ class converter:
     None
     '''
     @classmethod
-    def print_counts(cls, df : pd.core.frame.DataFrame) -> None:
-         # now print how many athletes are in each team and the total (partecipating medals)
+    def print_counts(cls, df: pd.core.frame.DataFrame) -> None:
+        # now print how many athletes are in each team and the total (partecipating medals)
         counter_df = df.drop(
             df.loc[df['Absent'].str.strip() == 'A'].index, inplace=False)
         counter_df = counter_df.groupby(['Name', 'Year', 'Sex', 'Team'])[
             ['Time']].agg(list)
-        
+
         print(counter_df.index.get_level_values('Team').value_counts())
         print("TOTALE ATLETI PARTECIPANTI: " + str(len(counter_df.index)))
-    
+
     '''
     This function takes a dataframe as input and returns a new dataframe with the correct format.
 
@@ -117,14 +116,14 @@ class converter:
         The converted dataframe.
     '''
     @classmethod
-    def groupdata(cls, df : pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+    def groupdata(cls, df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         # keep only rows with boolean set to T (valid times) and strip spaces in style column
         df.drop(
             df.loc[df['Boolean'].str.strip() != 'T'].index, inplace=True)
         df['Style'] = df['Style'].str.strip()
         # keeping only interesting data
         df = df[['Name', 'Year', 'Sex',
-                                'Style', 'Distance', 'Time', 'Team']]
+                 'Style', 'Distance', 'Time', 'Team']]
         # replacing style names
         df = df.replace({'Style': cls._styles})
         df['Race'] = df['Distance'].astype(
@@ -151,7 +150,7 @@ class converter:
 
         # split name column into words and ask surname in input if the number of words is greater than 2
         for index, full_name in enumerate(athletes.get_level_values('Name')):
-            name, surname = cls._split_names(full_name = full_name)
+            name, surname = cls._split_names(full_name=full_name)
             out_df.loc[index, 'Nome'] = name
             out_df.loc[index, 'Cognome'] = surname
 
