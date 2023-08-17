@@ -22,6 +22,7 @@ class converter:
     tuple
         A tuple containing the name and the surname.
     '''
+    @staticmethod
     def _split_names(full_name : str) -> tuple:
         if len(full_name.split()) > 2:
             print("Inserisci i dati di " + str(full_name) + ": ")
