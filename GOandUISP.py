@@ -1,8 +1,38 @@
 import pandas as pd
+import os
+'''
+This class contains the functions to convert the data from the GOandSwim format to the UISP format.
+
+Attributes
+----------
+__version__ : tuple
+    The version of the class.
+__author__ : str
+    The author of the class.
+_styles : dict
+    A dictionary containing the styles' names.
+_in_columns : list
+    A list containing the names of the columns of the input file.
+_in_columns_relayrace : list
+    A list containing the name sof the columns of the input file (relay races).
+
+Methods
+-------
+_split_names(full_name: str) -> tuple
+    This function splits a full name into name and surname.
+format(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
+    This function is the main function of the class. It takes a file name as input and returns a pandas dataframe.
+    The output dataset has the correct column labels, the correct style names and the correct names format.
+print_counts(df: pd.core.frame.DataFrame) -> None
+    This function prints how many athletes are in each team and the total (partecipating medals).
+groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
+    This function takes a dataframe as input and returns a new dataframe with the correct format.
+'''
 
 
 class converter:
     __version__ = (1, 4, 2)
+    __author__ = "Gregorio Berselli"
     # races dictionary: GoAndSwim -> dbMeeting
     _styles = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL', 'M': 'M'}
     _in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
@@ -163,3 +193,57 @@ class converter:
                 out_df.loc[index, 'Tempo' + str(i+1)] = time[i]
 
         return out_df
+
+
+'''
+This class contains the main function of the program, which communicates as io interface with the user.
+
+Attributes
+----------
+__version__ : tuple
+    The version of the class.
+__author__ : str
+    The author of the class.
+
+Methods
+-------
+convert_folder() -> None
+    This function converts all suitable files in the current folder using the converter class.
+'''
+
+
+class io:
+    __version__ = (1, 0, 0)
+    __author__ = "Gregorio Berselli"
+    '''
+    This function converts all suitable files in the current folder using the converter class.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    None
+    '''
+    @staticmethod
+    def convert_folder() -> None:
+        print("GOandUISP v" + (''.join(str(converter.__version__))
+                               ).replace(',', '.') + " by " + converter.__author__ + '.')
+        print("Per informazioni su come utilizzare il programma si consulti il repository GitHub: https://github.com/Grufoony/GOandUISP\n\n")
+        for f in os.listdir():
+            if f.endswith(".xlsx") or f.endswith(".xls"):
+                df = pd.read_excel(f, header=None)
+                # check if the file has 20 or 21 columns
+                if len(df.columns) < 20 or len(df.columns) > 21:
+                    print("Il file " + f +
+                          " non è nel formato corretto, verrà saltato.")
+                    continue
+                df = converter.format(df=df)
+                converter.print_counts(df=df)
+                input("Premi INVIO per continuare...")
+                out = converter.groupdata(df=df)
+                out.to_excel(f, index=False)
+                if not f.endswith(".xlsx"):
+                    os.remove(f)
+                print("File " + f + " convertito con successo!")
+        print("Tutti i file presenti nella cartella sono stati convertiti con successo!")
