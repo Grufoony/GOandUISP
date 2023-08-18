@@ -4,7 +4,7 @@ Script Python per la conversione di file _.xlsx_ da output GoAndSwim a input per
 ## Guida rapida
 
 ### Ottenere l'eseguibile
-Lo script si può eseguire sulla piattaforma [Google Colab](https://colab.research.google.com/github/Grufoony/GOandUISP/blob/main/GOandUISP.ipynb).
+Lo script si può eseguire sulla piattaforma [Google Colab](https://colab.research.google.com/github/Grufoony/GOandUISP/blob/main/main.ipynb).
 
 Per qualsiasi problema [scrivimi una mail](mailto:gregorio.berselli@studio.unibo.it).
 
