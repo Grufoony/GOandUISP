@@ -2,7 +2,7 @@ import pandas as pd
 
 
 class converter:
-    __version__ = (1, 4, 1)
+    __version__ = (1, 4, 2)
     # races dictionary: GoAndSwim -> dbMeeting
     _styles = {'F': 'Delfino', 'D': 'Dorso', 'R': 'Rana', 'S': 'SL', 'M': 'M'}
     _in_columns = ['Name', 'Year', 'Sex', '', 'Distance', 'Style', 'Team'] + \
@@ -56,10 +56,10 @@ class converter:
     '''
     @classmethod
     def format(cls, df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
-        # drop staffette rows
+        # drop relay races rows
         df = df.drop(
             df[df[2] == 0].index).reset_index(drop=True)
-        # drop nomiStaffette column, if exists
+        # drop relay races names column, if exists
         if len(df.columns) == 21:
             df.drop(df.columns[1], axis=1, inplace=True)
 
@@ -74,7 +74,10 @@ class converter:
         if incorrect_styles:
             df.columns = cls._in_columns_relayrace
 
+        # strip spaces in some columns
         df['Name'] = df['Name'].str.strip()
+        df['Team'] = df['Team'].str.strip()
+        # replace double spaces with single space in names
         df['Name'] = df['Name'].str.replace('  ', ' ')
 
         return df
