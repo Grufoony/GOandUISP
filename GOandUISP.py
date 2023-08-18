@@ -227,6 +227,7 @@ class io:
     '''
     @staticmethod
     def convert_folder() -> None:
+        os.system('cls' if os.name == 'nt' else 'clear')
         print("GOandUISP v" + (''.join(str(converter.__version__))
                                ).replace(',', '.') + " by " + converter.__author__ + '.')
         print("Per informazioni su come utilizzare il programma si consulti il repository GitHub: https://github.com/Grufoony/GOandUISP\n\n")
