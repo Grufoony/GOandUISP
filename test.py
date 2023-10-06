@@ -63,7 +63,7 @@ def test_print_counts(capfd):
     out = converter.format(df)
     converter.print_counts(out)
     out, err = capfd.readouterr()
-    assert out == 'Team\nAosta        3\nCatanzaro    1\nName: count, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 4\n'
+    assert out == 'Aosta        3\nCatanzaro    1\nName: Team, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 4\n'
 
 
 '''
