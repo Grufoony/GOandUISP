@@ -1,3 +1,5 @@
+import sys # nopep8
+sys.path.append('.') # nopep8
 import pandas as pd
 import numpy as np
 from GOandUISP import converter

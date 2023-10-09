@@ -31,6 +31,7 @@ jobs:
     - name: Formatting with autopep8
       run: |
         autopep8 -i *.py
+        autopep8 -i */*.py
     - name: Test with pytest
       run: |
-        pytest test.py
+        pytest
