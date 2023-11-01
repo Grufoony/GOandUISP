@@ -4,7 +4,8 @@ import pandas as pd
 
 class converter:
     """
-    This class contains the functions to convert the data from the GOandSwim format to the UISP format.
+    This class contains the functions to convert the data from the GOandSwim format to the UISP
+    format.
 
     Attributes
     ----------
@@ -24,12 +25,16 @@ class converter:
     _split_names(full_name: str) -> tuple
         This function splits a full name into name and surname.
     format(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
-        This function is the main function of the class. It takes a file name as input and returns a pandas dataframe.
-        The output dataset has the correct column labels, the correct style names and the correct names format.
+        This function is the main function of the class.
+        It takes a file name as input and returns a pandas dataframe.
+        The output dataset has the correct column labels, the correct style names and the correct
+        names format.
     print_counts(df: pd.core.frame.DataFrame) -> None
-        This function prints how many athletes are in each team and the total (partecipating medals).
+        This function prints how many athletes are in each team and the total
+        (partecipating medals).
     groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
-        This function takes a dataframe as input and returns a new dataframe with the correct format.
+        This function takes a dataframe as input and returns a new dataframe with the correct
+        format.
     """
 
     __version__ = (1, 4, 2)
@@ -57,7 +62,7 @@ class converter:
     def _split_names(full_name: str) -> tuple:
         """
         This function splits a full name into name and surname.
-        If the full name is composed by more than two words, it asks the user to insert the surname.
+        If the full name is composed by more than two words,it asks the user to insert the surname.
 
         Parameters
         ----------
@@ -79,15 +84,17 @@ class converter:
                 else:
                     print("COGNOME non presente nel nome, riprova: ")
             return name, surname
-        else:
-            name_column = full_name.split()
-            return name_column[1].upper(), name_column[0].upper()
+
+        name_column = full_name.split()
+        return name_column[1].upper(), name_column[0].upper()
 
     @classmethod
     def format(cls, df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         """
-        This function is the main function of the class. It takes a file name as input and returns a pandas dataframe.
-        The output dataset has the correct column labels, the correct style names and the correct names format.
+        This function is the main function of the class.
+        It takes a file name as input and returns a pandas dataframe.
+        The output dataset has the correct column labels,the correct style names and the correct
+        names format.
 
         Parameters
         ----------
@@ -127,7 +134,8 @@ class converter:
     @classmethod
     def print_counts(cls, df: pd.core.frame.DataFrame) -> None:
         """
-        This function prints how many athletes are in each team and the total (partecipating medals).
+        This function prints how many athletes are in each team and the total
+        (partecipating medals).
 
         Parameters
         ----------
@@ -152,7 +160,8 @@ class converter:
     @classmethod
     def groupdata(cls, df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         """
-        This function takes a dataframe as input and returns a new dataframe with the correct format.
+        This function takes a dataframe as input and returns a new dataframe with the correct
+        format.
 
         Parameters
         ----------
@@ -192,7 +201,8 @@ class converter:
         # get unique athletes
         athletes = df.index
 
-        # split name column into words and ask surname in input if the number of words is greater than 2
+        # split name column into words and ask surname in input if the number of words
+        # is greater than 2
         for index, full_name in enumerate(athletes.get_level_values("Name")):
             name, surname = cls._split_names(full_name=full_name)
             out_df.loc[index, "Nome"] = name
@@ -208,7 +218,8 @@ class converter:
 
 class io:
     """
-    This class contains the main function of the program, which communicates as io interface with the user.
+    This class contains the main function of the program, which communicates as io interface with
+    the user.
 
     Attributes
     ----------
@@ -246,7 +257,8 @@ class io:
             + "."
         )
         print(
-            "Per informazioni su come utilizzare il programma si consulti il repository GitHub: https://github.com/Grufoony/GOandUISP\n\n"
+            "Per informazioni su come utilizzare il programma si consulti il repository"
+            " GitHub: https://github.com/Grufoony/GOandUISP\n\n"
         )
         for f in os.listdir():
             if f.endswith(".xlsx") or f.endswith(".xls"):
