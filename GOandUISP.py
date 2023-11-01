@@ -81,8 +81,7 @@ class converter:
                 if surname in full_name.upper():
                     name = full_name.upper().replace(surname + " ", "")
                     break
-                else:
-                    print("COGNOME non presente nel nome, riprova: ")
+                print("COGNOME non presente nel nome, riprova: ")
             return name, surname
 
         name_column = full_name.split()
@@ -208,10 +207,10 @@ class converter:
             out_df.loc[index, "Nome"] = name
             out_df.loc[index, "Cognome"] = surname
 
-        for index, race, time in zip(range(len(df["Race"])), df["Race"], df["Time"]):
-            for i in range(len(race)):
-                out_df.loc[index, "Gara" + str(i + 1)] = race[i]
-                out_df.loc[index, "Tempo" + str(i + 1)] = time[i]
+        for athlete_index, row in enumerate(df.itertuples()):
+            for race_index, race in enumerate(zip(row.Race, row.Time)):
+                out_df.loc[athlete_index, "Gara" + str(race_index + 1)] = race[0]
+                out_df.loc[athlete_index, "Tempo" + str(race_index + 1)] = race[1]
 
         return out_df
 

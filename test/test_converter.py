@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 from GOandUISP import converter
 
+"""
+This file contains the tests for the converter.py module.
+"""
+
 
 def test_split_names():
     """
@@ -40,7 +44,8 @@ def test_format_relay():
     This function tests the converter.format function in the relay case.
     GIVEN a dataframe
     WHEN the function is called
-    THEN it returns a dataframe with the correct column labels, the correct style names and the correct names format.
+    THEN it returns a dataframe with the correct column labels, the correct style names and the
+    correct names format.
     """
     df = pd.read_excel("datasets/format_relay_test.xlsx", header=None)
     out = converter.format(df)
@@ -66,10 +71,11 @@ def test_print_counts(capfd):
     df = pd.read_excel("datasets/print_counts_test.xlsx", header=None)
     out = converter.format(df)
     converter.print_counts(out)
-    out, err = capfd.readouterr()
+    out, _ = capfd.readouterr()
     assert (
         out
-        == "Team\nAosta        3\nCatanzaro    1\nName: count, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 4\n"
+        == "Team\nAosta        3\nCatanzaro    1\nName: count"
+        + ", dtype: int64\nTOTALE ATLETI PARTECIPANTI: 4\n"
     )
 
 
