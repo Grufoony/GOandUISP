@@ -26,12 +26,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install autopep8 pytest
+        pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Formatting with autopep8
-      run: |
-        autopep8 -i *.py
-        autopep8 -i */*.py
     - name: Test with pytest
       run: |
-        pytest
+        make pytest
