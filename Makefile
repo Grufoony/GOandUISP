@@ -1,4 +1,4 @@
-.PHONY: test, format
+.PHONY: test format
 export PYTHONPATH := .
 
 test:
