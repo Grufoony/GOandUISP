@@ -1,4 +1,4 @@
-.PHONY: test, format
+.PHONY: test format
 export PYTHONPATH := .
 
 test:
@@ -6,3 +6,6 @@ test:
 
 format:
 	black .
+
+run:
+	python3 main.py
