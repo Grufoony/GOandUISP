@@ -84,7 +84,8 @@ def test_groupdata():
     This function tests the Utils.groupdata function.
     GIVEN a dataframe
     WHEN the function is called
-    THEN it returns a dataframe with the correct format."""
+    THEN it returns a dataframe with the correct format.
+    """
     df = pd.read_excel("datasets/format_test.xlsx", header=None)
     out = Utils.format(df)
     out = Utils.groupdata(out)
@@ -127,3 +128,23 @@ def test_groupdata():
         " 01'24\"80 ",
         "Aosta",
     ]
+
+
+def test_fill_categories():
+    """
+    This function tests the Utils.fill_categories function.
+    GIVEN a dataframe
+    WHEN the function is called
+    THEN it returns a dataframe with the correct categories.
+    """
+    df = pd.read_csv("datasets/fill_categories-staffette.csv", sep=";")
+    df_data = pd.read_csv("datasets/fill_categories.csv", sep=";")
+
+    # glue together 'Cognome' and 'Nome' of df_data
+    df_data["Nome"] = df_data["Cognome"] + " " + df_data["Nome"]
+    # make 'Nome' column lowercase
+    df_data["Nome"] = df_data["Nome"].str.lower()
+    df_data["Nome"] = df_data["Nome"].str.strip()
+
+    out = Utils.fill_categories(df, df_data)
+    assert out["Categoria"].values[0] == "A"
