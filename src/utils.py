@@ -143,7 +143,7 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     # check if style column is correct
     incorrect_styles = False
     for style in df.Style.unique():
-        if style.split()[0] not in list(STYLES.keys()):
+        if style.split()[0] not in list(STYLES):
             incorrect_styles = True
             break
 
