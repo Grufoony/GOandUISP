@@ -22,7 +22,7 @@ convert_folder() -> None
 
 def accumulate() -> None:
     """
-    This function converts all suitable files in the current folder using the Utils class.
+    This function accumulates all suitable files in the current folder using the Utils class.
 
     Parameters
     ----------
@@ -31,23 +31,17 @@ def accumulate() -> None:
     -------
     None
     """
-    # print(
-    #     "GOandUISP v"
-    #     + ("".join(str(utils.__version__))).replace(",", ".")
-    #     + " by "
-    #     + utils.__author__
-    #     + "."
-    # )
-    # print(
-    #     "Per informazioni su come utilizzare il programma si consulti il repository"
-    #     " GitHub: https://github.com/Grufoony/GOandUISP\n\n"
-    # )
+    changed_files = []
     for f in os.listdir():
         if f.endswith(".xlsx") or f.endswith(".xls"):
             df = pd.read_excel(f, header=None)
             # check if the file has 20 or 21 columns
             if len(df.columns) < 20 or len(df.columns) > 21:
-                print("Il file " + f + " non è nel formato corretto, verrà saltato.")
+                print(
+                    "Il file "
+                    + f
+                    + " non è formattato correttamente per l'accumulo e verrà saltato."
+                )
                 continue
             df = Utils.format(df=df)
             Utils.print_counts(df=df)
@@ -56,22 +50,40 @@ def accumulate() -> None:
             out.to_excel(f, index=False)
             if not f.endswith(".xlsx"):
                 os.remove(f)
-            print("File " + f + " convertito con successo!")
-    print("Tutti i file presenti nella cartella sono stati convertiti con successo!")
+            print(f'Il file "{f}" è stato convertito con successo!')
+            changed_files.append(f)
+    if len(changed_files) == 0:
+        print("Non ci sono file da accumulare nella cartella corrente.")
+    else:
+        print("I file accumulati sono: ")
+        for f in changed_files:
+            print(f)
 
 
 def find_categories() -> None:
-    for file in os.listdir():
-        if "-staffette" in file:
-            df_staffette = pd.read_csv(file, sep=";")
-            df_data = pd.read_csv(file.replace("-staffette", ""), sep=";")
+    """
+    This function finds the categories of all suitable files in the current folder using the Utils class.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+    changed_files = []
+    for f in os.listdir():
+        if "-staffette" in f:
+            df = pd.read_csv(f, sep=";")
+            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
             # check if the file has 12 columns
-            if len(df_staffette.columns) != 12:
-                print("Il file " + file + " non è nel formato corretto, verrà saltato.")
+            if len(df.columns) != 12:
+                print(
+                    f'Il file "{f}" non è formattato correttamente per la creazione automatica delle categorie e verrà saltato.'
+                )
                 continue
 
             # drop last two cols
-            df_staffette = df_staffette.drop(df_staffette.columns[-2:], axis=1)
+            df = df.drop(df.columns[-2:], axis=1)
 
             # glue together 'Cognome' and 'Nome' of df_data
             df_data["Nome"] = df_data["Cognome"] + " " + df_data["Nome"]
@@ -91,14 +103,14 @@ def find_categories() -> None:
                 "A2",
                 "A3",
             ]
-            df_staffette.columns = IN_COLS
+            df.columns = IN_COLS
 
             # clear column 'Categoria'
-            df_staffette["Categoria"] = ""
+            df["Categoria"] = ""
 
-            out_df = Utils.fill_categories(df_staffette, df_data)
+            out_df = Utils.fill_categories(df, df_data)
 
-            df_staffette.insert(0, "CategoriaVera", out_df["Categoria"])
+            df.insert(0, "CategoriaVera", out_df["Categoria"])
 
             OUT_COLS = [
                 "CategoriaVera",
@@ -113,6 +125,14 @@ def find_categories() -> None:
                 "Atleta",
                 "Atleta",
             ]
-            df_staffette.columns = OUT_COLS
+            df.columns = OUT_COLS
 
-            df_staffette.to_csv("tests.csv", sep=";", index=False)
+            df.to_csv(f, sep=";", index=False)
+            changed_files.append(f)
+
+    if len(changed_files) == 0:
+        print("Non ci sono file in cui creare le categorie nella cartella corrente.")
+    else:
+        print("I file con categorie generate automaticamente sono: ")
+        for f in changed_files:
+            print(f)
