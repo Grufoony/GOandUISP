@@ -1,4 +1,4 @@
-import src.Formatter as GOandUISP
+from src import formatter as GOandUISP
 
 __version__ = "2023.11.02"
 __author__ = "Gregorio Berselli"

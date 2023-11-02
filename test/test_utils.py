@@ -1,34 +1,34 @@
+"""
+This file contains the tests for the utils.py module.
+"""
+
 import pandas as pd
 import numpy as np
-from src import Utils
-
-"""
-This file contains the tests for the Utils.py module.
-"""
+from src import utils
 
 
 def test_split_names():
     """
-    This function tests the Utils.split_names function.
+    This function tests the utils.split_names function.
     GIVEN a full name
     WHEN the function is called
     THEN it returns a tuple containing the name and the surname.
     """
-    assert Utils.split_names("Rossi Mario") == ("MARIO", "ROSSI")
+    assert utils.split_names("Rossi Mario") == ("MARIO", "ROSSI")
 
 
-def test_format():
+def test_reformat():
     """
-    This function tests the Utils.format function.
+    This function tests the utils.reformat function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
-    df = pd.read_excel("datasets/format_test.xlsx", header=None)
-    out = Utils.format(df)
-    assert out.columns.tolist() == Utils.ACCUMULATE_INPUT_COLUMNS
-    assert (set(out.Style.unique())) == set(Utils.STYLES.keys())
+    df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
+    out = utils.reformat(df)
+    assert out.columns.tolist() == utils.ACCUMULATE_INPUT_COLUMNS
+    assert (set(out.Style.unique())) == set(utils.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
         "ROSSI MARIO",
@@ -39,18 +39,18 @@ def test_format():
     assert set(out["Team"].tolist()) == set(["Aosta", "Catanzaro"])
 
 
-def test_format_relay():
+def test_reformat_relay():
     """
-    This function tests the Utils.format function in the relay case.
+    This function tests the utils.reformat function in the relay case.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
-    df = pd.read_excel("datasets/format_relay_test.xlsx", header=None)
-    out = Utils.format(df)
-    assert out.columns.tolist() == Utils.ACCUMULATE_INPUT_COLUMNS_RELAYRACE
-    assert (set(out.Style.unique())) == set(Utils.STYLES.keys())
+    df = pd.read_excel("datasets/reformat_relay_test.xlsx", header=None)
+    out = utils.reformat(df)
+    assert out.columns.tolist() == utils.ACCUMULATE_INPUT_COLUMNS_RELAYRACE
+    assert (set(out.Style.unique())) == set(utils.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
         "ROSSI MARIO",
@@ -63,14 +63,14 @@ def test_format_relay():
 
 def test_print_counts(capfd):
     """
-    This function tests the Utils.print_counts function.
+    This function tests the utils.print_counts function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it prints how many athletes are in each team and the total (partecipating medals).
     """
     df = pd.read_excel("datasets/print_counts_test.xlsx", header=None)
-    out = Utils.format(df)
-    Utils.print_counts(out)
+    out = utils.reformat(df)
+    utils.print_counts(out)
     out, _ = capfd.readouterr()
     assert (
         out
@@ -81,14 +81,14 @@ def test_print_counts(capfd):
 
 def test_groupdata():
     """
-    This function tests the Utils.groupdata function.
+    This function tests the utils.groupdata function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct format.
     """
-    df = pd.read_excel("datasets/format_test.xlsx", header=None)
-    out = Utils.format(df)
-    out = Utils.groupdata(out)
+    df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
+    out = utils.reformat(df)
+    out = utils.groupdata(out)
     assert out.columns.tolist() == [
         "Cognome",
         "Nome",
@@ -132,7 +132,7 @@ def test_groupdata():
 
 def test_fill_categories():
     """
-    This function tests the Utils.fill_categories function.
+    This function tests the utils.fill_categories function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct categories.
@@ -146,5 +146,5 @@ def test_fill_categories():
     df_data["Nome"] = df_data["Nome"].str.lower()
     df_data["Nome"] = df_data["Nome"].str.strip()
 
-    out = Utils.fill_categories(df, df_data)
+    out = utils.fill_categories(df, df_data)
     assert out["Categoria"].values[0] == "A"

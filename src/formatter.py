@@ -1,7 +1,3 @@
-import os
-import pandas as pd
-import src.Utils as Utils
-
 """
 This class contains the main function of the program, which communicates as io interface with
 the user.
@@ -16,13 +12,17 @@ __author__ : str
 Methods
 -------
 convert_folder() -> None
-    This function converts all suitable files in the current folder using the Utils class.
+    This function converts all suitable files in the current folder using the utils class.
 """
+
+import os
+import pandas as pd
+from src import utils
 
 
 def accumulate() -> None:
     """
-    This function accumulates all suitable files in the current folder using the Utils class.
+    This function accumulates all suitable files in the current folder using the utils class.
 
     Parameters
     ----------
@@ -43,10 +43,10 @@ def accumulate() -> None:
                     + " non è formattato correttamente per l'accumulo e verrà saltato."
                 )
                 continue
-            df = Utils.format(df=df)
-            Utils.print_counts(df=df)
+            df = utils.reformat(df=df)
+            utils.print_counts(df=df)
             input("Premi INVIO per continuare...")
-            out = Utils.groupdata(df=df)
+            out = utils.groupdata(df=df)
             out.to_excel(f, index=False)
             if not f.endswith(".xlsx"):
                 os.remove(f)
@@ -62,7 +62,8 @@ def accumulate() -> None:
 
 def find_categories() -> None:
     """
-    This function finds the categories of all suitable files in the current folder using the Utils class.
+    This function finds the categories of all suitable files in the current folder using the utils
+    class.
 
     Parameters
     ----------
@@ -78,7 +79,8 @@ def find_categories() -> None:
             # check if the file has 12 columns
             if len(df.columns) != 12:
                 print(
-                    f'Il file "{f}" non è formattato correttamente per la creazione automatica delle categorie e verrà saltato.'
+                    f'Il file "{f}" non è formattato correttamente per la creazione automatica '
+                    + "delle categorie e verrà saltato."
                 )
                 continue
 
@@ -91,7 +93,7 @@ def find_categories() -> None:
             df_data["Nome"] = df_data["Nome"].str.lower()
             df_data["Nome"] = df_data["Nome"].str.strip()
 
-            IN_COLS = [
+            in_cols = [
                 "Codice",
                 "Societa",
                 "Categoria",
@@ -103,16 +105,16 @@ def find_categories() -> None:
                 "A2",
                 "A3",
             ]
-            df.columns = IN_COLS
+            df.columns = in_cols
 
             # clear column 'Categoria'
             df["Categoria"] = ""
 
-            out_df = Utils.fill_categories(df, df_data)
+            out_df = utils.fill_categories(df, df_data)
 
             df.insert(0, "CategoriaVera", out_df["Categoria"])
 
-            OUT_COLS = [
+            out_cols = [
                 "CategoriaVera",
                 "Codice",
                 "Societa",
@@ -125,7 +127,7 @@ def find_categories() -> None:
                 "Atleta",
                 "Atleta",
             ]
-            df.columns = OUT_COLS
+            df.columns = out_cols
 
             df.to_csv(f, sep=";", index=False)
             changed_files.append(f)

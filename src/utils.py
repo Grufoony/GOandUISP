@@ -1,5 +1,3 @@
-import pandas as pd
-
 """
 This class contains the functions to convert the data from the GOandSwim format to the UISP
 format.
@@ -21,7 +19,7 @@ Methods
 -------
 _split_names(full_name: str) -> tuple
     This function splits a full name into name and surname.
-format(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
+reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     This function is the main function of the class.
     It takes a file name as input and returns a pandas dataframe.
     The output dataset has the correct column labels, the correct style names and the correct
@@ -33,6 +31,9 @@ groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     This function takes a dataframe as input and returns a new dataframe with the correct
     format.
 """
+
+import pandas as pd
+
 
 __version__ = (1, 4, 2)
 __author__ = "Gregorio Berselli"
@@ -78,8 +79,7 @@ def get_category(sex: str, year: int) -> str:
             return "J"
         if year < 2011:
             return "R"
-        else:
-            return "nan"
+        return "nan"
     else:
         if year < 2008:
             return "A"
@@ -87,6 +87,7 @@ def get_category(sex: str, year: int) -> str:
             return "J"
         if year < 2012:
             return "R"
+        return "nan"
 
 
 def split_names(full_name: str) -> tuple:
@@ -118,7 +119,7 @@ def split_names(full_name: str) -> tuple:
     return name_column[1].upper(), name_column[0].upper()
 
 
-def format(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     """
     This function is the main function of the class.
     It takes a file name as input and returns a pandas dataframe.
