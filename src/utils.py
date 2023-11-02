@@ -67,27 +67,24 @@ ACCUMULATE_INPUT_COLUMNS_RELAYRACE = (
     + [""] * 5
 )
 
+MALE_CATEGORIES = {2006: "A", 2008: "J", 2011: "R"}
+
+FEMALE_CATEGORIES = {2008: "A", 2010: "J", 2012: "R"}
+
 
 def get_category(sex: str, year: int) -> str:
     """
     This function returns the category given sex and year.
     """
     if sex.lower().strip() == "m":
-        if year < 2006:
-            return "A"
-        if year < 2008:
-            return "J"
-        if year < 2011:
-            return "R"
+        for y, cat in MALE_CATEGORIES.items():
+            if year < y:
+                return cat
         return "nan"
-    else:
-        if year < 2008:
-            return "A"
-        if year < 2010:
-            return "J"
-        if year < 2012:
-            return "R"
-        return "nan"
+    for y, cat in FEMALE_CATEGORIES.items():
+        if year < y:
+            return cat
+    return "nan"
 
 
 def split_names(full_name: str) -> tuple:
@@ -245,6 +242,22 @@ def groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 def fill_categories(
     df: pd.core.frame.DataFrame, data: pd.core.frame.DataFrame
 ) -> pd.core.frame.DataFrame:
+    """
+    This function takes two dataframes as input and returns a new dataframe with the correct
+    categories.
+
+    Parameters
+    ----------
+    df : pandas.core.frame.DataFrame
+        The dataframe to be converted.
+    data : pandas.core.frame.DataFrame
+        The dataframe with the data to be used to fill the categories.
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        The converted dataframe.
+    """
     for row in df.itertuples():
         categories = []
         for i in range(4):
