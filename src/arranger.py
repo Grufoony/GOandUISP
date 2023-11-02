@@ -74,10 +74,8 @@ def find_categories() -> None:
     changed_files = []
     for f in os.listdir():
         if "-staffette" in f:
-            df = pd.read_csv(f, sep=";", encoding="latin-1")
-            df_data = pd.read_csv(
-                f.replace("-staffette", ""), sep=";", encoding="latin-1"
-            )
+            df = pd.read_csv(f, sep=";")
+            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
             # check if the file has 12 columns
             if len(df.columns) != 12:
                 print(
@@ -112,9 +110,6 @@ def find_categories() -> None:
             # clear column 'Categoria'
             df["Categoria"] = ""
 
-            # rename first column of data in 'Codice'
-            df_data.rename(columns={df_data.columns[0]: "CodSocietà"}, inplace=True)
-
             out_df = utils.fill_categories(df, df_data)
 
             df.insert(0, "CategoriaVera", out_df["Categoria"])
@@ -134,7 +129,7 @@ def find_categories() -> None:
             ]
             df.columns = out_cols
 
-            df.to_csv(f, sep=";", index=False, encoding="latin-1")
+            df.to_csv(f, sep=";", index=False)
             changed_files.append(f)
 
     if len(changed_files) == 0:
