@@ -1,12 +1,16 @@
 # GOandUISP
 Script Python per la conversione di file _.xlsx_ da output GoAndSwim a input per il portale online UISP.
 
-## Guida rapida
+***
 
-### Ottenere l'eseguibile
+## Ottenere l'eseguibile
 Lo script si può eseguire sulla piattaforma [Google Colab](https://colab.research.google.com/github/Grufoony/GOandUISP/blob/main/main.ipynb).
 
 Per qualsiasi problema [scrivimi una mail](mailto:gregorio.berselli@studio.unibo.it).
+
+***
+
+## Accumuli
 
 ### Preparare il file di input
 1. Creare un file excel (_.xlsx_), e aprirlo con Excel. Questo file deve essere vuoto per il momento
@@ -19,3 +23,9 @@ Per qualsiasi problema [scrivimi una mail](mailto:gregorio.berselli@studio.unibo
 Se è stato fatto tutto correttamente, basterà eseguire lo script _GOandUISP.py_ __nella stessa cartella__ del file: questo verrà sostituito con il file formattato correttamente.
 
 __NOTA__: nel caso di atleti con più di un nome/cognome il programma chiederà di inserirli manualmente, comunicandovi tutti i dati che possiede di quel determinato atleta. Potete scrivere sia in maiuscolo che in minuscolo ed inserire spazi (per i nomi/cognomi multipli). Una volta inserito il nome/cognome multiplo richiesto, premere INVIO e ripetere l'azione ogni qualvolta richiesta dal programma. Al termine della procedura la finestra si chiuderà automaticamente.
+
+***
+
+## Generare automaticamente le categorie delle staffette
+In questo caso serviranno i due file forniti dal portale nazionale UISP, *<nome\>-dbmeeting.csv* e *<nome\>-staffette-dbmeeting.csv*.
+Se presenti nella cartella il programma produrrà in output il file *<nome\>-staffette.csv*.
