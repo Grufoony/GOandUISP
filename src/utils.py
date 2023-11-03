@@ -284,6 +284,6 @@ def fill_categories(
         else:
             category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
 
-        df.at[row.Index, "Categoria"] = category
+        df.at[row.Index, "CategoriaVera"] = category
 
     return df

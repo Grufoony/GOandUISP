@@ -64,6 +64,9 @@ def find_categories() -> None:
     """
     This function finds the categories of all suitable files in the current folder using the utils
     class.
+    It requires two files named "<name>-staffette-dbmeeting.csv" and "<name>-dbmeeting.csv" where
+    "<name>" is the name of the meeting.
+    It will create a new file named "<name>-staffette.csv" with the categories.
 
     Parameters
     ----------
@@ -107,12 +110,9 @@ def find_categories() -> None:
             ]
             df.columns = in_cols
 
-            # clear column 'Categoria'
-            df["Categoria"] = ""
+            df.insert(0, "CategoriaVera", "")
 
             out_df = utils.fill_categories(df, df_data)
-
-            df.insert(0, "CategoriaVera", out_df["Categoria"])
 
             out_cols = [
                 "CategoriaVera",
@@ -127,9 +127,9 @@ def find_categories() -> None:
                 "Atleta",
                 "Atleta",
             ]
-            df.columns = out_cols
+            out_df.columns = out_cols
 
-            df.to_csv(f, sep=";", index=False)
+            out_df.to_csv(f.replace("-dbmeeting", ""), sep=";", index=False)
             changed_files.append(f)
 
     if len(changed_files) == 0:

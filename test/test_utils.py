@@ -147,4 +147,4 @@ def test_fill_categories():
     df_data["Nome"] = df_data["Nome"].str.strip()
 
     out = utils.fill_categories(df, df_data)
-    assert out["Categoria"].values[0] == "A"
+    assert out["CategoriaVera"].values[0] == "A"
