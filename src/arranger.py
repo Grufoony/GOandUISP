@@ -47,7 +47,7 @@ def accumulate() -> None:
             utils.print_counts(df=df)
             input("Premi INVIO per continuare...")
             out = utils.groupdata(df=df)
-            out.to_excel(f, index=False)
+            out.to_excel(f'ACCUMULATO_{f}', index=False)
             if not f.endswith(".xlsx"):
                 os.remove(f)
             print(f'Il file "{f}" è stato convertito con successo!')
