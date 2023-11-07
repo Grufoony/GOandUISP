@@ -199,6 +199,13 @@ def groupdata(
     ----------
     df : pandas.core.frame.DataFrame
         The dataframe to be converted.
+    by_points : bool, optional
+        If True, the function returns a dataframe with the total points for each athlete,
+        by default False
+    use_jolly : bool, optional
+        If True, the function uses the jolly points, by default False
+    out_df : pandas.core.frame.DataFrame, optional
+        A dataframe partially converted, by default None
 
     Returns
     -------
