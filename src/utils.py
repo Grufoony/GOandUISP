@@ -274,23 +274,38 @@ def groupdata(
         # print athlete with more points for each category and sex
         # if there are more than one athlete with the same points, print the one with lowest SL time
 
-        temp_df = out_df.copy()
-        temp_df["TempoStile"] = ""
-        for row in temp_df.itertuples():
+        # temp_df = out_df.copy()
+        out_df["TempoStile"] = ""
+        for row in out_df.itertuples():
             for i in range(1, 5):
                 if "SL" in str(getattr(row, f"Gara{i}")):
-                    temp_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
+                    out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
 
-        temp_df = temp_df.groupby(["Categoria", "Sesso"])[
-            ["Nome", "Cognome", "PuntiTotali", "TempoStile"]
+        temp_df = out_df.groupby(["Categoria", "Sesso"])[
+            ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
         ].apply(
             lambda x: x.sort_values(
                 by=["PuntiTotali", "TempoStile"], ascending=[False, True]
             ).head(3)
         )
 
+        # drop index 2
+        temp_df = temp_df.droplevel(2)
+
         print(temp_df)
+
+        return (
+            out_df.groupby(["Categoria", "Sesso"])[
+                ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
+            ]
+            .apply(
+                lambda x: x.sort_values(
+                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                )
+            )
+            .droplevel(2)
+        )
 
     return out_df
 

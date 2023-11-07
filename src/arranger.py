@@ -53,7 +53,7 @@ def accumulate(points: bool = False, jolly: bool = False) -> None:
                     df=df, by_points=points, use_jolly=jolly, out_df=out
                 )
                 out2.to_excel(
-                    f'ACCUMULATO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=False
+                    f'ACCUMULATO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=True
                 )
             if not f.endswith(".xlsx"):
                 os.remove(f)
