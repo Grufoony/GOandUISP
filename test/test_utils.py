@@ -79,7 +79,7 @@ def test_print_counts(capfd):
     )
 
 
-def test_groupdata():
+def test_groupdata1():
     """
     This function tests the utils.groupdata function.
     GIVEN a dataframe
@@ -127,6 +127,30 @@ def test_groupdata():
         "200 Rana",
         " 01'24\"80 ",
         "Aosta",
+    ]
+
+
+def test_groupdata2():
+    """
+    This function tests the utils.groupdata function when the athlets have same points.
+    GIVEN a dataframe
+    WHEN the function is called
+    THEN it returns a dataframe with the athlets sorted by time.
+    """
+    df = pd.read_excel("datasets/groupby_test.xlsx", header=None)
+    df = utils.reformat(df)
+    out = utils.groupdata(df, by_points=True, use_jolly=True)
+    assert out.columns.tolist() == [
+        "Cognome",
+        "Nome",
+        "Societa",
+        "PuntiTotali",
+        "TempoStile",
+    ]
+    assert out.PuntiTotali.tolist() == [70, 70]
+    assert out.TempoStile.tolist() == [
+        " 01'22\"80 ",
+        " 01'26\"90 ",
     ]
 
 

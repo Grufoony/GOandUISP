@@ -14,5 +14,5 @@ if __name__ == "__main__":
         "Per informazioni su come utilizzare il programma si consulti il repository"
         " GitHub: https://github.com/Grufoony/GOandUISP\n\n"
     )
-    GOandUISP.accumulate()
+    GOandUISP.accumulate(points=True, jolly=True)
     GOandUISP.find_categories()

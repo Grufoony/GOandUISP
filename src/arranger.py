@@ -20,7 +20,7 @@ import pandas as pd
 from src import utils
 
 
-def accumulate() -> None:
+def accumulate(points: bool = False, jolly: bool = False) -> None:
     """
     This function accumulates all suitable files in the current folder using the utils class.
 
@@ -33,7 +33,7 @@ def accumulate() -> None:
     """
     changed_files = []
     for f in os.listdir():
-        if f.endswith(".xlsx") or f.endswith(".xls"):
+        if (f.endswith(".xlsx") or f.endswith(".xls")) and not "ACCUMULATO" in f:
             df = pd.read_excel(f, header=None)
             # check if the file has 20 or 21 columns
             if len(df.columns) < 20 or len(df.columns) > 21:
@@ -47,7 +47,14 @@ def accumulate() -> None:
             utils.print_counts(df=df)
             input("Premi INVIO per continuare...")
             out = utils.groupdata(df=df)
-            out.to_excel(f, index=False)
+            out.to_excel(f"ACCUMULATO_{f}", index=False)
+            if points:
+                out2 = utils.groupdata(
+                    df=df, by_points=points, use_jolly=jolly, out_df=out
+                )
+                out2.to_excel(
+                    f'ACCUMULATO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=True
+                )
             if not f.endswith(".xlsx"):
                 os.remove(f)
             print(f'Il file "{f}" è stato convertito con successo!')
