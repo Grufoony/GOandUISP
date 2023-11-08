@@ -278,7 +278,7 @@ def groupdata(
         for athlete_index, row in enumerate(df.itertuples()):
             i = 0
             for points, double in zip(row.Points, row.Double):
-                if "," in double:
+                if "," in str(double):
                     double = double.replace(",", ".")
                 i += int(points)
                 if use_jolly and int(float(double)) == 2:
