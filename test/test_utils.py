@@ -1,34 +1,34 @@
 """
-This file contains the tests for the utils.py module.
+This file contains the tests for the GOandUISP.py module.
 """
 
 import pandas as pd
 import numpy as np
-from src import utils
+from src import go_and_uisp as GOandUISP
 
 
 def test_split_names():
     """
-    This function tests the utils.split_names function.
+    This function tests the GOandUISP.split_names function.
     GIVEN a full name
     WHEN the function is called
     THEN it returns a tuple containing the name and the surname.
     """
-    assert utils.split_names("Rossi Mario") == ("MARIO", "ROSSI")
+    assert GOandUISP.split_names("Rossi Mario") == ("MARIO", "ROSSI")
 
 
 def test_reformat():
     """
-    This function tests the utils.reformat function.
+    This function tests the GOandUISP.reformat function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
     df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
-    out = utils.reformat(df)
-    assert out.columns.tolist() == utils.ACCUMULATE_INPUT_COLUMNS
-    assert (set(out.Style.unique())) == set(utils.STYLES.keys())
+    out = GOandUISP.reformat(df)
+    assert out.columns.tolist() == GOandUISP.ACCUMULATE_INPUT_COLUMNS
+    assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
         "ROSSI MARIO",
@@ -41,16 +41,16 @@ def test_reformat():
 
 def test_reformat_relay():
     """
-    This function tests the utils.reformat function in the relay case.
+    This function tests the GOandUISP.reformat function in the relay case.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
     df = pd.read_excel("datasets/reformat_relay_test.xlsx", header=None)
-    out = utils.reformat(df)
-    assert out.columns.tolist() == utils.ACCUMULATE_INPUT_COLUMNS_RELAYRACE
-    assert (set(out.Style.unique())) == set(utils.STYLES.keys())
+    out = GOandUISP.reformat(df)
+    assert out.columns.tolist() == GOandUISP.ACCUMULATE_INPUT_COLUMNS_RELAYRACE
+    assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
         "ROSSI MARIO",
@@ -63,14 +63,14 @@ def test_reformat_relay():
 
 def test_print_counts(capfd):
     """
-    This function tests the utils.print_counts function.
+    This function tests the GOandUISP.print_counts function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it prints how many athletes are in each team and the total (partecipating medals).
     """
     df = pd.read_excel("datasets/print_counts_test.xlsx", header=None)
-    out = utils.reformat(df)
-    utils.print_counts(out)
+    out = GOandUISP.reformat(df)
+    GOandUISP.print_counts(out)
     out, _ = capfd.readouterr()
     assert (
         out
@@ -81,14 +81,14 @@ def test_print_counts(capfd):
 
 def test_groupdata1():
     """
-    This function tests the utils.groupdata function.
+    This function tests the GOandUISP.groupdata function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct format.
     """
     df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
-    out = utils.reformat(df)
-    out = utils.groupdata(out)
+    out = GOandUISP.reformat(df)
+    out = GOandUISP.groupdata(out)
     assert out.columns.tolist() == [
         "Cognome",
         "Nome",
@@ -132,14 +132,14 @@ def test_groupdata1():
 
 def test_groupdata2():
     """
-    This function tests the utils.groupdata function when the athlets have same points.
+    This function tests the GOandUISP.groupdata function when the athlets have same points.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the athlets sorted by time.
     """
     df = pd.read_excel("datasets/groupby_test.xlsx", header=None)
-    df = utils.reformat(df)
-    out = utils.groupdata(df, by_points=True, use_jolly=True)
+    df = GOandUISP.reformat(df)
+    out = GOandUISP.groupdata(df, by_points=True, use_jolly=True)
     assert out.columns.tolist() == [
         "Cognome",
         "Nome",
@@ -156,7 +156,7 @@ def test_groupdata2():
 
 def test_fill_categories():
     """
-    This function tests the utils.fill_categories function.
+    This function tests the GOandUISP.fill_categories function.
     GIVEN a dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct categories.
@@ -170,5 +170,5 @@ def test_fill_categories():
     df_data["Nome"] = df_data["Nome"].str.lower()
     df_data["Nome"] = df_data["Nome"].str.strip()
 
-    out = utils.fill_categories(df, df_data)
+    out = GOandUISP.fill_categories(df, df_data)
     assert out["CategoriaVera"].values[0] == "A"

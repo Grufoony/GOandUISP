@@ -30,12 +30,21 @@ print_counts(df: pd.core.frame.DataFrame) -> None
 groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     This function takes a dataframe as input and returns a new dataframe with the correct
     format.
+fill_categories(df: pd.core.frame.DataFrame, data: pd.core.frame.DataFrame)
+        -> pd.core.frame.DataFrame
+    This function takes two dataframes as input and returns a new dataframe with the correct
+    categories.
+accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None
+    This function accumulates all suitable files in the current folder.
+find_categories() -> None
+    This function finds the categories of all suitable files in the current folder.
 """
 
+import os
 import pandas as pd
 
 
-__version__ = (1, 4, 2)
+__version__ = (1, 5, 0)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -269,15 +278,16 @@ def groupdata(
         for athlete_index, row in enumerate(df.itertuples()):
             i = 0
             for points, double in zip(row.Points, row.Double):
+                if "," in double:
+                    double = double.replace(",", ".")
                 i += int(points)
-                if use_jolly and int(double) == 2:
+                if use_jolly and int(float(double)) == 2:
                     i += int(points)
             out_df.loc[athlete_index, "PuntiTotali"] = i
 
         # print athlete with more points for each category and sex
         # if there are more than one athlete with the same points, print the one with lowest SL time
 
-        # temp_df = out_df.copy()
         out_df["TempoStile"] = ""
         for row in out_df.itertuples():
             for i in range(1, 5):
@@ -360,3 +370,123 @@ def fill_categories(
         df.at[row.Index, "CategoriaVera"] = category
 
     return df
+
+
+def accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None:
+    """
+    This function accumulates all suitable files in the current folder.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    None
+    """
+    changed_files = []
+    for f in os.listdir():
+        if (f.endswith(".xlsx") or f.endswith(".xls")) and not "ACCUMULO" in f:
+            df = pd.read_excel(f, header=None)
+            # check if the file has 20 or 21 columns
+            if len(df.columns) < 20 or len(df.columns) > 21:
+                print(
+                    "Il file "
+                    + f
+                    + " non è formattato correttamente per l'accumulo e verrà saltato."
+                )
+                continue
+            df = reformat(df=df)
+            if counts:
+                print_counts(df=df)
+                input("Premi INVIO per continuare...")
+            out = groupdata(df=df)
+            out.to_excel(f"ACCUMULATO_{f}", index=False)
+            if points:
+                out2 = groupdata(df=df, by_points=points, use_jolly=jolly, out_df=out)
+                out2.to_excel(
+                    f'ACCUMULO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=True
+                )
+            changed_files.append(f)
+    if len(changed_files) == 0:
+        print("Non ci sono file da accumulare nella cartella corrente.")
+    else:
+        print("I file accumulati sono: ")
+        for f in changed_files:
+            print(f)
+
+
+def find_categories() -> None:
+    """
+    This function finds the categories of all suitable files in the current folder.
+    It requires two files named "<name>-staffette-dbmeeting.csv" and "<name>-dbmeeting.csv" where
+    "<name>" is the name of the meeting.
+    It will create a new file named "<name>-staffette.csv" with the categories.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+    changed_files = []
+    for f in os.listdir():
+        if "-staffette" in f:
+            df = pd.read_csv(f, sep=";")
+            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
+            # check if the file has 12 columns
+            if len(df.columns) != 12:
+                print(
+                    f'Il file "{f}" non è formattato correttamente per la creazione automatica '
+                    + "delle categorie e verrà saltato."
+                )
+                continue
+
+            # drop last two cols
+            df = df.drop(df.columns[-2:], axis=1)
+
+            # glue together 'Cognome' and 'Nome' of df_data
+            df_data["Nome"] = df_data["Cognome"] + " " + df_data["Nome"]
+            # make 'Nome' column lowercase
+            df_data["Nome"] = df_data["Nome"].str.lower()
+            df_data["Nome"] = df_data["Nome"].str.strip()
+
+            df.columns = [
+                "Codice",
+                "Societa",
+                "Categoria",
+                "Sesso",
+                "Gara",
+                "Tempo",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+            ]
+
+            df.insert(0, "CategoriaVera", "")
+
+            out_df = fill_categories(df, df_data)
+
+            out_df.columns = [
+                "CategoriaVera",
+                "Codice",
+                "Societa",
+                "Categoria",
+                "Sesso",
+                "Gara",
+                "Tempo",
+                "Atleta",
+                "Atleta",
+                "Atleta",
+                "Atleta",
+            ]
+
+            out_df.to_csv(f.replace("-dbmeeting", ""), sep=";", index=False)
+            changed_files.append(f)
+
+    if len(changed_files) == 0:
+        print("Non ci sono file in cui creare le categorie nella cartella corrente.")
+    else:
+        print("I file con categorie generate automaticamente sono: ")
+        for f in changed_files:
+            print(f)
