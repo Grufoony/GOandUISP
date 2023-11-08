@@ -129,27 +129,28 @@ def test_groupdata1():
         "Aosta",
     ]
 
+
 def test_groupdata2():
     """
-    This function tests the utils.groupdata function specifying parameters
+    This function tests the utils.groupdata function when the athlets have same points.
     GIVEN a dataframe
     WHEN the function is called
-    THEN it returns a dataframe with the correct format.
+    THEN it returns a dataframe with the athlets sorted by time.
     """
     df = pd.read_excel("datasets/groupby_test.xlsx", header=None)
     df = utils.reformat(df)
-    out = utils.groupdata(df)
-    out2 = utils.groupdata(df, by_points=True, use_jolly=True)
-    assert out2.columns.tolist() == [
+    out = utils.groupdata(df, by_points=True, use_jolly=True)
+    assert out.columns.tolist() == [
         "Cognome",
         "Nome",
         "Societa",
         "PuntiTotali",
-        "TempoStile"
+        "TempoStile",
     ]
-    assert out2.TempoStile.tolist() == [
-        "",
-        " 01\'22\"80 "
+    assert out.PuntiTotali.tolist() == [70, 70]
+    assert out.TempoStile.tolist() == [
+        " 01'22\"80 ",
+        " 01'26\"90 ",
     ]
 
 
