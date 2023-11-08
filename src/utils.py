@@ -238,14 +238,10 @@ def groupdata(
         ["Race", "Time", "Points", "Double"]
     ].agg(list)
 
-    # get unique athletes
-    athletes = df.index
-
     if out_df is None:
         # creates empty output database with columns' names
         out_columns = ["Cognome", "Nome", "Anno", "Sesso"]
-        max_len = df["Race"].apply(len).max()
-        for i in range(max_len):
+        for i in range(df["Race"].apply(len).max()):
             out_columns.append("Gara" + str(i + 1))
             out_columns.append("Tempo" + str(i + 1))
         out_columns.append("Societa")
@@ -257,26 +253,26 @@ def groupdata(
 
         # split name column into words and ask surname in input if the number of words
         # is greater than 2
-        for index, full_name in enumerate(athletes.get_level_values("Name")):
+        for index, full_name in enumerate(df.index.get_level_values("Name")):
             name, surname = split_names(full_name=full_name)
             out_df.loc[index, "Nome"] = name
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
-            for race_index, race in enumerate(zip(row.Race, row.Time)):
-                out_df.loc[athlete_index, "Gara" + str(race_index + 1)] = race[0]
-                out_df.loc[athlete_index, "Tempo" + str(race_index + 1)] = race[1]
+            for index, race in enumerate(zip(row.Race, row.Time)):
+                out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
+                out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
 
     if by_points:
         out_df["PuntiTotali"] = 0
         out_df["Categoria"] = df.index.get_level_values("Category")
         for athlete_index, row in enumerate(df.itertuples()):
-            p = 0
+            i = 0
             for points, double in zip(row.Points, row.Double):
-                p += int(points)
+                i += int(points)
                 if use_jolly and int(double) == 2:
-                    p += int(points)
-            out_df.loc[athlete_index, "PuntiTotali"] = p
+                    i += int(points)
+            out_df.loc[athlete_index, "PuntiTotali"] = i
 
         # print athlete with more points for each category and sex
         # if there are more than one athlete with the same points, print the one with lowest SL time
@@ -289,18 +285,17 @@ def groupdata(
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
 
-        temp_df = out_df.groupby(["Categoria", "Sesso"])[
-            ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
-        ].apply(
-            lambda x: x.sort_values(
-                by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-            ).head(3)
+        print(
+            out_df.groupby(["Categoria", "Sesso"])[
+                ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
+            ]
+            .apply(
+                lambda x: x.sort_values(
+                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                ).head(3)
+            )
+            .droplevel(2)
         )
-
-        # drop index 2
-        temp_df = temp_df.droplevel(2)
-
-        print(temp_df)
 
         return (
             out_df.groupby(["Categoria", "Sesso"])[
