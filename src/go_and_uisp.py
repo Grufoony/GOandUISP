@@ -10,10 +10,6 @@ __author__ : str
     The author of the class.
 STYLES : dict
     A dictionary containing the styles' names.
-ACCUMULATE_INPUT_COLUMNS : list
-    A list containing the names of the columns of the input file.
-ACCUMULATE_INPUT_COLUMNS_RELAYRACE : list
-    A list containing the name sof the columns of the input file (relay races).
 
 Methods
 -------
@@ -58,27 +54,6 @@ CATEGORY_PRIORITIES = {
     "J": 7,
     "A": 8,
 }
-
-ACCUMULATE_INPUT_COLUMNS = (
-    ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
-    + [""] * 3
-    + ["Time"]
-    + [""] * 2
-    + ["Boolean", "Absent"]
-    + [""]
-    + ["Points", "Double"]
-    + [""] * 2
-)
-ACCUMULATE_INPUT_COLUMNS_RELAYRACE = (
-    ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
-    + [""] * 3
-    + ["Time"]
-    + [""] * 2
-    + ["Boolean", "Absent"]
-    + [""]
-    + ["Points", "Double"]
-    + [""] * 2
-)
 
 MALE_CATEGORIES = {2006: "A", 2008: "J", 2011: "R"}
 
@@ -152,7 +127,16 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     if len(df.columns) == 21:
         df.drop(df.columns[1], axis=1, inplace=True)
 
-    df.columns = ACCUMULATE_INPUT_COLUMNS
+    df.columns = (
+        ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
+        + [""] * 3
+        + ["Time"]
+        + [""] * 2
+        + ["Boolean", "Absent"]
+        + [""]
+        + ["Points", "Double"]
+        + [""] * 2
+    )
     # check if style column is correct
     incorrect_styles = False
     for style in df.Style.unique():
@@ -161,7 +145,16 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
             break
 
     if incorrect_styles:
-        df.columns = ACCUMULATE_INPUT_COLUMNS_RELAYRACE
+        df.columns = (
+            ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
+            + [""] * 3
+            + ["Time"]
+            + [""] * 2
+            + ["Boolean", "Absent"]
+            + [""]
+            + ["Points", "Double"]
+            + [""] * 2
+        )
 
     # strip spaces in some columns
     df["Name"] = df["Name"].str.strip()

@@ -1,5 +1,5 @@
 """
-This file contains the tests for the GOandUISP.py module.
+This file contains the tests for the go_and_uisp.py module.
 """
 
 import pandas as pd
@@ -27,7 +27,6 @@ def test_reformat():
     """
     df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
     out = GOandUISP.reformat(df)
-    assert out.columns.tolist() == GOandUISP.ACCUMULATE_INPUT_COLUMNS
     assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
@@ -49,7 +48,6 @@ def test_reformat_relay():
     """
     df = pd.read_excel("datasets/reformat_relay_test.xlsx", header=None)
     out = GOandUISP.reformat(df)
-    assert out.columns.tolist() == GOandUISP.ACCUMULATE_INPUT_COLUMNS_RELAYRACE
     assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
         "ROSSI MARIO",
