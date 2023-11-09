@@ -1,0 +1,1 @@
+Assieme alla pipeline per l'accumulo finale dei risultati è qui presnete il file *RefPoints.xml* da fornire a Go And Swim per il corretto calcolo dei punteggi.
