@@ -59,24 +59,6 @@ def test_reformat_relay():
     assert set(out["Team"].tolist()) == set(["Aosta", "Catanzaro"])
 
 
-def test_print_counts(capfd):
-    """
-    This function tests the GOandUISP.print_counts function.
-    GIVEN a dataframe
-    WHEN the function is called
-    THEN it prints how many athletes are in each team and the total (partecipating medals).
-    """
-    df = pd.read_excel("datasets/print_counts_test.xlsx", header=None)
-    out = GOandUISP.reformat(df)
-    GOandUISP.print_counts(out)
-    out, _ = capfd.readouterr()
-    assert (
-        out
-        == "Team\nAosta        3\nCatanzaro    1\nName: count"
-        + ", dtype: int64\nTOTALE ATLETI PARTECIPANTI: 4\n"
-    )
-
-
 def test_groupdata1():
     """
     This function tests the GOandUISP.groupdata function.
@@ -333,5 +315,6 @@ def test_print_counts(capfd):
     # check the output
     assert (
         out.out
-        == "Team\nAosta        2\nCatanzaro    1\nName: count, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
+        == "Team\nAosta        2\nCatanzaro    1\nName: count, "
+        + "dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
     )
