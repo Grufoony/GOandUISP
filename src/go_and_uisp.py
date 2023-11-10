@@ -282,7 +282,7 @@ def groupdata(
 
         out_df["TempoStile"] = ""
         for row in out_df.itertuples():
-            for i in range(1, 5):
+            for i in range(1, df["Race"].apply(len).max() + 1):
                 if "SL" in str(getattr(row, f"Gara{i}")):
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
