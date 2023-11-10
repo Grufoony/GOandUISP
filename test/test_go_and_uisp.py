@@ -171,36 +171,6 @@ def test_fill_categories():
     out = GOandUISP.fill_categories(df, df_data)
     assert out["CategoriaVera"].values[0] == "A"
 
-def test_print_counts(capfd):
-    """
-    This function tests the GOandUISP.print_counts function.
-    GIVEN a dataframe
-    WHEN the function is called
-    THEN it prints how many athletes are in each team and the total (partecipating medals).
-    """
-    # create a test dataframe
-    data = {
-        "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario", "Bianchi Giovanni"],
-        "Year": [2010, 2010, 2011, 2011],
-        "Sex": ["M", "F", "M", "M"],
-        "Team": ["Aosta", "Catanzaro", "Aosta", "Aosta"],
-        "Time": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
-        "Absent": ["", "", "", "A"],
-    }
-    df = pd.DataFrame(data)
-
-    # capture stdout
-    out = capfd.readouterr()
-
-    # call the function
-    GOandUISP.print_counts(df)
-
-    # capture stdout again
-    out = capfd.readouterr()
-
-    # check the output
-    assert out.out == "Team\nAosta        2\nCatanzaro    1\nName: count, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
-
 
 def test_groupdata3():
     """
@@ -331,3 +301,37 @@ def test_groupdata5():
         "TempoStile",
     ]
     assert out.PuntiTotali.tolist() == [2, 2]
+
+
+def test_print_counts(capfd):
+    """
+    This function tests the GOandUISP.print_counts function.
+    GIVEN a dataframe
+    WHEN the function is called
+    THEN it prints how many athletes are in each team and the total (partecipating medals).
+    """
+    # create a test dataframe
+    data = {
+        "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario", "Bianchi Giovanni"],
+        "Year": [2010, 2010, 2011, 2011],
+        "Sex": ["M", "F", "M", "M"],
+        "Team": ["Aosta", "Catanzaro", "Aosta", "Aosta"],
+        "Time": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
+        "Absent": ["", "", "", "A"],
+    }
+    df = pd.DataFrame(data)
+
+    # capture stdout
+    out = capfd.readouterr()
+
+    # call the function
+    GOandUISP.print_counts(df)
+
+    # capture stdout again
+    out = capfd.readouterr()
+
+    # check the output
+    assert (
+        out.out
+        == "Team\nAosta        2\nCatanzaro    1\nName: count, dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
+    )
