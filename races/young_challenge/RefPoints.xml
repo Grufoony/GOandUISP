@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RacePoints>
+  <SinglePoints>
+    <Points  Position="1" Points="50"/>
+    <Points  Position="2" Points="50"/>
+    <Points  Position="3" Points="50"/>
+    <Points  Position="4" Points="50"/>
+    <Points  Position="5" Points="45"/>
+    <Points  Position="6" Points="45"/>
+    <Points  Position="7" Points="45"/>
+    <Points  Position="8" Points="45"/>   
+	<Points  Position="9" Points="40"/>
+    <Points  Position="10" Points="40"/>
+    <Points  Position="11" Points="40"/>
+    <Points  Position="12" Points="40"/> 
+	<Points  Position="13" Points="35"/>
+    <Points  Position="14" Points="35"/>
+    <Points  Position="15" Points="35"/>
+    <Points  Position="16" Points="35"/>   
+	<Points  Position="17" Points="30"/>
+    <Points  Position="18" Points="30"/>
+    <Points  Position="19" Points="30"/>
+    <Points  Position="20" Points="30"/>    
+	<Points  Position="21" Points="25"/>
+    <Points  Position="22" Points="25"/>
+    <Points  Position="23" Points="25"/>
+	<Points  Position="24" Points="25"/>	
+	<Points  Position="25" Points="20"/>
+    <Points  Position="26" Points="20"/>
+    <Points  Position="27" Points="20"/>
+    <Points  Position="28" Points="20"/>  
+	<Points  Position="29" Points="15"/>
+    <Points  Position="30" Points="15"/>
+    <Points  Position="31" Points="15"/>
+	<Points  Position="32" Points="15"/>	
+	<Points  Position="33" Points="10"/>
+    <Points  Position="34" Points="10"/>
+    <Points  Position="35" Points="10"/>
+    <Points  Position="36" Points="10"/>   
+	<Points  Position="37" Points="5"/>
+    <Points  Position="38" Points="5"/>
+    <Points  Position="39" Points="5"/>
+	<Points  Position="40" Points="5"/>
+	<Points  Position="*" Points="0"/>
+  </SinglePoints>
+  <RelayTeamPoints>
+    <Points  Position="1" Points="12"/>
+    <Points  Position="2" Points="10"/>
+    <Points  Position="3" Points="9"/>
+    <Points  Position="4" Points="8"/>
+    <Points  Position="5" Points="7"/>
+    <Points  Position="6" Points="6"/>  
+    <Points  Position="7" Points="5"/>
+    <Points  Position="8" Points="4"/>
+    <Points  Position="9" Points="3"/>
+    <Points  Position="10" Points="2"/>
+    <Points  Position="*" Points="1"/>
+  </RelayTeamPoints>
+  <NotStarted Single="0" RelayTeam="0"/>
+</RacePoints>
