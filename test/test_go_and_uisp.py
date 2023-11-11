@@ -290,5 +290,4 @@ def test_fill_categories():
     df = pd.DataFrame(data)
 
     out = GOandUISP.fill_categories(df, df_data)
-    assert out["CategoriaVera"].values[0] == "A"
-    assert out["CategoriaVera"].values[1] == "J"
+    assert out.CategoriaVera.tolist() == ["A", "J"]
