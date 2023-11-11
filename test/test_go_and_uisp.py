@@ -25,7 +25,47 @@ def test_reformat():
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
-    df = pd.read_excel("datasets/reformat_test.xlsx", header=None)
+    data = {
+        0: {
+            0: "ROSSI MARIO ",
+            1: "ROSSI MARIO ",
+            2: "ROSSI  MARIO ",
+            3: "ROSI MARIA ",
+            4: "ROSI MARIA ",
+        },
+        1: {0: 2013, 1: 2013, 2: 2013, 3: 2011, 4: 2011},
+        2: {0: " M ", 1: " M ", 2: " M ", 3: " F ", 4: " F "},
+        3: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: " EA2 ", 4: " EA2 "},
+        4: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100},
+        5: {0: "F", 1: "D", 2: "R", 3: "S", 4: "M"},
+        6: {0: " Aosta", 1: " Aosta", 2: " Aosta", 3: "Catanzaro", 4: "Catanzaro"},
+        7: {0: 34, 1: 27, 2: 27, 3: 10, 4: 23},
+        8: {0: 2, 1: 4, 2: 4, 3: 1, 4: 3},
+        9: {
+            0: " 00'45\"30 ",
+            1: " 01'24\"50 ",
+            2: " 01'24\"50 ",
+            3: " 01'16\"00 ",
+            4: " 01'24\"00 ",
+        },
+        10: {
+            0: " 00'47\"10 ",
+            1: " 01'24\"80 ",
+            2: " 01'24\"80 ",
+            3: " 01'17\"10 ",
+            4: " 01'26\"90 ",
+        },
+        11: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1},
+        12: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1},
+        13: {0: " T ", 1: " T ", 2: " T ", 3: " S", 4: " T "},
+        14: {0: "  ", 1: "  ", 2: "  ", 3: "  ", 4: "  "},
+        15: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: " EA2 ", 4: " EA2 "},
+        16: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0},
+        17: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0},
+        18: {0: "  ", 1: "  ", 2: "  ", 3: "  ", 4: "  "},
+        19: {0: " ", 1: " ", 2: " ", 3: " ", 4: " "},
+    }
+    df = pd.DataFrame(data)
     out = GOandUISP.reformat(df)
     assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
@@ -38,7 +78,7 @@ def test_reformat():
     assert set(out["Team"].tolist()) == set(["Aosta", "Catanzaro"])
 
 
-def test_reformat_relay():
+def test_reformat2():
     """
     This function tests the GOandUISP.reformat function in the relay case.
     GIVEN a dataframe
@@ -46,7 +86,58 @@ def test_reformat_relay():
     THEN it returns a dataframe with the correct column labels, the correct style names and the
     correct names format.
     """
-    df = pd.read_excel("datasets/reformat_relay_test.xlsx", header=None)
+    data = {
+        0: {
+            0: "ROSSI MARIO ",
+            1: "ROSSI MARIO ",
+            2: "ROSSI  MARIO ",
+            3: np.nan,
+            4: "ROSI MARIA ",
+            5: "ROSI MARIA ",
+        },
+        1: {0: np.nan, 1: np.nan, 2: np.nan, 3: "LOMBARDIA ASD", 4: np.nan, 5: np.nan},
+        2: {0: 2013, 1: 2013, 2: 2013, 3: 0, 4: 2011, 5: 2011},
+        3: {0: " M ", 1: " M ", 2: " M ", 3: np.nan, 4: " F ", 5: " F "},
+        4: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: np.nan, 4: " EA2 ", 5: " EA2 "},
+        5: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100, 5: 100},
+        6: {
+            0: " Aosta",
+            1: " Aosta",
+            2: " Aosta",
+            3: np.nan,
+            4: "Catanzaro",
+            5: "Catanzaro",
+        },
+        7: {0: "F", 1: "D", 2: "R", 3: "M", 4: "S", 5: "M"},
+        8: {0: 34.0, 1: 27.0, 2: 27.0, 3: np.nan, 4: 10.0, 5: 23.0},
+        9: {0: 2.0, 1: 4.0, 2: 4.0, 3: np.nan, 4: 1.0, 5: 3.0},
+        10: {
+            0: " 00'45\"30 ",
+            1: " 01'24\"50 ",
+            2: " 01'24\"50 ",
+            3: "00'30'00",
+            4: " 01'16\"00 ",
+            5: " 01'24\"00 ",
+        },
+        11: {
+            0: " 00'47\"10 ",
+            1: " 01'24\"80 ",
+            2: " 01'24\"80 ",
+            3: "00'30\"00",
+            4: " 01'17\"10 ",
+            5: " 01'26\"90 ",
+        },
+        12: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        13: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        14: {0: " T ", 1: " T ", 2: " T ", 3: " T ", 4: " T ", 5: " T "},
+        15: {0: "  ", 1: "  ", 2: "  ", 3: np.nan, 4: "  ", 5: "  "},
+        16: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: np.nan, 4: " EA2 ", 5: " EA2 "},
+        17: {0: 0.0, 1: 0.0, 2: 0.0, 3: np.nan, 4: 0.0, 5: 0.0},
+        18: {0: 0.0, 1: 0.0, 2: 0.0, 3: np.nan, 4: 0.0, 5: 0.0},
+        19: {0: "  ", 1: "  ", 2: "  ", 3: np.nan, 4: "  ", 5: "  "},
+        20: {0: " ", 1: " ", 2: " ", 3: np.nan, 4: " ", 5: " "},
+    }
+    df = pd.DataFrame(data)
     out = GOandUISP.reformat(df)
     assert (set(out.Style.unique())) == set(GOandUISP.STYLES.keys())
     assert out["Name"].tolist() == [
