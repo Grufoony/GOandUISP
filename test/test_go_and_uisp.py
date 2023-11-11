@@ -261,18 +261,34 @@ def test_print_counts(capfd):
 def test_fill_categories():
     """
     This function tests the GOandUISP.fill_categories function.
-    GIVEN a dataframe
+    GIVEN a dataframe and a data dataframe
     WHEN the function is called
     THEN it returns a dataframe with the correct categories.
     """
-    df = pd.read_csv("datasets/fill_categories-staffette.csv", sep=";")
-    df_data = pd.read_csv("datasets/fill_categories.csv", sep=";")
+    # create a test dataframe
+    data = {
+        "CodSocietà": [1, 1, 2],
+        "Cognome": ["Rossi", "Rosi", "Rosi"],
+        "Nome": ["Mario", "Luigi", "Maria"],
+        "Anno": [2010, 2000, 2008],
+        "Sesso": ["M", "M", "F"],
+    }
+    df_data = pd.DataFrame(data)
 
-    # glue together 'Cognome' and 'Nome' of df_data
-    df_data["Nome"] = df_data["Cognome"] + " " + df_data["Nome"]
-    # make 'Nome' column lowercase
-    df_data["Nome"] = df_data["Nome"].str.lower()
-    df_data["Nome"] = df_data["Nome"].str.strip()
+    data = {
+        "Codice": [1, 2],
+        "Società": ["Aosta", "Catanzaro"],
+        "Categoria": ["", ""],
+        "Sesso": ["M", "F"],
+        "Gara": ["100 Dorso", "100 Dorso"],
+        "Tempo": ["01'23\"45", "01'23\"45"],
+        "A0": ["Rossi Mario", "Rosi Maria"],
+        "A1": ["Rosi Luigi", np.nan],
+        "A2": [np.nan, np.nan],
+        "A3": [np.nan, np.nan],
+    }
+    df = pd.DataFrame(data)
 
     out = GOandUISP.fill_categories(df, df_data)
     assert out["CategoriaVera"].values[0] == "A"
+    assert out["CategoriaVera"].values[1] == "J"

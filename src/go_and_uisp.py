@@ -333,11 +333,22 @@ def fill_categories(
     pandas.core.frame.DataFrame
         The converted dataframe.
     """
+    # drop last two cols
+    df = df.drop(df.columns[-2:], axis=1)
+
+    # glue together 'Cognome' and 'Nome' of data
+    data["Nome"] = data["Cognome"] + " " + data["Nome"]
+    # make 'Nome' column lowercase
+    data["Nome"] = data["Nome"].str.lower()
+    data["Nome"] = data["Nome"].str.strip()
     for row in df.itertuples():
         categories = []
         for i in range(4):
             col = f"A{i}"
-            athlete = getattr(row, col)
+            try:
+                athlete = getattr(row, col)
+            except AttributeError:
+                continue
             if str(athlete) == "nan":
                 continue
             athlete = athlete.lower().strip()
@@ -432,15 +443,6 @@ def find_categories() -> None:
                     + "delle categorie e verrà saltato."
                 )
                 continue
-
-            # drop last two cols
-            df = df.drop(df.columns[-2:], axis=1)
-
-            # glue together 'Cognome' and 'Nome' of df_data
-            df_data["Nome"] = df_data["Cognome"] + " " + df_data["Nome"]
-            # make 'Nome' column lowercase
-            df_data["Nome"] = df_data["Nome"].str.lower()
-            df_data["Nome"] = df_data["Nome"].str.strip()
 
             df.columns = [
                 "Codice",
