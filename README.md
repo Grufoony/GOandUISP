@@ -22,6 +22,27 @@ Per qualsiasi problema [scrivimi una mail](mailto:gregorio.berselli@studio.unibo
 
 __NOTA__: nel caso di atleti con più di un nome/cognome il programma chiederà di inserirli manualmente, comunicandovi tutti i dati che possiede di quel determinato atleta. Potete scrivere sia in maiuscolo che in minuscolo ed inserire spazi (per i nomi/cognomi multipli). Una volta inserito il nome/cognome multiplo richiesto, premere INVIO e ripetere l'azione ogni qualvolta richiesta dal programma. Al termine della procedura la finestra si chiuderà automaticamente.
 
+Il file così creato dovrebbe presentarsi nel formato:
+
+|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|
+|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+|ROSSI MARIO |2013   |M |EB1    |50	    |F	    |Aosta	    |34	|2	 |00'45"30 	 |00'47"10 	|1	|1  |T  |EB1 	|0	|0  |	 
+|ROSSI MARIO |2013   |M |EB1 	|100	|D	    |Aosta	    |27	|4	 |01'24"50 	 |01'24"80 	|1	|1	|T  |EB1 	|0	|0  | 
+|ROSSI MARIO |2013   |M |EB1 	|200	|R	    |Aosta	    |27	|4	 |01'24"50 	 |01'24"80 	|1	|1	|T  |EB1 	|0	|0	| 
+|ROSI MARIA  |2011   |F |EA2 	|100	|S	    |Catanzaro	|10	|1	 |01'16"00 	 |01'17"10 	|1	|1	|S  |EA2 	|0	|0	| 
+|ROSI MARIA  |2011   |F |EA2 	|100	|M	    |Catanzaro	|23	|3	 |01'24"00 	 |01'26"90 	|1	|1	|T  |EA2 	|0	|0	|
+
+oppure, nel caso siano presenti staffette nella manifestazione:
+
+|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|<!-- -->|
+|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+|ROSSI MARIO |              |2013   |M |EB1 |50	    |Aosta	    |F	|34	|2	 |00'45"30 	 |00'47"10 	|1	|1  |T  |EB1 |0	|0  |	 
+|ROSSI MARIO |              |2013   |M |EB1 |100	|Aosta	    |D	|27	|4	 |01'24"50 	 |01'24"80 	|1	|1	|T  |EB1 |0	|0  | 
+|ROSSI MARIO |              |2013   |M |EB1 |200	|Aosta      |R	|27	|4	 |01'24"50 	 |01'24"80 	|1	|1	|T  |EB1 |0	|0	|
+|            |LOMBARDIA ASD	|0		|  |    |100    |           |M	|	|	 |00'30'00	|00'30"00	|1	|1	|T  |    |   | 	|					
+|ROSI MARIA  |              |2011   |F |EA2 |100	|Catanzaro	|S	|10	|1	 |01'16"00 	 |01'17"10 	|1	|1	|S  |EA2 |0	|0	| 
+|ROSI MARIA  |              |2011   |F |EA2 |100	|Catanzaro	|M	|23	|3	 |01'24"00 	 |01'26"90 	|1	|1	|T  |EA2 |0	|0	|
+
 ***
 
 ## Generare automaticamente le categorie delle staffette
