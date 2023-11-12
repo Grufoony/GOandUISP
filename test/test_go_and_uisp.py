@@ -2,9 +2,49 @@
 This file contains the tests for the go_and_uisp.py module.
 """
 
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from src import go_and_uisp as GOandUISP
+
+
+def test_get_category_male():
+    """
+    This function tests the get_category function for male athletes.
+    GIVEN a male athlete's sex and year of birth
+    WHEN the function is called
+    THEN it returns the correct category.
+    """
+    current_year = datetime.now().year
+    assert GOandUISP.get_category("M", current_year - 20) == "A"
+    assert GOandUISP.get_category("M", current_year - 18) == "A"
+    assert GOandUISP.get_category("M", current_year - 16) == "J"
+    assert GOandUISP.get_category("M", current_year - 14) == "R"
+    assert GOandUISP.get_category("M", current_year - 12) == "EA"
+    assert GOandUISP.get_category("M", current_year - 10) == "EB"
+    assert GOandUISP.get_category("M", current_year - 8) == "EC"
+    assert GOandUISP.get_category("M", current_year - 6) == "G"
+    assert GOandUISP.get_category("M", current_year - 4) == "nan"
+
+
+def test_get_category_female():
+    """
+    This function tests the get_category function for female athletes.
+    GIVEN a female athlete's sex and year of birth
+    WHEN the function is called
+    THEN it returns the correct category.
+    """
+    current_year = datetime.now().year
+    assert GOandUISP.get_category("F", current_year - 20) == "A"
+    assert GOandUISP.get_category("F", current_year - 18) == "A"
+    assert GOandUISP.get_category("F", current_year - 16) == "A"
+    assert GOandUISP.get_category("F", current_year - 14) == "J"
+    assert GOandUISP.get_category("F", current_year - 12) == "R"
+    assert GOandUISP.get_category("F", current_year - 10) == "EA"
+    assert GOandUISP.get_category("F", current_year - 8) == "EB"
+    assert GOandUISP.get_category("F", current_year - 7) == "EC"
+    assert GOandUISP.get_category("F", current_year - 6) == "G"
+    assert GOandUISP.get_category("F", current_year - 3) == "nan"
 
 
 def test_split_names():
