@@ -78,7 +78,9 @@ def get_category(sex: str, year: int) -> str:
 def split_names(full_name: str) -> tuple:
     """
     This function splits a full name into name and surname.
-    If the full name is composed by more than two words,it asks the user to insert the surname.
+    If the full name is composed by more than two words, it asks the user to insert the surname.
+    If the input is void, it takes the first word as surname and the rest as name.
+    If the input consists of only one char, it takes the first two words as surname and the rest.
 
     Parameters
     ----------
@@ -90,18 +92,27 @@ def split_names(full_name: str) -> tuple:
     tuple
         A tuple containing the name and the surname.
     """
+    full_name = full_name.upper()
     if len(full_name.split()) > 2:
         print("Inserisci i dati di " + str(full_name) + ": ")
         while True:
             surname = input("Inserisci il COGNOME: ").upper()
-            if surname in full_name.upper():
-                name = full_name.upper().replace(surname + " ", "")
+            if len(surname.split()) == 0:
+                surname = full_name.split()[0]
+                name = full_name.replace(surname + " ", "")
+                break
+            if len(surname.split()) == 1 and surname in full_name.split()[0]:
+                surname = f"{full_name.split()[0]} {full_name.split()[1]}"
+                name = full_name.replace(surname + " ", "")
+                break
+            if surname in full_name:
+                name = full_name.replace(surname + " ", "")
                 break
             print("COGNOME non presente nel nome, riprova: ")
         return name, surname
 
     name_column = full_name.split()
-    return name_column[1].upper(), name_column[0].upper()
+    return name_column[1], name_column[0]
 
 
 def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
@@ -255,6 +266,13 @@ def groupdata(
 
         # split name column into words and ask surname in input if the number of words
         # is greater than 2
+        print("Se richiesto, inserire i COGNOMI degli atleti mancanti.")
+        print(
+            "Se nessun COGNOME viene inserito, verrà preso il primo nome come COGNOME."
+        )
+        print(
+            "Se il COGNOME è composto da una sola lettera, verranno considerati i primi due nomi."
+        )
         for index, full_name in enumerate(df.index.get_level_values("Name")):
             name, surname = split_names(full_name=full_name)
             out_df.loc[index, "Nome"] = name
