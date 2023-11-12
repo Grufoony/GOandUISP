@@ -3,6 +3,11 @@ Script Python per la conversione di file _.xlsx_ da output GoAndSwim a input per
 
 ***
 
+## File gare
+Nella sottocartella *races* sono presenti cartelle per varie manifestazioni contenenti file utili per esse.
+
+***
+
 ## Ottenere l'eseguibile
 Lo script si può eseguire sulla piattaforma [Google Colab](https://colab.research.google.com/github/Grufoony/GOandUISP/blob/main/main.ipynb).
 
