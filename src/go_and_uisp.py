@@ -37,6 +37,7 @@ find_categories() -> None
 """
 
 import os
+from datetime import datetime
 import pandas as pd
 
 
@@ -46,33 +47,78 @@ __author__ = "Gregorio Berselli"
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
 CATEGORY_PRIORITIES = {
     "EC": 1,
-    "EA1": 2,
-    "EA2": 3,
-    "EB1": 4,
-    "EB2": 5,
-    "R": 6,
-    "J": 7,
-    "A": 8,
+    "EA": 2,
+    "EB": 4,
+    "R": 5,
+    "J": 6,
+    "A": 7,
 }
-
-MALE_CATEGORIES = {2006: "A", 2008: "J", 2011: "R"}
-
-FEMALE_CATEGORIES = {2008: "A", 2010: "J", 2012: "R"}
+CATEGORIES = {
+    "M": {
+        6: "G",
+        7: "G",
+        8: "G",
+        9: "EC",
+        10: "EB",
+        11: "EB",
+        12: "EA",
+        13: "EA",
+        14: "R",
+        15: "R",
+        16: "R",
+        17: "J",
+        18: "J",
+        19: "A",
+        20: "A",
+        21: "A",
+        22: "A",
+        23: "A",
+        24: "A",
+        25: "A",
+    },
+    "F": {
+        5: "G",
+        6: "G",
+        7: "G",
+        8: "EC",
+        9: "EB",
+        10: "EB",
+        11: "EA",
+        12: "EA",
+        13: "R",
+        14: "R",
+        15: "J",
+        16: "J",
+        17: "A",
+        18: "A",
+        19: "A",
+        20: "A",
+        21: "A",
+        22: "A",
+        23: "A",
+        24: "A",
+        25: "A",
+    },
+}
 
 
 def get_category(sex: str, year: int) -> str:
     """
     This function returns the category given sex and year.
     """
-    if sex.lower().strip() == "m":
-        for y, cat in MALE_CATEGORIES.items():
-            if year < y:
-                return cat
+    if datetime.now().month > 9:
+        age = datetime.now().year + 1 - year
+    else:
+        age = datetime.now().year - year
+    if sex.upper().strip() == "M":
+        try:
+            return CATEGORIES["M"][age]
+        except KeyError:
+            return "nan"
+    try:
+        return CATEGORIES["F"][age]
+    except KeyError:
         return "nan"
-    for y, cat in FEMALE_CATEGORIES.items():
-        if year < y:
-            return cat
-    return "nan"
 
 
 def split_names(full_name: str) -> tuple:
