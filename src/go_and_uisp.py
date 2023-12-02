@@ -41,11 +41,12 @@ from datetime import datetime
 import pandas as pd
 
 
-__version__ = (1, 5, 0)
+__version__ = (1, 5, 1)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
 CATEGORY_PRIORITIES = {
+    "G": 0,
     "EC": 1,
     "EA": 2,
     "EB": 4,
@@ -519,6 +520,8 @@ def find_categories() -> None:
                 "A1",
                 "A2",
                 "A3",
+                "",
+                "",
             ]
 
             df.insert(0, "CategoriaVera", "")
