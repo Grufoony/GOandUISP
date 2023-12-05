@@ -372,13 +372,10 @@ def test_print_counts(capfd):
     }
     df = pd.DataFrame(data)
 
-    # capture stdout
-    out = capfd.readouterr()
-
     # call the function
     GOandUISP.print_counts(df)
 
-    # capture stdout again
+    # capture stdout
     out = capfd.readouterr()
 
     # check the output
@@ -389,7 +386,7 @@ def test_print_counts(capfd):
     )
 
 
-def test_fill_categories():
+def test_fill_categories(capfd):
     """
     This function tests the GOandUISP.fill_categories function.
     GIVEN a dataframe and a data dataframe
@@ -408,17 +405,26 @@ def test_fill_categories():
 
     data = {
         "Codice": [1, 2],
-        "Società": ["Aosta", "Catanzaro"],
+        "Societa": ["Aosta", "Catanzaro"],
         "Categoria": ["", ""],
         "Sesso": ["M", "F"],
         "Gara": ["100 Dorso", "100 Dorso"],
         "Tempo": ["01'23\"45", "01'23\"45"],
         "A0": ["Rossi Mario", "Rosi Maria"],
-        "A1": ["Rosi Luigi", np.nan],
-        "A2": [np.nan, np.nan],
+        "A1": ["Rosi Luigi", "Zazza Alex"],
+        "A2": ["Gialli Fabio", np.nan],
         "A3": [np.nan, np.nan],
+        "A4": [np.nan, np.nan],
+        "A5": [np.nan, np.nan],
     }
     df = pd.DataFrame(data)
 
     out = GOandUISP.fill_categories(df, df_data)
+    out_line = capfd.readouterr()
     assert out.CategoriaVera.tolist() == ["A", "J"]
+    assert (
+        out_line.out
+        == "ATTENZIONE: la società Aosta ha 1 atleti che non gareggiano in gare individuali."
+        + "\nATTENZIONE: la società Catanzaro ha 1 atleti che non gareggiano in gare individuali.\n"
+        + "\nIn particolare, gli atleti sono:\ngialli fabio\nzazza alex\n\n"
+    )

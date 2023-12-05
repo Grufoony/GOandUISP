@@ -384,6 +384,8 @@ def fill_categories(
     """
     This function takes two dataframes as input and returns a new dataframe with the correct
     categories.
+    Moreover, it also prints the number of athletes in each team that do not compete in individual
+    races.
 
     Parameters
     ----------
@@ -405,6 +407,10 @@ def fill_categories(
     # make 'Nome' column lowercase
     data["Nome"] = data["Nome"].str.lower()
     data["Nome"] = data["Nome"].str.strip()
+
+    # create a count dict with CodSocieta as keys
+    count_dict = {}
+    counted = []
     for row in df.itertuples():
         categories = []
         for i in range(4):
@@ -421,6 +427,12 @@ def fill_categories(
             search = societa.loc[data["Nome"] == athlete]
             # if search is empty continue
             if search.empty:
+                if athlete not in counted:
+                    try:
+                        count_dict[row.Societa] += 1
+                    except KeyError:
+                        count_dict[row.Societa] = 1
+                    counted.append(athlete)
                 continue
             sex = search["Sesso"].values[0]
             year = search["Anno"].values[0]
@@ -435,6 +447,16 @@ def fill_categories(
             category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
 
         df.at[row.Index, "CategoriaVera"] = category
+
+    if len(count_dict) > 0:
+        for team, count in count_dict.items():
+            print(
+                f"ATTENZIONE: la società {team} ha {count} atleti che non gareggiano in gare individuali."
+            )
+        print("\nIn particolare, gli atleti sono:")
+        for athlete in counted:
+            print(athlete)
+        print("")
 
     return df
 
