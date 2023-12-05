@@ -46,6 +46,7 @@ __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
 CATEGORY_PRIORITIES = {
+    "G": 0,
     "EC": 1,
     "EA": 2,
     "EB": 4,
@@ -542,6 +543,8 @@ def find_categories() -> None:
                 "A1",
                 "A2",
                 "A3",
+                "",
+                "",
             ]
 
             df.insert(0, "CategoriaVera", "")
