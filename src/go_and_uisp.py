@@ -41,7 +41,7 @@ from datetime import datetime
 import pandas as pd
 
 
-__version__ = (1, 5, 1)
+__version__ = (1, 5, 2)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -385,6 +385,8 @@ def fill_categories(
     """
     This function takes two dataframes as input and returns a new dataframe with the correct
     categories.
+    Moreover, it also prints the number of athletes in each team that do not compete in individual
+    races.
 
     Parameters
     ----------
@@ -406,6 +408,10 @@ def fill_categories(
     # make 'Nome' column lowercase
     data["Nome"] = data["Nome"].str.lower()
     data["Nome"] = data["Nome"].str.strip()
+
+    # create a count dict with CodSocieta as keys
+    count_dict = {}
+    counted = []
     for row in df.itertuples():
         categories = []
         for i in range(4):
@@ -418,15 +424,21 @@ def fill_categories(
                 continue
             athlete = athlete.lower().strip()
             # seach for athlete in data with the same CodSocieta
-            societa = data.loc[data["CodSocietà"] == row.Codice]
-            search = societa.loc[data["Nome"] == athlete]
+            search = data.loc[data["CodSocietà"] == row.Codice].loc[
+                data["Nome"] == athlete
+            ]
             # if search is empty continue
             if search.empty:
+                if athlete not in counted:
+                    try:
+                        count_dict[row.Societa] += 1
+                    except KeyError:
+                        count_dict[row.Societa] = 1
+                    counted.append(athlete)
                 continue
-            sex = search["Sesso"].values[0]
-            year = search["Anno"].values[0]
-            sex.lower().strip()
-            category = get_category(sex, year)
+            category = get_category(
+                search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
+            )
             categories.append(category)
 
         # take the max category given CATEGORIES dict
@@ -436,6 +448,17 @@ def fill_categories(
             category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
 
         df.at[row.Index, "CategoriaVera"] = category
+
+    if len(count_dict) > 0:
+        for team, count in count_dict.items():
+            print(
+                f"ATTENZIONE: la società {team} ha {count} "
+                + "atleti che non gareggiano in gare individuali."
+            )
+        print("\nIn particolare, gli atleti sono:")
+        for athlete in counted:
+            print(athlete)
+        print("")
 
     return df
 
