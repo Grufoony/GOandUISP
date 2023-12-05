@@ -423,8 +423,9 @@ def fill_categories(
                 continue
             athlete = athlete.lower().strip()
             # seach for athlete in data with the same CodSocieta
-            societa = data.loc[data["CodSocietà"] == row.Codice]
-            search = societa.loc[data["Nome"] == athlete]
+            search = data.loc[data["CodSocietà"] == row.Codice].loc[
+                data["Nome"] == athlete
+            ]
             # if search is empty continue
             if search.empty:
                 if athlete not in counted:
@@ -434,11 +435,11 @@ def fill_categories(
                         count_dict[row.Societa] = 1
                     counted.append(athlete)
                 continue
-            sex = search["Sesso"].values[0]
-            year = search["Anno"].values[0]
-            sex.lower().strip()
-            category = get_category(sex, year)
-            categories.append(category)
+            categories.append(
+                get_category(
+                    search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
+                )
+            )
 
         # take the max category given CATEGORIES dict
         if len(categories) == 0:
@@ -451,7 +452,8 @@ def fill_categories(
     if len(count_dict) > 0:
         for team, count in count_dict.items():
             print(
-                f"ATTENZIONE: la società {team} ha {count} atleti che non gareggiano in gare individuali."
+                f"ATTENZIONE: la società {team} ha {count} "
+                + "atleti che non gareggiano in gare individuali."
             )
         print("\nIn particolare, gli atleti sono:")
         for athlete in counted:
