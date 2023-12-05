@@ -12,7 +12,7 @@ from src import go_and_uisp as GOandUISP
 
 # pylint enable=wrong-import-position
 
-__version__ = "09/11/2023"
+__version__ = "05/12/2023"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":

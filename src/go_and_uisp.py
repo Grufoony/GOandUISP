@@ -41,7 +41,7 @@ from datetime import datetime
 import pandas as pd
 
 
-__version__ = (1, 5, 0)
+__version__ = (1, 5, 2)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
