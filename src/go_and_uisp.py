@@ -435,11 +435,10 @@ def fill_categories(
                         count_dict[row.Societa] = 1
                     counted.append(athlete)
                 continue
-            categories.append(
-                get_category(
-                    search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
-                )
+            category = get_category(
+                search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
             )
+            categories.append(category)
 
         # take the max category given CATEGORIES dict
         if len(categories) == 0:
