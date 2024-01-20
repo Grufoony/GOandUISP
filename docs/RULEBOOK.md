@@ -8,12 +8,37 @@
 4. [Nuotate](#Nuotate)
 5. [Cronometraggio e Classifiche](#Classifiche)
 
-## G.A.N.
-Abbreviazione per Giudice Arbitro Nuoto.
+## Giudice Arbitro Nuoto
 
 ## Piscina
 
 ## Ruoli
+
+### Giudice Arbitro
+- Pieno controllo ed autorità su tutti gli altri giudici
+- Istruisce la giuria sulla manifestazione e assegna gli altri ruoli
+- Fa rispettare le normative della U.I.S.P.
+- Ha decisione finale su tutte le questioni per le quali non è prevista da regolamento
+- **Deve** squalificare per ogni violazione personalmente constatata
+- **Può** squalificare per segnalazioni ricevute da altri ufficiali gara
+
+**NOTA**: il nuotatore **deve** sempre avere il beneficio del dubbio!
+
+### Giudice di Partenza
+- Ha il pieno contorllo dei concorrenti da quando il giudice arbitro glieli assegna fino a inizio competizione
+- Propone squalifiche per *falsa partenza*, *indisciplina*
+- **Può** annullare una partenza ritenuta irregolare (anche il giudice arbitro può farlo)
+
+### Addetto ai Concorrenti
+- Raduna i nuotatori prima di ogni gara e ne controlla i documenti
+- Comunica a segreteria ed eventualmente al giudice arbitro eventuali assenze
+- Accompagna gli atleti ai blocchi
+- Controlla la regolarità dei costumi (vedi sezione (...)) e l'assenza di *taping*
+
+### Giudice di Stile
+- Posizionato sul lato lungo della vasca
+- Si accerta del rispetto delle norme relative allo stile e coadiuva i giudici di virata
+- **Deve** riferire per iscritto al giudice arbitro ogni infrazione osservata
 
 ## Nuotate
 
