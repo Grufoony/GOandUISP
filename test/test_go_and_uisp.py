@@ -381,8 +381,8 @@ def test_print_counts(capfd):
     # check the output
     assert (
         out.out
-        == "Team\nAosta        2\nCatanzaro    1\nName: count, "
-        + "dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
+        == "TOTALE ATLETI:\t4\nTOTALE ATLETI PARTECIPANTI:\t3\n           Presenti  Totali\nTeam"
+        + "                       \nAosta             2       3\nCatanzaro         1       1\n"
     )
 
 
