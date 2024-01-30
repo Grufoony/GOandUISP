@@ -41,7 +41,7 @@ from datetime import datetime
 import pandas as pd
 
 
-__version__ = (1, 5, 2)
+__version__ = (1, 5, 3)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -226,7 +226,7 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 def print_counts(df: pd.core.frame.DataFrame) -> None:
     """
     This function prints how many athletes are in each team and the total
-    (partecipating medals).
+    of the effective athletes (for partecipating medals).
 
     Parameters
     ----------
@@ -240,9 +240,20 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
     counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
+    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
+    print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
+    print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
 
-    print(counter_df.index.get_level_values("Team").value_counts())
-    print("TOTALE ATLETI PARTECIPANTI: " + str(len(counter_df.index)))
+    counter_df = pd.concat(
+        [
+            counter_df.index.get_level_values("Team").value_counts(),
+            counter_df_total.index.get_level_values("Team").value_counts(),
+        ],
+        axis=1,
+    )
+    counter_df.columns = ["Presenti", "Totali"]
+
+    print(counter_df)
 
 
 def groupdata(

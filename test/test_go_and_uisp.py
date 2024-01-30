@@ -17,13 +17,13 @@ def test_get_category_male():
     """
     current_year = datetime.now().year
     assert GOandUISP.get_category("M", current_year - 20) == "A"
-    assert GOandUISP.get_category("M", current_year - 18) == "A"
-    assert GOandUISP.get_category("M", current_year - 16) == "J"
+    assert GOandUISP.get_category("M", current_year - 18) == "J"
+    assert GOandUISP.get_category("M", current_year - 16) == "R"
     assert GOandUISP.get_category("M", current_year - 14) == "R"
     assert GOandUISP.get_category("M", current_year - 12) == "EA"
     assert GOandUISP.get_category("M", current_year - 10) == "EB"
-    assert GOandUISP.get_category("M", current_year - 8) == "EC"
-    assert GOandUISP.get_category("M", current_year - 6) == "G"
+    assert GOandUISP.get_category("M", current_year - 9) == "EC"
+    assert GOandUISP.get_category("M", current_year - 8) == "G"
     assert GOandUISP.get_category("M", current_year - 4) == "nan"
 
 
@@ -37,13 +37,12 @@ def test_get_category_female():
     current_year = datetime.now().year
     assert GOandUISP.get_category("F", current_year - 20) == "A"
     assert GOandUISP.get_category("F", current_year - 18) == "A"
-    assert GOandUISP.get_category("F", current_year - 16) == "A"
-    assert GOandUISP.get_category("F", current_year - 14) == "J"
-    assert GOandUISP.get_category("F", current_year - 12) == "R"
-    assert GOandUISP.get_category("F", current_year - 10) == "EA"
-    assert GOandUISP.get_category("F", current_year - 8) == "EB"
-    assert GOandUISP.get_category("F", current_year - 7) == "EC"
-    assert GOandUISP.get_category("F", current_year - 6) == "G"
+    assert GOandUISP.get_category("F", current_year - 16) == "J"
+    assert GOandUISP.get_category("F", current_year - 14) == "R"
+    assert GOandUISP.get_category("F", current_year - 12) == "EA"
+    assert GOandUISP.get_category("F", current_year - 9) == "EB"
+    assert GOandUISP.get_category("F", current_year - 8) == "EC"
+    assert GOandUISP.get_category("F", current_year - 7) == "G"
     assert GOandUISP.get_category("F", current_year - 3) == "nan"
 
 
@@ -381,8 +380,8 @@ def test_print_counts(capfd):
     # check the output
     assert (
         out.out
-        == "Team\nAosta        2\nCatanzaro    1\nName: count, "
-        + "dtype: int64\nTOTALE ATLETI PARTECIPANTI: 3\n"
+        == "TOTALE ATLETI:\t4\nTOTALE ATLETI PARTECIPANTI:\t3\n           Presenti  Totali\nTeam"
+        + "                       \nAosta             2       3\nCatanzaro         1       1\n"
     )
 
 
