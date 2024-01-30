@@ -226,7 +226,7 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 def print_counts(df: pd.core.frame.DataFrame) -> None:
     """
     This function prints how many athletes are in each team and the total
-    (partecipating medals).
+    of the effective athletes (for partecipating medals).
 
     Parameters
     ----------
