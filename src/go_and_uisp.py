@@ -585,3 +585,17 @@ def find_categories() -> None:
         print("I file con categorie generate automaticamente sono: ")
         for f in changed_files:
             print(f)
+
+def version() -> str:
+    """
+    This function returns the version of the class.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    str
+        The version of the class.
+    """
+    return ".".join([str(i) for i in __version__])
