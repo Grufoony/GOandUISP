@@ -7,15 +7,6 @@ import pandas as pd
 import numpy as np
 from src import go_and_uisp as GOandUISP
 
-OUT_GROUPBY_RESUME_COLUMNS = [
-    "Cognome",
-    "Nome",
-    "Societa",
-    "PuntiTotali",
-    "GareDisputate",
-    "TempoStile",
-]
-
 
 def test_get_category_male():
     """
@@ -220,7 +211,7 @@ def test_groupdata1():
     }
     df = pd.DataFrame(data)
     out = GOandUISP.groupdata(df, by_points=True)
-    assert out.columns.tolist() == OUT_GROUPBY_RESUME_COLUMNS
+    assert out.columns.tolist() == GOandUISP.GROUPBY_RESUME_COLUMNS
     assert out.PuntiTotali.tolist() == [1, 1]
     assert out.TempoStile.tolist() == ["01'23\"45", "01'26\"45"]
 
@@ -351,7 +342,7 @@ def test_groupdata4():
     }
     df = pd.DataFrame(data)
     out = GOandUISP.groupdata(df, by_points=True)
-    assert out.columns.tolist() == OUT_GROUPBY_RESUME_COLUMNS
+    assert out.columns.tolist() == GOandUISP.GROUPBY_RESUME_COLUMNS
     assert out.PuntiTotali.tolist() == [2, 2]
 
 

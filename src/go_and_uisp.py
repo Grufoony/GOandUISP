@@ -102,6 +102,15 @@ CATEGORIES = {
     },
 }
 
+GROUPBY_RESUME_COLUMNS = [
+    "Cognome",
+    "Nome",
+    "Societa",
+    "PuntiTotali",
+    "GareDisputate",
+    "TempoStile",
+]
+
 
 def get_category(sex: str, year: int) -> str:
     """
@@ -396,16 +405,7 @@ def groupdata(
         )
 
         return (
-            out_df.groupby(["Categoria", "Sesso"])[
-                [
-                    "Cognome",
-                    "Nome",
-                    "Societa",
-                    "PuntiTotali",
-                    "GareDisputate",
-                    "TempoStile",
-                ]
-            ]
+            out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
             .apply(
                 lambda x: x.sort_values(
                     by=["PuntiTotali", "TempoStile"], ascending=[False, True]
