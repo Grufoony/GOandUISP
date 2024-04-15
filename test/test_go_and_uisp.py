@@ -216,6 +216,7 @@ def test_groupdata1():
         "Nome",
         "Societa",
         "PuntiTotali",
+        "GareDisputate",
         "TempoStile",
     ]
     assert out.PuntiTotali.tolist() == [1, 1]
@@ -252,6 +253,7 @@ def test_groupdata2():
         "Gara1",
         "Tempo1",
         "Societa",
+        "GareDisputate",
     ]
     assert out.loc[0].tolist() == [
         "ROSSI",
@@ -261,6 +263,7 @@ def test_groupdata2():
         "100 Dorso",
         "01'23\"45",
         "Aosta",
+        1,
     ]
 
 
@@ -296,6 +299,7 @@ def test_groupdata3():
         "Gara2",
         "Tempo2",
         "Societa",
+        "GareDisputate",
     ]
     assert out.loc[0].tolist() == [
         "ROSI",
@@ -307,6 +311,7 @@ def test_groupdata3():
         np.nan,
         np.nan,
         "Catanzaro",
+        1,
     ]
     assert out.loc[1].tolist() == [
         "ROSSI",
@@ -318,6 +323,7 @@ def test_groupdata3():
         "100 Delfino",
         "01'23\"45",
         "Aosta",
+        2,
     ]
 
 
@@ -348,6 +354,7 @@ def test_groupdata4():
         "Nome",
         "Societa",
         "PuntiTotali",
+        "GareDisputate",
         "TempoStile",
     ]
     assert out.PuntiTotali.tolist() == [2, 2]

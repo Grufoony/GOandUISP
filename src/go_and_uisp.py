@@ -281,7 +281,19 @@ def groupdata(
     Returns
     -------
     pandas.core.frame.DataFrame
-        The converted dataframe.
+        The converted dataframe. This dataframe contains the following columns:
+        - "Cognome"
+        - "Nome"
+        - "Anno"
+        - "Sesso"
+        - "Gara1"
+        - "Tempo1"
+        - "..."
+        - "GaraN"
+        - "TempoN"
+        - "Societa"
+        - "GareDisputate" (containing the number of played races)
+        - "PuntiTotali" (if by_points is True)
     """
     # keep only rows with boolean set to T (valid times) and strip spaces in style column
     df.drop(df.loc[df["Boolean"].str.strip() != "T"].index, inplace=True)
@@ -337,9 +349,12 @@ def groupdata(
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
+            n_played = 0
             for index, race in enumerate(zip(row.Race, row.Time)):
                 out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
                 out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
+                n_played += 1
+            out_df.loc[athlete_index, "GareDisputate"] = n_played
 
     if by_points:
         out_df["PuntiTotali"] = 0
@@ -365,7 +380,7 @@ def groupdata(
 
         print(
             out_df.groupby(["Categoria", "Sesso"])[
-                ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
+                ["Cognome", "Nome", "Societa", "PuntiTotali", "GareDisputate", "TempoStile"]
             ]
             .apply(
                 lambda x: x.sort_values(
@@ -377,7 +392,7 @@ def groupdata(
 
         return (
             out_df.groupby(["Categoria", "Sesso"])[
-                ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
+                ["Cognome", "Nome", "Societa", "PuntiTotali", "GareDisputate" ,"TempoStile"]
             ]
             .apply(
                 lambda x: x.sort_values(
