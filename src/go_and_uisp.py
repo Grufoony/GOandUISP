@@ -349,12 +349,10 @@ def groupdata(
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
-            n_played = 0
             for index, race in enumerate(zip(row.Race, row.Time)):
                 out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
                 out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
-                n_played += 1
-            out_df.loc[athlete_index, "GareDisputate"] = n_played
+            out_df.loc[athlete_index, "GareDisputate"] = index + 1
 
     if by_points:
         out_df["PuntiTotali"] = 0
@@ -380,7 +378,14 @@ def groupdata(
 
         print(
             out_df.groupby(["Categoria", "Sesso"])[
-                ["Cognome", "Nome", "Societa", "PuntiTotali", "GareDisputate", "TempoStile"]
+                [
+                    "Cognome",
+                    "Nome",
+                    "Societa",
+                    "PuntiTotali",
+                    "GareDisputate",
+                    "TempoStile",
+                ]
             ]
             .apply(
                 lambda x: x.sort_values(
@@ -392,7 +397,14 @@ def groupdata(
 
         return (
             out_df.groupby(["Categoria", "Sesso"])[
-                ["Cognome", "Nome", "Societa", "PuntiTotali", "GareDisputate" ,"TempoStile"]
+                [
+                    "Cognome",
+                    "Nome",
+                    "Societa",
+                    "PuntiTotali",
+                    "GareDisputate",
+                    "TempoStile",
+                ]
             ]
             .apply(
                 lambda x: x.sort_values(
