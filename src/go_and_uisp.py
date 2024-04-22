@@ -49,7 +49,8 @@ CATEGORY_PRIORITIES = {
     "G": 0,
     "EC": 1,
     "EA": 2,
-    "EB": 4,
+    "EB": 3,
+    "R14": 4,
     "R": 5,
     "J": 6,
     "A": 7,
@@ -110,6 +111,8 @@ GROUPBY_RESUME_COLUMNS = [
     "GareDisputate",
     "TempoStile",
 ]
+
+__ENCODINGS = ["utf-8", "latin1"]
 
 
 def get_category(sex: str, year: int) -> str:
@@ -479,11 +482,16 @@ def fill_categories(
             )
             categories.append(category)
 
-        # take the max category given CATEGORIES dict
+        # remove nan from categories
+        categories = [x for x in categories if x != "nan"]
         if len(categories) == 0:
             category = "nan"
         else:
-            category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
+            try:
+                category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
+            except KeyError:
+                print(f"ERRORE: categoria in {categories} non trovata.")
+                category = "nan"
 
         df.at[row.Index, "CategoriaVera"] = category
 
@@ -560,8 +568,14 @@ def find_categories() -> None:
     changed_files = []
     for f in os.listdir():
         if "-staffette" in f:
-            df = pd.read_csv(f, sep=";")
-            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
+            for encoding in __ENCODINGS:
+                try:
+                    df = pd.read_csv(f, sep=";", encoding=encoding)
+                    df_data = pd.read_csv(f.replace("-staffette", ""), sep=";", encoding=encoding)
+                except UnicodeDecodeError:
+                    continue
+                print(f"File {f} importato correttamente con encoding {encoding}.")
+            
             # check if the file has 12 columns
             if len(df.columns) != 12:
                 print(
