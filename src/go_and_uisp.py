@@ -384,35 +384,66 @@ def groupdata(
                 if "SL" in str(getattr(row, f"Gara{i}")):
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
-
-        print(
-            out_df.groupby(["Categoria", "Sesso"])[
-                [
-                    "Cognome",
-                    "Nome",
-                    "Societa",
-                    "PuntiTotali",
-                    "GareDisputate",
-                    "TempoStile",
+        
+        if use_jolly:
+            print(
+                out_df.groupby(["Categoria", "Sesso"])[
+                    [
+                        "Cognome",
+                        "Nome",
+                        "Societa",
+                        "PuntiTotali",
+                        "GareDisputate",
+                        "TempoStile",
+                    ]
                 ]
-            ]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-                ).head(3)
-            )
-            .droplevel(2)
-        )
-
-        return (
-            out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                .apply(
+                    lambda x: x.sort_values(
+                        by=["PuntiTotali", "TempoStile"], ascending=[False,  True]
+                    ).head(3)
                 )
+                .droplevel(2)
             )
-            .droplevel(2)
-        )
+
+            return (
+                out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
+                .apply(
+                    lambda x: x.sort_values(
+                        by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                    )
+                )
+                .droplevel(2)
+            )
+        else:
+            print(
+                out_df.groupby(["Categoria", "Sesso"])[
+                    [
+                        "Cognome",
+                        "Nome",
+                        "Societa",
+                        "PuntiTotali",
+                        "GareDisputate",
+                        "TempoStile",
+                    ]
+                ]
+                .apply(
+                    lambda x: x.sort_values(
+                        by=["PuntiTotali", "GareDisputate", "TempoStile"], ascending=[False, False, True]
+                    ).head(3)
+                )
+                .droplevel(2)
+            )
+
+            return (
+                out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
+                .apply(
+                    lambda x: x.sort_values(
+                        by=["PuntiTotali", "GareDisputate", "TempoStile"], ascending=[False, False, True]
+                    )
+                )
+                .droplevel(2)
+            )
+
 
     return out_df
 
