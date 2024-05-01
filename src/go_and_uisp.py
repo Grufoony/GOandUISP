@@ -362,8 +362,7 @@ def groupdata(
                 if "SL" in str(getattr(row, f"Gara{i}")):
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
-
-        print(
+        out_df = (
             out_df.groupby(["Categoria", "Sesso"])[
                 ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
             ]
@@ -375,17 +374,7 @@ def groupdata(
             .droplevel(2)
         )
 
-        return (
-            out_df.groupby(["Categoria", "Sesso"])[
-                ["Cognome", "Nome", "Societa", "PuntiTotali", "TempoStile"]
-            ]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-                )
-            )
-            .droplevel(2)
-        )
+        print(out_df)
 
     return out_df
 
@@ -585,6 +574,7 @@ def find_categories() -> None:
         print("I file con categorie generate automaticamente sono: ")
         for f in changed_files:
             print(f)
+
 
 def version() -> str:
     """
