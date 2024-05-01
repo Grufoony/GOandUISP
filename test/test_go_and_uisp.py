@@ -346,7 +346,7 @@ def test_groupdata4():
     assert out.PuntiTotali.tolist() == [2, 2]
 
 
-def test_print_counts(capfd):
+def test_get_counts(capfd):
     """
     This function tests the GOandUISP.print_counts function.
     GIVEN a dataframe
@@ -365,17 +365,12 @@ def test_print_counts(capfd):
     df = pd.DataFrame(data)
 
     # call the function
-    GOandUISP.print_counts(df)
+    out_df = GOandUISP.get_counts(df)
+    out_df.reset_index(inplace=True)
 
-    # capture stdout
-    out = capfd.readouterr()
-
-    # check the output
-    assert (
-        out.out
-        == "TOTALE ATLETI:\t4\nTOTALE ATLETI PARTECIPANTI:\t3\n           Presenti  Totali\nTeam"
-        + "                       \nAosta             2       3\nCatanzaro         1       1\n"
-    )
+    assert out_df["Team"].tolist() == ["Aosta", "Catanzaro", "TOTALE"]
+    assert out_df["Presenti"].tolist() == [2, 1, 3]
+    assert out_df["Totali"].tolist() == [3, 1, 4]
 
 
 def test_fill_categories(capfd):

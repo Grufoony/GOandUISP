@@ -20,9 +20,9 @@ reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     It takes a file name as input and returns a pandas dataframe.
     The output dataset has the correct column labels, the correct style names and the correct
     names format.
-print_counts(df: pd.core.frame.DataFrame) -> None
+get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     This function prints how many athletes are in each team and the total
-    (partecipating medals).
+    (partecipating medals) and returns the counts df.
 groupdata(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
     This function takes a dataframe as input and returns a new dataframe with the correct
     format.
@@ -41,7 +41,7 @@ from datetime import datetime
 import pandas as pd
 
 
-__version__ = (1, 5, 4)
+__version__ = (1, 6, 0)
 __author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -232,10 +232,10 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     return df
 
 
-def print_counts(df: pd.core.frame.DataFrame) -> None:
+def get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     """
     This function prints how many athletes are in each team and the total
-    of the effective athletes (for partecipating medals).
+    of the effective athletes (for partecipating medals) and returns the counts df.
 
     Parameters
     ----------
@@ -244,14 +244,13 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
 
     Returns
     -------
-    None
+    pandas.core.frame.DataFrame
+        The dataframe with the counts.
     """
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
     counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
     counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
-    print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
-    print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
 
     counter_df = pd.concat(
         [
@@ -261,8 +260,10 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
         axis=1,
     )
     counter_df.columns = ["Presenti", "Totali"]
+    # add row with total
+    counter_df.loc["TOTALE"] = counter_df.sum()
 
-    print(counter_df)
+    return counter_df
 
 
 def groupdata(
@@ -517,7 +518,7 @@ def accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -
                 continue
             df = reformat(df=df)
             if counts:
-                print_counts(df=df)
+                print(get_counts(df=df))
                 input("Premi INVIO per continuare...")
             out = groupdata(df=df)
             out.to_excel(f"ACCUMULATO_{f}", index=False)
