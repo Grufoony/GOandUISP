@@ -110,7 +110,7 @@ class GUI:
     def open_file(self):
         while True:
             self.file = filedialog.askopenfilename()
-            if self.file.isinstance(tuple):
+            if type(self.file) == tuple:
                 break
             print(type(self.file))
             print(self.file)
