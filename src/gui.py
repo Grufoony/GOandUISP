@@ -59,7 +59,7 @@ class DataFrameWindow(tk.Toplevel):  # Inherits from tk.Toplevel
         for row in df_rows:
             tv1.insert(
                 "", "end", values=row
-            )  # inserts each list into the treeview. For parameters see https://docs.python.org/3/library/tkinter.ttk.html#tkinter.ttk.Treeview.insert
+            )  # inserts each list into the treeview.
 
 
 class GUI:
@@ -68,37 +68,38 @@ class GUI:
 
     def __init__(self):
         self.cached_df = None
+        self.file = ""
 
-        self.mainWin = tk.Tk()
-        self.mainWin.title("Swim Utils v" + ".".join(map(str, self.__version__)))
-        self.mainWin.minsize(width=500, height=300)
+        self.main_win = tk.Tk()
+        self.main_win.title("Swim Utils v" + ".".join(map(str, self.__version__)))
+        self.main_win.minsize(width=500, height=300)
 
-        self.menuBar = tk.Menu(self.mainWin)
+        self.menu_bar = tk.Menu(self.main_win)
 
         # File menu
-        self.fileMenu = tk.Menu(self.menuBar, tearoff=0)
-        self.fileMenu.add_command(label="Open", command=self.openFile)
-        self.menuBar.add_cascade(label="File", menu=self.fileMenu)
+        self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(label="Open", command=self.open_file)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
         # add about menu
-        self.aboutMenu = tk.Menu(self.menuBar, tearoff=0)
-        self.aboutMenu.add_command(
+        self.about_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.about_menu.add_command(
             label="About",
             command=lambda: messagebox.showinfo(
                 "About", "Go And Uisp v" + go.version()
             ),
         )
-        self.menuBar.add_cascade(label="About", menu=self.aboutMenu)
+        self.menu_bar.add_cascade(label="About", menu=self.about_menu)
         # add help menu
-        self.helpMenu = tk.Menu(self.menuBar, tearoff=0)
-        self.helpMenu.add_command(label="Help", command=lambda: print("Help"))
-        self.menuBar.add_cascade(label="Help", menu=self.helpMenu)
+        self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.help_menu.add_command(label="Help", command=lambda: print("Help"))
+        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
 
-        self.mainWin.config(menu=self.menuBar)
+        self.main_win.config(menu=self.menu_bar)
 
-        self.youngchallengeButton = tk.Button(
-            text="Print Counts", command=lambda: self.printCounts()
+        self.btn_print_counts = tk.Button(
+            text="Print Counts", command=lambda: self.print_counts()
         )
-        self.youngchallengeButton.pack()
+        self.btn_print_counts.pack()
 
         # self.combinedButton = tk.Button(text="Combinata", command=lambda : go.accumulate())
         # self.combinedButton.pack()
@@ -106,27 +107,31 @@ class GUI:
         # self.relayButton = tk.Button(text="Staffetta", command=lambda : go.find_categories())
         # self.relayButton.pack()
 
-    def openFile(self):
-        self.file = ""
+    def open_file(self):
         while True:
             self.file = filedialog.askopenfilename()
-            if type(self.file) == tuple:
+            if self.file.isinstance(tuple):
                 break
             print(type(self.file))
             print(self.file)
             try:
                 if self.file.endswith(".csv"):
-                    df = pd.read_csv(self.file, header=None)
+                    if "dbmeeting" in self.file:
+                        df = pd.read_csv(self.file, sep=";")
+                        self.cached_df = df
+                    else:
+                        df = pd.read_csv(self.file, sep=";", header=None)
+                        self.cached_df = go.reformat(df)
                 elif self.file.endswith(".xlsx"):
                     df = pd.read_excel(self.file, header=None)
-                self.cached_df = go.reformat(df)
+                    self.cached_df = go.reformat(df)
                 break
             except Exception as e:
                 if self.file == "":
                     break
                 messagebox.showerror("Invalid File", f"Error details: {e.__context__}")
 
-    def printCounts(self):
+    def print_counts(self):
         if self.cached_df is None:
             messagebox.showerror("No File", "No file has been loaded yet.")
         # set filename as title
@@ -135,4 +140,4 @@ class GUI:
 
 if __name__ == "__main__":
     gui = GUI()
-    gui.mainWin.mainloop()
+    gui.main_win.mainloop()

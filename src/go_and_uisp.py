@@ -248,18 +248,49 @@ def get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         The dataframe with the counts.
     """
     # now print how many athletes are in each team and the total (partecipating medals)
-    counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
-    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
-    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
+    if "Absent" in df.columns:
+        counter_df = df.drop(
+            df.loc[df["Absent"].str.strip() == "A"].index, inplace=False
+        )
+        counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(
+            list
+        )
+        counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(
+            list
+        )
+        counter_df = pd.concat(
+            [
+                counter_df.index.get_level_values("Team").value_counts(),
+                counter_df_total.index.get_level_values("Team").value_counts(),
+            ],
+            axis=1,
+        )
+        counter_df.columns = ["Presenti", "Totali"]
+    else:
+        if "Cognome" not in df.columns:
+            df.columns = [
+                "CodSocieta",
+                "Societa",
+                "Categoria",
+                "Sesso",
+                "Gara",
+                "Tempo",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "",
+                "",
+            ]
+            df["Nome"] = df["A0"] + " " + df["A1"] + " " + df["A2"] + " " + df["A3"]
+        else:
+            df["Nome"] = df["Cognome"] + " " + df["Nome"] + " " + str(df["Anno"])
+        # get the number of rows corresponding to each team
+        counter_df = df.groupby(["Nome", "Societa"]).count()
+        counter_df = counter_df.reset_index().groupby("Societa").count()
+        counter_df = counter_df[["Nome"]]
+        counter_df.columns = ["Presenti"]
 
-    counter_df = pd.concat(
-        [
-            counter_df.index.get_level_values("Team").value_counts(),
-            counter_df_total.index.get_level_values("Team").value_counts(),
-        ],
-        axis=1,
-    )
-    counter_df.columns = ["Presenti", "Totali"]
     # add row with total
     counter_df.loc["TOTALE"] = counter_df.sum()
 
