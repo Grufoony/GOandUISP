@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, simpledialog
 import pandas as pd
 import go_and_uisp as go
 
@@ -7,7 +7,7 @@ import go_and_uisp as go
 class DataFrameWindow(tk.Toplevel):  # Inherits from tk.Toplevel
 
     def __init__(
-        self, your_dataframe, title
+        self, your_dataframe, title, reset_index=True
     ):  # the dataframe you passed through is here
         super().__init__()
 
@@ -43,9 +43,9 @@ class DataFrameWindow(tk.Toplevel):  # Inherits from tk.Toplevel
             side="right", fill="y"
         )  # make the scrollbar fill the y axis of the Treeview widget
 
-        # add also index
-        your_dataframe.reset_index(inplace=True)
-        your_dataframe.rename(columns={"index": "Indice"}, inplace=True)
+        if reset_index:
+            your_dataframe.reset_index(inplace=True)
+            your_dataframe.rename(columns={"index": "Indice"}, inplace=True)
 
         # this loads the dataframe into the treeview widget
         tv1["column"] = list(your_dataframe.columns)
@@ -57,9 +57,7 @@ class DataFrameWindow(tk.Toplevel):  # Inherits from tk.Toplevel
             your_dataframe.to_numpy().tolist()
         )  # turns the dataframe into a list of lists
         for row in df_rows:
-            tv1.insert(
-                "", "end", values=row
-            )  # inserts each list into the treeview.
+            tv1.insert("", "end", values=row)  # inserts each list into the treeview.
 
 
 class GUI:
@@ -101,19 +99,30 @@ class GUI:
         )
         self.btn_print_counts.pack()
 
-        # self.combinedButton = tk.Button(text="Combinata", command=lambda : go.accumulate())
-        # self.combinedButton.pack()
+        self.btn_make_ranking = tk.Button(
+            text="Make Ranking", command=lambda: self.make_ranking()
+        )
+        self.btn_make_ranking.pack()
 
         # self.relayButton = tk.Button(text="Staffetta", command=lambda : go.find_categories())
         # self.relayButton.pack()
+
+    def __combobox(self, title: str, values: list):
+        top = tk.Toplevel()  # use Toplevel() instead of Tk()
+        tk.Label(top, text=title).pack()
+        box_value = tk.StringVar()
+        combo = ttk.Combobox(top, textvariable=box_value, values=values)
+        combo.pack()
+        combo.bind("<<ComboboxSelected>>", lambda _: top.destroy())
+        top.grab_set()
+        top.wait_window(top)  # wait for itself destroyed, so like a modal dialog
+        return box_value.get()
 
     def open_file(self):
         while True:
             self.file = filedialog.askopenfilename()
             if type(self.file) == tuple:
                 break
-            print(type(self.file))
-            print(self.file)
             try:
                 if self.file.endswith(".csv"):
                     if "dbmeeting" in self.file:
@@ -129,13 +138,49 @@ class GUI:
             except Exception as e:
                 if self.file == "":
                     break
-                messagebox.showerror("Invalid File", f"Error details: {e.__context__}")
+                messagebox.showerror("Invalid File", f"Error details: {e.__str__()}")
 
     def print_counts(self):
         if self.cached_df is None:
             messagebox.showerror("No File", "No file has been loaded yet.")
         # set filename as title
         DataFrameWindow(go.get_counts(self.cached_df), title=self.file)
+
+    def make_ranking(self):
+        if self.cached_df is None:
+            messagebox.showerror("No File", "No file has been loaded yet.")
+        result_df = go.groupdata(df=self.cached_df, split_names=False)
+        # ask for jolly count and number of athletes to show
+        use_jolly = messagebox.askyesno("Jolly", "Vuoi considerare i jolly?")
+        # ask for playoff race making as choices the races in the dataframe
+        columns = [
+            f"Gara{i}" for i in range(1, int(result_df["GareDisputate"].max()) + 1)
+        ]
+        unique_races = (
+            pd.concat([result_df[col] for col in columns]).dropna().unique().tolist()
+        )
+        # ask for playoff giving unique_races as choices
+        playoff_race = self.__combobox(
+            title="Seleziona la gara di spareggio", values=unique_races
+        )
+        show_first = simpledialog.askinteger(
+            "Atleti da mostrare", "Quanti atleti per categoria vuoi mostrare?"
+        )
+        min_races = simpledialog.askinteger(
+            "Gare minime",
+            "Quante gare minime devono avere gli atleti per essere considerati?",
+        )
+
+        result_df = go.ranking(
+            result_df,
+            use_jolly=use_jolly,
+            playoff_race=playoff_race,
+            show_first=show_first,
+            min_races=min_races,
+        )
+        DataFrameWindow(result_df, title=self.file)
+        # except Exception as e:
+        #     messagebox.showerror("Error", f"Error details: {e.__str__()}")
 
 
 if __name__ == "__main__":

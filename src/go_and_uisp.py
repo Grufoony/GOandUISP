@@ -102,13 +102,12 @@ CATEGORIES = {
     },
 }
 
-GROUPBY_RESUME_COLUMNS = [
-    "Cognome",
+RANKING_COLUMNS = [
     "Nome",
     "Societa",
     "PuntiTotali",
     "GareDisputate",
-    "TempoStile",
+    "TempoSpareggio",
 ]
 
 
@@ -299,9 +298,7 @@ def get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
 def groupdata(
     df: pd.core.frame.DataFrame,
-    by_points: bool = False,
-    use_jolly: bool = False,
-    out_df: pd.core.frame.DataFrame = None,
+    split_names: bool = False,
 ) -> pd.core.frame.DataFrame:
     """
     This function takes a dataframe as input and returns a new dataframe with the correct
@@ -362,19 +359,23 @@ def groupdata(
         ["Race", "Time", "Points", "Double"]
     ].agg(list)
 
-    if out_df is None:
-        # creates empty output database with columns' names
-        out_columns = ["Cognome", "Nome", "Anno", "Sesso"]
-        for i in range(df["Race"].apply(len).max()):
-            out_columns.append("Gara" + str(i + 1))
-            out_columns.append("Tempo" + str(i + 1))
-        out_columns.append("Societa")
-        out_df = pd.DataFrame(columns=out_columns)
+    # creates empty output database with columns' names
+    out_columns = ["Nome", "Anno", "Sesso", "Categoria"]
+    for i in range(df["Race"].apply(len).max()):
+        out_columns.append("Gara" + str(i + 1))
+        out_columns.append("Tempo" + str(i + 1))
+    out_columns.append("Societa")
+    out_columns.append("Punti")
+    out_columns.append("Jolly")
+    out_df = pd.DataFrame(columns=out_columns)
 
-        out_df["Anno"] = df.index.get_level_values("Year")
-        out_df["Sesso"] = df.index.get_level_values("Sex")
-        out_df["Societa"] = df.index.get_level_values("Team")
+    out_df["Nome"] = df.index.get_level_values("Name").str.upper()
+    out_df["Anno"] = df.index.get_level_values("Year")
+    out_df["Sesso"] = df.index.get_level_values("Sex")
+    out_df["Categoria"] = df.index.get_level_values("Category")
+    out_df["Societa"] = df.index.get_level_values("Team")
 
+    if split_names:
         # split name column into words and ask surname in input if the number of words
         # is greater than 2
         print("Se richiesto, inserire i COGNOMI degli atleti mancanti.")
@@ -389,55 +390,62 @@ def groupdata(
             out_df.loc[index, "Nome"] = name
             out_df.loc[index, "Cognome"] = surname
 
-        for athlete_index, row in enumerate(df.itertuples()):
-            for index, race in enumerate(zip(row.Race, row.Time)):
-                out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
-                out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
-            out_df.loc[athlete_index, "GareDisputate"] = index + 1
-
-    if by_points:
-        out_df["PuntiTotali"] = 0
-        out_df["Categoria"] = df.index.get_level_values("Category")
-        for athlete_index, row in enumerate(df.itertuples()):
-            i = 0
-            for points, double in zip(row.Points, row.Double):
-                double = double.replace(",", ".") if "," in str(double) else double
-                i += int(points)
-                if use_jolly and int(float(double)) == 2:
-                    i += int(points)
-            out_df.loc[athlete_index, "PuntiTotali"] = i
-
-        # print athlete with more points for each category and sex
-        # if there are more than one athlete with the same points, print the one with lowest SL time
-
-        out_df["TempoStile"] = ""
-        for row in out_df.itertuples():
-            for i in range(1, df["Race"].apply(len).max() + 1):
-                if "SL" in str(getattr(row, f"Gara{i}")):
-                    out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
-                    break
-        out_df = (
-            out_df.groupby(["Categoria", "Sesso"])[
-                [
-                    "Cognome",
-                    "Nome",
-                    "Societa",
-                    "PuntiTotali",
-                    "GareDisputate",
-                    "TempoStile",
-                ]
-            ]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-                ).head(3)
-            )
-            .droplevel(2)
-        )
-
-        print(out_df)
+    for athlete_index, row in enumerate(df.itertuples()):
+        index = 0
+        for index, race in enumerate(zip(row.Race, row.Time)):
+            out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
+            out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
+        out_df.loc[athlete_index, "GareDisputate"] = index + 1
+        out_df.at[athlete_index, "Punti"] = row.Points
+        out_df.at[athlete_index, "Jolly"] = row.Double
 
     return out_df
+
+
+def ranking(
+    df: pd.core.frame.DataFrame,
+    use_jolly: bool = False,
+    playoff_race: str = "50 SL",
+    show_first: int = None,
+    min_races: int = None,
+) -> pd.core.frame.DataFrame:
+    df["PuntiTotali"] = 0
+    df["TempoSpareggio"] = ""
+    if show_first is None:
+        show_first = len(df)
+    if min_races is not None and min_races < 0:
+        min_races = int(df["GareDisputate"].max())
+        # keep only data where GareDisputate >= min_races
+        df.drop(df.loc[df.GareDisputate < min_races].index, inplace=True)
+
+    for row in df.itertuples():
+        i = 0
+        for points, double in zip(row.Punti, row.Jolly):
+            double = double.replace(",", ".") if "," in str(double) else double
+            i += int(points)
+            if use_jolly and int(float(double)) == 2:
+                i += int(points)
+        df.loc[row.Index, "PuntiTotali"] = i
+
+    # print athlete with more points for each category and sex
+    # if there are more than one athlete with the same points, print the one with lowest SL time
+
+    for row in df.itertuples():
+        for i in range(1, int(row.GareDisputate) + 1):
+            if str(getattr(row, f"Gara{i}")) == playoff_race:
+                df.at[row.Index, "TempoSpareggio"] = getattr(row, f"Tempo{i}")
+                break
+    df = (
+        df.groupby(["Categoria", "Sesso"])[RANKING_COLUMNS]
+        .apply(
+            lambda x: x.sort_values(
+                by=["PuntiTotali", "TempoSpareggio"], ascending=[False, True]
+            ).head(show_first)
+        )
+        .droplevel(2)
+    )
+
+    return df
 
 
 def fill_categories(
