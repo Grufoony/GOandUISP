@@ -307,6 +307,45 @@ def test_groupdata2():
     ]
 
 
+def test_groupdata3():
+    """
+    This function tests the GOandUISP.groupdata function when by_points is True.
+    GIVEN a dataframe and by_points is True
+    WHEN the function is called
+    THEN it returns a dataframe with the correct format.
+    """
+    data = {
+        "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario"],
+        "Year": [2010, 2010, 2010],
+        "Sex": ["M", "F", "M"],
+        "Team": ["Aosta", "Catanzaro", "Aosta"],
+        "Style": ["Dorso", "Rana", "Delfino"],
+        "Distance": [100, 200, 100],
+        "Category": ["A", "B", "A"],
+        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "Points": [1, 2, 1],
+        "Double": ["0", "0", "0"],
+        "Boolean": ["T", "T", "T"],
+    }
+    df = pd.DataFrame(data)
+    out = GOandUISP.groupdata(df)
+    assert out.columns.tolist() == [
+        "Nome",
+        "Anno",
+        "Sesso",
+        "Categoria",
+        "Gara1",
+        "Tempo1",
+        "Gara2",
+        "Tempo2",
+        "Societa",
+        "Punti",
+        "Jolly",
+        "GareDisputate",
+    ]
+    assert out.Punti.tolist() == [[2], [1, 1]]
+
+
 def test_ranking1():
     """
     This function tests the GOandUISP.ranking function when the athlets have same points.
@@ -333,32 +372,6 @@ def test_ranking1():
     assert out.columns.tolist() == GOandUISP.RANKING_COLUMNS
     assert out.PuntiTotali.tolist() == [1, 1]
     assert out.TempoSpareggio.tolist() == ["01'23\"45", "01'26\"45"]
-
-
-# def test_groupdata4():
-#     """
-#     This function tests the GOandUISP.groupdata function when by_points is True.
-#     GIVEN a dataframe and by_points is True
-#     WHEN the function is called
-#     THEN it returns a dataframe with the correct format.
-#     """
-#     data = {
-#         "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario"],
-#         "Year": [2010, 2010, 2010],
-#         "Sex": ["M", "F", "M"],
-#         "Team": ["Aosta", "Catanzaro", "Aosta"],
-#         "Style": ["Dorso", "Rana", "Delfino"],
-#         "Distance": [100, 200, 100],
-#         "Category": ["A", "B", "A"],
-#         "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
-#         "Points": [1, 2, 1],
-#         "Double": ["0", "0", "0"],
-#         "Boolean": ["T", "T", "T"],
-#     }
-#     df = pd.DataFrame(data)
-#     out = GOandUISP.groupdata(df, by_points=True)
-#     assert out.columns.tolist() == GOandUISP.GROUPBY_RESUME_COLUMNS
-#     assert out.PuntiTotali.tolist() == [2, 2]
 
 
 def test_get_counts(capfd):
