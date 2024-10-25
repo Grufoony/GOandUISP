@@ -11,6 +11,7 @@ NOW = datetime.now()
 if NOW.month > 9:
     NOW = NOW.replace(year=NOW.year + 1)
 
+
 def test_get_category_male():
     """
     This function tests the get_category function for male athletes.
@@ -75,7 +76,13 @@ def test_reformat():
             3: "ROSI MARIA ",
             4: "ROSI MARIA ",
         },
-        1: {0: NOW.year - 11, 1: NOW.year - 11, 2: NOW.year - 11, 3: NOW.year - 13, 4: NOW.year - 13},
+        1: {
+            0: NOW.year - 11,
+            1: NOW.year - 11,
+            2: NOW.year - 11,
+            3: NOW.year - 13,
+            4: NOW.year - 13,
+        },
         2: {0: " M ", 1: " M ", 2: " M ", 3: " F ", 4: " F "},
         3: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: " EA2 ", 4: " EA2 "},
         4: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100},
@@ -138,7 +145,14 @@ def test_reformat2():
             5: "ROSI MARIA ",
         },
         1: {0: np.nan, 1: np.nan, 2: np.nan, 3: "LOMBARDIA ASD", 4: np.nan, 5: np.nan},
-        2: {0: NOW.year - 11, 1: NOW.year - 11, 2: NOW.year - 11, 3: 0, 4: NOW.year - 13, 5: NOW.year - 13},
+        2: {
+            0: NOW.year - 11,
+            1: NOW.year - 11,
+            2: NOW.year - 11,
+            3: 0,
+            4: NOW.year - 13,
+            5: NOW.year - 13,
+        },
         3: {0: " M ", 1: " M ", 2: " M ", 3: np.nan, 4: " F ", 5: " F "},
         4: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: np.nan, 4: " EA2 ", 5: " EA2 "},
         5: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100, 5: 100},

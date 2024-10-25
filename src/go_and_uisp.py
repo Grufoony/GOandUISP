@@ -250,8 +250,12 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
     """
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
-    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(list)
-    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(list)
+    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
+        list
+    )
+    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
+        list
+    )
     print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
     print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
 
