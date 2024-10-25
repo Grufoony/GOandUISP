@@ -360,7 +360,7 @@ def groupdata(
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
-            for index, race in enumerate(zip(row.Race, row.Time)):
+            for index, race in enumerate(zip(row.Race, row.SubTime)):
                 out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
                 out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
             out_df.loc[athlete_index, "GareDisputate"] = index + 1
