@@ -197,8 +197,9 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     df.columns = (
         ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
         + [""] * 3
-        + ["Time"]
-        + [""] * 2
+        + ["SubTime"]
+        + ["RaceTime"]
+        + [""]
         + ["Boolean", "Absent"]
         + [""]
         + ["Points", "Double"]
@@ -215,8 +216,9 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         df.columns = (
             ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
             + [""] * 3
-            + ["Time"]
-            + [""] * 2
+            + ["SubTime"]
+            + ["RaceTime"]
+            + [""]
             + ["Boolean", "Absent"]
             + [""]
             + ["Points", "Double"]
@@ -248,8 +250,12 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
     """
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
-    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
-    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
+    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
+        list
+    )
+    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
+        list
+    )
     print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
     print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
 
@@ -316,7 +322,7 @@ def groupdata(
             "Style",
             "Distance",
             "Category",
-            "Time",
+            "SubTime",
             "Team",
             "Points",
             "Double",
@@ -327,7 +333,7 @@ def groupdata(
     df["Race"] = df["Distance"].astype(str) + " " + df["Style"]
     # groupby races and times, i.e. get unique athletes
     df = df.groupby(["Name", "Year", "Sex", "Category", "Team"])[
-        ["Race", "Time", "Points", "Double"]
+        ["Race", "SubTime", "Points", "Double"]
     ].agg(list)
 
     if out_df is None:
@@ -358,7 +364,7 @@ def groupdata(
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
-            for index, race in enumerate(zip(row.Race, row.Time)):
+            for index, race in enumerate(zip(row.Race, row.SubTime)):
                 out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
                 out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
             out_df.loc[athlete_index, "GareDisputate"] = index + 1

@@ -7,6 +7,10 @@ import pandas as pd
 import numpy as np
 from src import go_and_uisp as GOandUISP
 
+NOW = datetime.now()
+if NOW.month > 9:
+    NOW = NOW.replace(year=NOW.year + 1)
+
 
 def test_get_category_male():
     """
@@ -15,7 +19,7 @@ def test_get_category_male():
     WHEN the function is called
     THEN it returns the correct category.
     """
-    current_year = datetime.now().year
+    current_year = NOW.year
     assert GOandUISP.get_category("M", current_year - 20) == "A"
     assert GOandUISP.get_category("M", current_year - 18) == "J"
     assert GOandUISP.get_category("M", current_year - 16) == "R"
@@ -34,7 +38,7 @@ def test_get_category_female():
     WHEN the function is called
     THEN it returns the correct category.
     """
-    current_year = datetime.now().year
+    current_year = NOW.year
     assert GOandUISP.get_category("F", current_year - 20) == "A"
     assert GOandUISP.get_category("F", current_year - 18) == "A"
     assert GOandUISP.get_category("F", current_year - 16) == "J"
@@ -72,7 +76,13 @@ def test_reformat():
             3: "ROSI MARIA ",
             4: "ROSI MARIA ",
         },
-        1: {0: 2013, 1: 2013, 2: 2013, 3: 2011, 4: 2011},
+        1: {
+            0: NOW.year - 11,
+            1: NOW.year - 11,
+            2: NOW.year - 11,
+            3: NOW.year - 13,
+            4: NOW.year - 13,
+        },
         2: {0: " M ", 1: " M ", 2: " M ", 3: " F ", 4: " F "},
         3: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: " EA2 ", 4: " EA2 "},
         4: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100},
@@ -135,7 +145,14 @@ def test_reformat2():
             5: "ROSI MARIA ",
         },
         1: {0: np.nan, 1: np.nan, 2: np.nan, 3: "LOMBARDIA ASD", 4: np.nan, 5: np.nan},
-        2: {0: 2013, 1: 2013, 2: 2013, 3: 0, 4: 2011, 5: 2011},
+        2: {
+            0: NOW.year - 11,
+            1: NOW.year - 11,
+            2: NOW.year - 11,
+            3: 0,
+            4: NOW.year - 13,
+            5: NOW.year - 13,
+        },
         3: {0: " M ", 1: " M ", 2: " M ", 3: np.nan, 4: " F ", 5: " F "},
         4: {0: " EB1 ", 1: " EB1 ", 2: " EB1 ", 3: np.nan, 4: " EA2 ", 5: " EA2 "},
         5: {0: 50, 1: 100, 2: 200, 3: 100, 4: 100, 5: 100},
@@ -198,13 +215,13 @@ def test_groupdata1():
     """
     data = {
         "Name": ["Rossi Mario", "Rosi Luigi", "Rossi Mario"],
-        "Year": [2010, 2010, 2010],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 14],
         "Sex": ["M", "M", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta"],
         "Style": ["SL", "SL", "Delfino"],
         "Distance": [100, 100, 100],
         "Category": ["A", "A", "A"],
-        "Time": ["01'26\"45", "01'23\"45", "01'23\"45"],
+        "SubTime": ["01'26\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 1, 0],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -225,13 +242,13 @@ def test_groupdata2():
     """
     data = {
         "Name": ["Rossi Mario"],
-        "Year": [2010],
+        "Year": [NOW.year - 14],
         "Sex": ["M"],
         "Team": ["Aosta"],
         "Style": ["Dorso"],
         "Distance": [100],
         "Category": ["A"],
-        "Time": ["01'23\"45"],
+        "SubTime": ["01'23\"45"],
         "Points": [1],
         "Double": ["0"],
         "Boolean": ["T"],
@@ -251,7 +268,7 @@ def test_groupdata2():
     assert out.loc[0].tolist() == [
         "ROSSI",
         "MARIO",
-        2010,
+        NOW.year - 14,
         "M",
         "100 Dorso",
         "01'23\"45",
@@ -269,13 +286,13 @@ def test_groupdata3():
     """
     data = {
         "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario"],
-        "Year": [2010, 2011, 2010],
+        "Year": [NOW.year - 14, NOW.year - 13, NOW.year - 14],
         "Sex": ["M", "F", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta"],
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -297,7 +314,7 @@ def test_groupdata3():
     assert out.loc[0].tolist() == [
         "ROSI",
         "MARIA",
-        2011,
+        NOW.year - 13,
         "F",
         "200 Rana",
         "01'23\"45",
@@ -309,7 +326,7 @@ def test_groupdata3():
     assert out.loc[1].tolist() == [
         "ROSSI",
         "MARIO",
-        2010,
+        NOW.year - 14,
         "M",
         "100 Dorso",
         "01'23\"45",
@@ -329,13 +346,13 @@ def test_groupdata4():
     """
     data = {
         "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario"],
-        "Year": [2010, 2010, 2010],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 14],
         "Sex": ["M", "F", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta"],
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -356,10 +373,10 @@ def test_print_counts(capfd):
     # create a test dataframe
     data = {
         "Name": ["Rossi Mario", "Rosi Maria", "Rossi Mario", "Bianchi Giovanni"],
-        "Year": [2010, 2010, 2011, 2011],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
         "Sex": ["M", "F", "M", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta", "Aosta"],
-        "Time": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
+        "SubTime": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
         "Absent": ["", "", "", "A"],
     }
     df = pd.DataFrame(data)
@@ -390,7 +407,7 @@ def test_fill_categories(capfd):
         "CodSocietà": [1, 1, 2],
         "Cognome": ["Rossi", "Rosi", "Rosi"],
         "Nome": ["Mario", "Luigi", "Maria"],
-        "Anno": [2010, 2000, 2008],
+        "Anno": [NOW.year - 14, NOW.year - 24, NOW.year - 16],
         "Sesso": ["M", "M", "F"],
     }
     df_data = pd.DataFrame(data)
