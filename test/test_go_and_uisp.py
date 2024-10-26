@@ -221,7 +221,7 @@ def test_groupdata1():
         "Style": ["SL", "SL", "Delfino"],
         "Distance": [100, 100, 100],
         "Category": ["A", "A", "A"],
-        "SubTime": ["01'26\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'26\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 1, 0],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -248,7 +248,7 @@ def test_groupdata2():
         "Style": ["Dorso"],
         "Distance": [100],
         "Category": ["A"],
-        "SubTime": ["01'23\"45"],
+        "Time": ["01'23\"45"],
         "Points": [1],
         "Double": ["0"],
         "Boolean": ["T"],
@@ -292,7 +292,7 @@ def test_groupdata3():
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -352,7 +352,7 @@ def test_groupdata4():
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -376,7 +376,7 @@ def test_print_counts(capfd):
         "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
         "Sex": ["M", "F", "M", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta", "Aosta"],
-        "SubTime": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
+        "Time": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
         "Absent": ["", "", "", "A"],
     }
     df = pd.DataFrame(data)
@@ -437,3 +437,18 @@ def test_fill_categories(capfd):
         + "\nATTENZIONE: la società Catanzaro ha 1 atleti che non gareggiano in gare individuali.\n"
         + "\nIn particolare, gli atleti sono:\ngialli fabio\nzazza alex\n\n"
     )
+
+
+def test_time_conversions():
+    str_time = "00'00\"99"
+    int_time = 99
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
+    str_time = "00'59\"99"
+    int_time = 5999
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
+    str_time = "59'59\"99"
+    int_time = 359999
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
