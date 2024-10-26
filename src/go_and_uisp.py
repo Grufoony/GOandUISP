@@ -197,8 +197,7 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     df.columns = (
         ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
         + [""] * 3
-        + ["SubTime"]
-        + ["RaceTime"]
+        + ["SubTime", "RaceTime"]
         + [""]
         + ["Boolean", "Absent"]
         + [""]
@@ -216,8 +215,7 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         df.columns = (
             ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
             + [""] * 3
-            + ["SubTime"]
-            + ["RaceTime"]
+            + ["SubTime", "RaceTime"]
             + [""]
             + ["Boolean", "Absent"]
             + [""]
@@ -618,3 +616,32 @@ def find_categories() -> None:
         print("I file con categorie generate automaticamente sono: ")
         for f in changed_files:
             print(f)
+
+
+def build_random_teams(df: pd.DataFrame, n_teams: int, seed: int) -> list:
+    """
+    Builds random teams from a DataFrame of athletes and their race times.
+
+    Args:
+        df: A pandas DataFrame with columns "Name" and "RaceTime".
+        n_teams: The desired number of teams.
+
+    Returns:
+        A list of teams, where each team is a list of tuples (name, race_time).
+    """
+
+    df = df.sort_values(by="RaceTime")
+    subsets = [df.iloc[i::n_teams] for i in range(n_teams)]
+    teams = []
+
+    while len(subsets) > 0:
+        team = []
+        for subset in subsets:
+            athlete = subset.sample(n=1, random_state=seed)
+            team.append((athlete["Name"].values[0], athlete["RaceTime"].values[0]))
+            subset.drop(athlete.index, inplace=True)
+        teams.append(team)
+        # remove empty subsets
+        subsets = [subset for subset in subsets if len(subset) > 0]
+
+    return teams
