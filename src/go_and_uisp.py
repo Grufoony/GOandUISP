@@ -694,9 +694,9 @@ def build_random_teams(
 
     subsets = create_subsets(df, n_teams)
 
-    print("SUBSETS:")
-    for subset in subsets:
-        print(subset)
+    # print("SUBSETS:")
+    # for subset in subsets:
+    #     print(subset)
     # init teams df
     teams = pd.DataFrame(columns=["Name", "Year", "Sex", "Time", "Team"])
     # TEAM NAMES CONSTANT (COLORS)
