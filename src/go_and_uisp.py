@@ -647,7 +647,7 @@ def build_random_teams(
     # init teams df
     teams = pd.DataFrame(columns=["Name", "Year", "Sex", "Time", "Team"])
     # TEAM NAMES CONSTANT (COLORS)
-    TEAM_NAMES = [
+    team_names = [
         "Rosso",
         "Blu",
         "Verde",

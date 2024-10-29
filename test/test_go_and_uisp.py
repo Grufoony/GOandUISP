@@ -440,6 +440,12 @@ def test_fill_categories(capfd):
 
 
 def test_time_conversions():
+    """
+    This function tests the GOandUISP.time_to_int and GOandUISP.int_to_time functions.
+    GIVEN a time in string or int format
+    WHEN the time_to_int or int_to_time function is called
+    THEN it returns the time in integer or string format
+    """
     str_time = "00'00\"99"
     int_time = 99
     assert GOandUISP.time_to_int(str_time) == int_time
@@ -452,3 +458,99 @@ def test_time_conversions():
     int_time = 359999
     assert GOandUISP.time_to_int(str_time) == int_time
     assert GOandUISP.int_to_time(int_time) == str_time
+
+
+def test_build_random_teams():
+    """
+    This function tests the GOandUISP.build_random_teams function.
+    GIVEN a dataframe of athletes and their race times
+    WHEN the function is called
+    THEN it returns a dataframe with the correct teams.
+    """
+    data = {
+        "Name": ["Rossi Mario", "Rosi Luigi", "Bianchi Giovanni", "Verdi Luca"],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
+        "Sex": ["M", "M", "M", "M"],
+        "Distance": [50, 50, 50, 50],
+        "Style": ["F", "F", "F", "F"],
+        "Time": ["00'30\"00", "00'29\"00", "00'28\"00", "00'27\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed)
+    assert teams.columns.tolist() == ["Name", "Year", "Sex", "Time", "Team"]
+    assert set(teams["Team"].tolist()) == {"Rosso", "Blu"}
+    assert len(teams) == 4
+
+
+def test_build_random_teams_with_different_distance():
+    """
+    This function tests the GOandUISP.build_random_teams function with a different distance.
+    GIVEN a dataframe of athletes and their race times
+    WHEN the function is called with a different distance
+    THEN it returns a dataframe with the correct teams.
+    """
+    data = {
+        "Name": ["Rossi Mario", "Rosi Luigi", "Bianchi Giovanni", "Verdi Luca"],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
+        "Sex": ["M", "M", "M", "M"],
+        "Distance": [100, 100, 100, 100],
+        "Style": ["F", "F", "F", "F"],
+        "Time": ["01'00\"00", "00'59\"00", "00'58\"00", "00'57\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed, distance=100)
+    assert teams.columns.tolist() == ["Name", "Year", "Sex", "Time", "Team"]
+    assert set(teams["Team"].tolist()) == {"Rosso", "Blu"}
+    assert len(teams) == 4
+
+
+def test_build_random_teams_with_different_style():
+    """
+    This function tests the GOandUISP.build_random_teams function with a different style.
+    GIVEN a dataframe of athletes and their race times
+    WHEN the function is called with a different style
+    THEN it returns a dataframe with the correct teams.
+    """
+    data = {
+        "Name": ["Rossi Mario", "Rosi Luigi", "Bianchi Giovanni", "Verdi Luca"],
+        "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
+        "Sex": ["M", "M", "M", "M"],
+        "Distance": [50, 50, 50, 50],
+        "Style": ["D", "D", "D", "D"],
+        "Time": ["00'30\"00", "00'29\"00", "00'28\"00", "00'27\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed, style="D")
+    assert teams.columns.tolist() == ["Name", "Year", "Sex", "Time", "Team"]
+    assert set(teams["Team"].tolist()) == {"Rosso", "Blu"}
+    assert len(teams) == 4
+
+
+def test_build_random_teams_with_insufficient_athletes():
+    """
+    This function tests the GOandUISP.build_random_teams function with insufficient athletes.
+    GIVEN a dataframe of athletes and their race times
+    WHEN the function is called with insufficient athletes
+    THEN it returns a dataframe with the correct teams.
+    """
+    data = {
+        "Name": ["Rossi Mario", "Rosi Luigi"],
+        "Year": [NOW.year - 14, NOW.year - 14],
+        "Sex": ["M", "M"],
+        "Distance": [50, 50],
+        "Style": ["F", "F"],
+        "Time": ["00'30\"00", "00'29\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed)
+    assert teams.columns.tolist() == ["Name", "Year", "Sex", "Time", "Team"]
+    assert set(teams["Team"].tolist()) == {"Rosso", "Blu"}
+    assert len(teams) == 2
