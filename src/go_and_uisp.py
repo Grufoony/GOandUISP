@@ -662,7 +662,7 @@ def build_random_teams(
     while len(subsets) > 0:
         for i, subset in enumerate(subsets):
             athlete = subset.sample(n=1, random_state=seed)
-            athlete["Team"] = TEAM_NAMES[team_name_idx]
+            athlete["Team"] = team_names[team_name_idx]
             teams = pd.concat([teams, athlete])
 
             # Directly modify the subset in-place
