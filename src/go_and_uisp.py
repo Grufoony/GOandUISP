@@ -616,7 +616,7 @@ def find_categories() -> None:
 
 def build_random_teams(
     df: pd.DataFrame, n_teams: int, seed: int, distance: int = 50, style: str = "F"
-) -> list:
+) -> pd.DataFrame:
     """
     Builds random teams from a DataFrame of athletes and their race times.
 
@@ -672,6 +672,9 @@ def build_random_teams(
         subsets = [subset for subset in subsets if not subset.empty]
 
         team_name_idx += 1
+
+    # reset teams index
+    teams = teams.reset_index(drop=True)
 
     return teams
 
