@@ -196,10 +196,9 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     df.columns = (
         ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
-        + [""] * 3
-        + ["SubTime"]
-        + ["RaceTime"]
-        + [""]
+        + [""] * 2
+        + ["SubTime", "Time"]
+        + [""] * 2
         + ["Boolean", "Absent"]
         + [""]
         + ["Points", "Double"]
@@ -215,10 +214,9 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     if incorrect_styles:
         df.columns = (
             ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
-            + [""] * 3
-            + ["SubTime"]
-            + ["RaceTime"]
-            + [""]
+            + [""] * 2
+            + ["SubTime", "Time"]
+            + [""] * 2
             + ["Boolean", "Absent"]
             + [""]
             + ["Points", "Double"]
@@ -250,12 +248,8 @@ def print_counts(df: pd.core.frame.DataFrame) -> None:
     """
     # now print how many athletes are in each team and the total (partecipating medals)
     counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
-    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
-        list
-    )
-    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["SubTime"]].agg(
-        list
-    )
+    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
+    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
     print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
     print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
 
@@ -322,7 +316,7 @@ def groupdata(
             "Style",
             "Distance",
             "Category",
-            "SubTime",
+            "Time",
             "Team",
             "Points",
             "Double",
@@ -333,7 +327,7 @@ def groupdata(
     df["Race"] = df["Distance"].astype(str) + " " + df["Style"]
     # groupby races and times, i.e. get unique athletes
     df = df.groupby(["Name", "Year", "Sex", "Category", "Team"])[
-        ["Race", "SubTime", "Points", "Double"]
+        ["Race", "Time", "Points", "Double"]
     ].agg(list)
 
     if out_df is None:
@@ -364,7 +358,7 @@ def groupdata(
             out_df.loc[index, "Cognome"] = surname
 
         for athlete_index, row in enumerate(df.itertuples()):
-            for index, race in enumerate(zip(row.Race, row.SubTime)):
+            for index, race in enumerate(zip(row.Race, row.Time)):
                 out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
                 out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
             out_df.loc[athlete_index, "GareDisputate"] = index + 1
@@ -618,3 +612,174 @@ def find_categories() -> None:
         print("I file con categorie generate automaticamente sono: ")
         for f in changed_files:
             print(f)
+
+
+def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
+    """
+    Creates subsets of athletes from a DataFrame of
+    athletes
+
+    Args:
+        df: A pandas DataFrame with at least "Sex" "Category" columns
+        n_teams: A int representing the maximum length of a subset
+
+    Returns:
+        A list of subsets, where each subset is a DataFrame
+
+    """
+
+    array_df = []
+    for _, sex_df in df.groupby("Sex"):
+        for _, cat_df in sex_df.groupby("Category"):
+            cat_df = cat_df.drop(columns=["Category"])
+            array_df.append(cat_df)
+
+    subsets = []
+    for temp_df in array_df:
+        subsets += [
+            temp_df.iloc[i : i + n_teams] for i in range(0, len(temp_df), n_teams)
+        ]
+
+    # glue together subsets with len < n_teams and subdivide them again
+    sub_rest_m = [
+        subset
+        for subset in subsets
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "M"
+    ]
+    sub_rest_f = [
+        subset
+        for subset in subsets
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F"
+    ]
+    subsets = [subset for subset in subsets if len(subset) == n_teams]
+    if len(sub_rest_m) > 0:
+        sub_rest_m = pd.concat(sub_rest_m)
+        subsets += [
+            sub_rest_m.iloc[i : i + n_teams] for i in range(0, len(sub_rest_m), n_teams)
+        ]
+    if len(sub_rest_f) > 0:
+        sub_rest_f = pd.concat(sub_rest_f)
+        subsets += [
+            sub_rest_f.iloc[i : i + n_teams] for i in range(0, len(sub_rest_f), n_teams)
+        ]
+
+    return subsets
+
+
+def build_random_teams(
+    df: pd.DataFrame, n_teams: int, seed: int, distance: int = 50, style: str = "F"
+) -> pd.DataFrame:
+    """
+    Builds random teams from a DataFrame of athletes and their race times.
+
+    Args:
+        df: A pandas DataFrame with columns "Name" and "Time".
+        n_teams: The desired number of teams.
+
+    Returns:
+        A list of teams, where each team is a list of tuples (name, race_time).
+    """
+    # filter by distance and style
+    df = df[
+        (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
+    ]
+    if df.empty:
+        return pd.DataFrame()
+    # keep only Name Time columns
+    df = df[["Name", "Year", "Sex", "Category", "Time"]]
+    # transform time column using time_to_int
+    df["Time"] = df["Time"].apply(time_to_int)
+    df = df.sort_values(by="Time")
+    df["Time"] = df["Time"].apply(int_to_time)
+
+    subsets = create_subsets(df, n_teams)
+
+    # print("SUBSETS:")
+    # for subset in subsets:
+    #     print(subset)
+    # init teams df
+    teams = pd.DataFrame(columns=["Name", "Year", "Sex", "Time", "Team"])
+    # TEAM NAMES CONSTANT (COLORS)
+    team_names = [
+        "Rosso",
+        "Blu",
+        "Verde",
+        "Giallo",
+        "Viola",
+        "Arancione",
+        "Bianco",
+        "Nero",
+    ]
+
+    team_name_idx = 0
+    # get the id in the subsets list of the df with Sex = F and len < n_teams
+    id_len = (-1, -1)
+    for i, subset in enumerate(subsets):
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F":
+            id_len = (i, n_teams - len(subset) - 1)
+            break
+    while len(subsets) > 0:
+        for i, subset in enumerate(subsets):
+            if (i, team_name_idx) == id_len:
+                # Teams created firstly will have one more male
+                # Teams created lastly will have one more female
+                continue
+            athlete = subset.sample(n=1, random_state=seed)
+            athlete["Team"] = team_names[team_name_idx]
+            teams = pd.concat([teams, athlete])
+
+            # Directly modify the subset in-place
+            subsets[i] = subset.drop(athlete.index)
+
+        # remove empty subsets
+        subsets = [subset for subset in subsets if not subset.empty]
+
+        team_name_idx += 1
+
+    # sort by time and groupby team
+    teams = teams.groupby("Team").apply(
+        lambda x: x.sort_values(by="Time"), include_groups=False
+    )
+    # reset index without dropping team column
+    teams = teams.reset_index(level=1, drop=True)
+    # transform index into a column
+    teams = teams.reset_index()
+
+    return teams
+
+
+def time_to_int(time_str: str) -> int:
+    """
+    Converts a time string in the format '00'00"00' to an integer representing the time in
+    centiseconds.
+
+    Args:
+        time_str: A time string in the format '00'00"00'.
+
+    Returns:
+        The time in centiseconds.
+    """
+    # ensure the string is stripped
+    time_str = time_str.strip()
+    # get data
+    minutes = int(time_str[0:2])
+    seconds = int(time_str[3:5])
+    centiseconds = int(time_str[6:8])
+    return minutes * 6000 + seconds * 100 + centiseconds
+
+
+def int_to_time(time_int: int) -> str:
+    """
+    Converts an integer representing the time in centiseconds to a time string in the format
+    '00'00"00'.
+
+    Args:
+        time_int: The time in centiseconds.
+
+    Returns:
+        The time string in the format '00'00"00'.
+    """
+    minutes = time_int // 6000
+    seconds = (time_int % 6000) // 100
+    centiseconds = time_int % 100
+    return f"{minutes:02d}'{seconds:02d}\"{centiseconds:02d}"

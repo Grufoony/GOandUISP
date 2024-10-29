@@ -221,7 +221,7 @@ def test_groupdata1():
         "Style": ["SL", "SL", "Delfino"],
         "Distance": [100, 100, 100],
         "Category": ["A", "A", "A"],
-        "SubTime": ["01'26\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'26\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 1, 0],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -248,7 +248,7 @@ def test_groupdata2():
         "Style": ["Dorso"],
         "Distance": [100],
         "Category": ["A"],
-        "SubTime": ["01'23\"45"],
+        "Time": ["01'23\"45"],
         "Points": [1],
         "Double": ["0"],
         "Boolean": ["T"],
@@ -292,7 +292,7 @@ def test_groupdata3():
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -352,7 +352,7 @@ def test_groupdata4():
         "Style": ["Dorso", "Rana", "Delfino"],
         "Distance": [100, 200, 100],
         "Category": ["A", "B", "A"],
-        "SubTime": ["01'23\"45", "01'23\"45", "01'23\"45"],
+        "Time": ["01'23\"45", "01'23\"45", "01'23\"45"],
         "Points": [1, 2, 1],
         "Double": ["0", "0", "0"],
         "Boolean": ["T", "T", "T"],
@@ -376,7 +376,7 @@ def test_print_counts(capfd):
         "Year": [NOW.year - 14, NOW.year - 14, NOW.year - 13, NOW.year - 13],
         "Sex": ["M", "F", "M", "M"],
         "Team": ["Aosta", "Catanzaro", "Aosta", "Aosta"],
-        "SubTime": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
+        "Time": ["01:23:45", "01:23:45", "01:23:45", "01:23:45"],
         "Absent": ["", "", "", "A"],
     }
     df = pd.DataFrame(data)
@@ -437,3 +437,179 @@ def test_fill_categories(capfd):
         + "\nATTENZIONE: la società Catanzaro ha 1 atleti che non gareggiano in gare individuali.\n"
         + "\nIn particolare, gli atleti sono:\ngialli fabio\nzazza alex\n\n"
     )
+
+
+def test_time_conversions():
+    """
+    This function tests the GOandUISP.time_to_int and GOandUISP.int_to_time functions.
+    GIVEN a time in string or int format
+    WHEN the time_to_int or int_to_time function is called
+    THEN it returns the time in integer or string format
+    """
+    str_time = "00'00\"99"
+    int_time = 99
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
+    str_time = "00'59\"99"
+    int_time = 5999
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
+    str_time = "59'59\"99"
+    int_time = 359999
+    assert GOandUISP.time_to_int(str_time) == int_time
+    assert GOandUISP.int_to_time(int_time) == str_time
+
+
+def test_build_random_teams():
+    """
+    This function tests the GOandUISP.build_random_teams function.
+    GIVEN a dataframe of athletes and their race times
+    WHEN the function is called
+    THEN it returns a dataframe with the athletes divided into random teams.
+    """
+    data = {
+        "Name": [
+            "Rossi Mario",
+            "Rosi Luigi",
+            "Bianchi Giovanni",
+            "Verdi Luca",
+            "Neri Marco",
+        ],
+        "Year": [
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+        ],
+        "Sex": ["M", "M", "M", "M", "M"],
+        "Category": ["A", "A", "A", "A", "A"],
+        "Distance": [50, 50, 50, 50, 50],
+        "Style": ["F", "F", "F", "F", "F"],
+        "Time": ["00'30\"00", "00'31\"00", "00'32\"00", "00'33\"00", "00'34\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed)
+    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time"]
+    assert len(teams["Team"].unique()) == n_teams
+    assert teams["Team"].value_counts().tolist() == [3, 2]
+
+
+def test_build_random_teams_with_different_styles():
+    """
+    This function tests the GOandUISP.build_random_teams function with different styles.
+    GIVEN a dataframe of athletes with different styles
+    WHEN the function is called
+    THEN it returns a dataframe with the athletes divided into random teams.
+    """
+    data = {
+        "Name": [
+            "Rossi Mario",
+            "Rosi Luigi",
+            "Bianchi Giovanni",
+            "Verdi Luca",
+            "Neri Marco",
+        ],
+        "Year": [
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+        ],
+        "Sex": ["M", "M", "M", "M", "M"],
+        "Category": ["A", "A", "A", "A", "A"],
+        "Distance": [50, 50, 50, 50, 50],
+        "Style": ["D", "D", "R", "S", "M"],
+        "Time": ["00'30\"00", "00'31\"00", "00'32\"00", "00'33\"00", "00'34\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed, style="F")
+    assert teams.empty  # No teams should be formed as no athlete matches the style "F"
+
+
+def test_build_random_teams_with_different_distances():
+    """
+    This function tests the GOandUISP.build_random_teams function with different distances.
+    GIVEN a dataframe of athletes with different distances
+    WHEN the function is called
+    THEN it returns a dataframe with the athletes divided into random teams.
+    """
+    data = {
+        "Name": [
+            "Rossi Mario",
+            "Rosi Luigi",
+            "Bianchi Giovanni",
+            "Verdi Luca",
+            "Neri Marco",
+        ],
+        "Year": [
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+        ],
+        "Sex": ["M", "M", "M", "M", "M"],
+        "Category": ["A", "A", "A", "A", "A"],
+        "Distance": [100, 100, 100, 100, 100],
+        "Style": ["F", "F", "F", "F", "F"],
+        "Time": ["00'30\"00", "00'31\"00", "00'32\"00", "00'33\"00", "00'34\"00"],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed, distance=50)
+    assert (
+        teams.empty
+    )  # No teams should be formed as no athlete matches the distance 50
+
+
+def test_build_random_teams_with_mixed_sex():
+    """
+    This function tests the GOandUISP.build_random_teams function with mixed sex.
+    GIVEN a dataframe of athletes with mixed sex
+    WHEN the function is called
+    THEN it returns a dataframe with the athletes divided into random teams.
+    """
+    data = {
+        "Name": [
+            "Rossi Mario",
+            "Rosi Luigi",
+            "Bianchi Giovanni",
+            "Verdi Luca",
+            "Neri Marco",
+            "Bianchi Maria",
+        ],
+        "Year": [
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+            NOW.year - 14,
+        ],
+        "Sex": ["M", "M", "M", "M", "M", "F"],
+        "Category": ["A", "A", "A", "A", "A", "A"],
+        "Distance": [50, 50, 50, 50, 50, 50],
+        "Style": ["F", "F", "F", "F", "F", "F"],
+        "Time": [
+            "00'30\"00",
+            "00'31\"00",
+            "00'32\"00",
+            "00'33\"00",
+            "00'34\"00",
+            "00'35\"00",
+        ],
+    }
+    df = pd.DataFrame(data)
+    n_teams = 2
+    seed = 42
+    teams = GOandUISP.build_random_teams(df, n_teams, seed)
+    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time"]
+    assert len(teams["Team"].unique()) == n_teams
+    assert teams["Team"].value_counts().tolist() == [3, 3]
