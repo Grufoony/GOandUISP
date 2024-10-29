@@ -632,15 +632,45 @@ def build_random_teams(
         (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
     ]
     # keep only Name Time columns
-    df = df[["Name", "Year", "Sex", "Time"]]
+    df = df[["Name", "Year", "Sex", "Category", "Time"]]
     # transform time column using time_to_int
     df["Time"] = df["Time"].apply(time_to_int)
     df = df.sort_values(by="Time")
     df["Time"] = df["Time"].apply(int_to_time)
-    # reset index
-    df = df.reset_index(drop=True)
-    print(df)
-    subsets = [df.iloc[i : i + n_teams] for i in range(0, len(df), n_teams)]
+
+    array_df = []
+    for _, sex_df in df.groupby("Sex"):
+        for _, cat_df in sex_df.groupby("Category"):
+            cat_df = cat_df.drop(columns=["Category"])
+            array_df.append(cat_df)
+
+    subsets = []
+    for temp_df in array_df:
+        subsets += [
+            temp_df.iloc[i : i + n_teams] for i in range(0, len(temp_df), n_teams)
+        ]
+
+    # glue together subsets with len < n_teams and subdivide them again
+    sub_rest_m = [
+        subset
+        for subset in subsets
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "M"
+    ]
+    sub_rest_m = pd.concat(sub_rest_m)
+    sub_rest_f = [
+        subset
+        for subset in subsets
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F"
+    ]
+    sub_rest_f = pd.concat(sub_rest_f)
+    subsets = [subset for subset in subsets if len(subset) == n_teams]
+    subsets += [
+        sub_rest_m.iloc[i : i + n_teams] for i in range(0, len(sub_rest_m), n_teams)
+    ]
+    subsets += [
+        sub_rest_f.iloc[i : i + n_teams] for i in range(0, len(sub_rest_f), n_teams)
+    ]
+
     print("SUBSETS:")
     for subset in subsets:
         print(subset)
@@ -659,8 +689,17 @@ def build_random_teams(
     ]
 
     team_name_idx = 0
+    # get the id in the subsets list of the df with Sex = F and len < n_teams
+    id_len = (-1, -1)
+    for i, subset in enumerate(subsets):
+        if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F":
+            id_len = (i, n_teams - len(subset) - 1)
+            break
     while len(subsets) > 0:
         for i, subset in enumerate(subsets):
+            if (i, team_name_idx) == id_len:
+                # Teams created firstly will have one more male, teams created lastly will have one more female
+                continue
             athlete = subset.sample(n=1, random_state=seed)
             athlete["Team"] = team_names[team_name_idx]
             teams = pd.concat([teams, athlete])
@@ -673,6 +712,12 @@ def build_random_teams(
 
         team_name_idx += 1
 
+    # sort by time and groupby team
+    teams = (
+        teams.groupby("Team")
+        .apply(lambda x: x.sort_values(by="Time"))
+        .reset_index(drop=True)
+    )
     # reset teams index
     teams = teams.reset_index(drop=True)
 
