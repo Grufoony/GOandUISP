@@ -631,6 +631,8 @@ def build_random_teams(
     df = df[
         (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
     ]
+    if df.empty:
+        return pd.DataFrame()
     # keep only Name Time columns
     df = df[["Name", "Year", "Sex", "Category", "Time"]]
     # transform time column using time_to_int
@@ -656,20 +658,22 @@ def build_random_teams(
         for subset in subsets
         if len(subset) < n_teams and subset["Sex"].values[0].strip() == "M"
     ]
-    sub_rest_m = pd.concat(sub_rest_m)
     sub_rest_f = [
         subset
         for subset in subsets
         if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F"
     ]
-    sub_rest_f = pd.concat(sub_rest_f)
     subsets = [subset for subset in subsets if len(subset) == n_teams]
-    subsets += [
-        sub_rest_m.iloc[i : i + n_teams] for i in range(0, len(sub_rest_m), n_teams)
-    ]
-    subsets += [
-        sub_rest_f.iloc[i : i + n_teams] for i in range(0, len(sub_rest_f), n_teams)
-    ]
+    if len(sub_rest_m) > 0:
+        sub_rest_m = pd.concat(sub_rest_m)
+        subsets += [
+            sub_rest_m.iloc[i : i + n_teams] for i in range(0, len(sub_rest_m), n_teams)
+        ]
+    if len(sub_rest_f) > 0:
+        sub_rest_f = pd.concat(sub_rest_f)
+        subsets += [
+            sub_rest_f.iloc[i : i + n_teams] for i in range(0, len(sub_rest_f), n_teams)
+        ]
 
     print("SUBSETS:")
     for subset in subsets:
@@ -713,13 +717,13 @@ def build_random_teams(
         team_name_idx += 1
 
     # sort by time and groupby team
-    teams = (
-        teams.groupby("Team")
-        .apply(lambda x: x.sort_values(by="Time"))
-        .reset_index(drop=True)
+    teams = teams.groupby("Team").apply(
+        lambda x: x.sort_values(by="Time"), include_groups=False
     )
-    # reset teams index
-    teams = teams.reset_index(drop=True)
+    # reset index without dropping team column
+    teams = teams.reset_index(level=1, drop=True)
+    # transform index into a column
+    teams = teams.reset_index()
 
     return teams
 
