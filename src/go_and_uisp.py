@@ -682,35 +682,35 @@ def build_random_teams(
 def time_to_int(time_str: str) -> int:
     """
     Converts a time string in the format '00'00"00' to an integer representing the time in
-    milliseconds.
+    centiseconds.
 
     Args:
         time_str: A time string in the format '00'00"00'.
 
     Returns:
-        The time in milliseconds.
+        The time in centiseconds.
     """
     # ensure the string is stripped
     time_str = time_str.strip()
     # get data
     minutes = int(time_str[0:2])
     seconds = int(time_str[3:5])
-    milliseconds = int(time_str[6:8])
-    return minutes * 6000 + seconds * 100 + milliseconds
+    centiseconds = int(time_str[6:8])
+    return minutes * 6000 + seconds * 100 + centiseconds
 
 
 def int_to_time(time_int: int) -> str:
     """
-    Converts an integer representing the time in milliseconds to a time string in the format
+    Converts an integer representing the time in centiseconds to a time string in the format
     '00'00"00'.
 
     Args:
-        time_int: The time in milliseconds.
+        time_int: The time in centiseconds.
 
     Returns:
         The time string in the format '00'00"00'.
     """
     minutes = time_int // 6000
     seconds = (time_int % 6000) // 100
-    milliseconds = time_int % 100
-    return f"{minutes:02d}'{seconds:02d}\"{milliseconds:02d}"
+    centiseconds = time_int % 100
+    return f"{minutes:02d}'{seconds:02d}\"{centiseconds:02d}"
