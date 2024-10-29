@@ -614,31 +614,19 @@ def find_categories() -> None:
             print(f)
 
 
-def build_random_teams(
-    df: pd.DataFrame, n_teams: int, seed: int, distance: int = 50, style: str = "F"
-) -> pd.DataFrame:
+def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
     """
-    Builds random teams from a DataFrame of athletes and their race times.
+    Creates subsets of athletes from a DataFrame of
+    athletes
 
     Args:
-        df: A pandas DataFrame with columns "Name" and "Time".
-        n_teams: The desired number of teams.
+        df: A pandas DataFrame with at least "Sex" "Category" columns
+        n_teams: A int representing the maximum length of a subset
 
     Returns:
-        A list of teams, where each team is a list of tuples (name, race_time).
+        A list of subsets, where each subset is a DataFrame
+
     """
-    # filter by distance and style
-    df = df[
-        (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
-    ]
-    if df.empty:
-        return pd.DataFrame()
-    # keep only Name Time columns
-    df = df[["Name", "Year", "Sex", "Category", "Time"]]
-    # transform time column using time_to_int
-    df["Time"] = df["Time"].apply(time_to_int)
-    df = df.sort_values(by="Time")
-    df["Time"] = df["Time"].apply(int_to_time)
 
     array_df = []
     for _, sex_df in df.groupby("Sex"):
@@ -675,6 +663,37 @@ def build_random_teams(
             sub_rest_f.iloc[i : i + n_teams] for i in range(0, len(sub_rest_f), n_teams)
         ]
 
+    return subsets
+
+
+def build_random_teams(
+    df: pd.DataFrame, n_teams: int, seed: int, distance: int = 50, style: str = "F"
+) -> pd.DataFrame:
+    """
+    Builds random teams from a DataFrame of athletes and their race times.
+
+    Args:
+        df: A pandas DataFrame with columns "Name" and "Time".
+        n_teams: The desired number of teams.
+
+    Returns:
+        A list of teams, where each team is a list of tuples (name, race_time).
+    """
+    # filter by distance and style
+    df = df[
+        (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
+    ]
+    if df.empty:
+        return pd.DataFrame()
+    # keep only Name Time columns
+    df = df[["Name", "Year", "Sex", "Category", "Time"]]
+    # transform time column using time_to_int
+    df["Time"] = df["Time"].apply(time_to_int)
+    df = df.sort_values(by="Time")
+    df["Time"] = df["Time"].apply(int_to_time)
+
+    subsets = create_subsets(df, n_teams)
+
     print("SUBSETS:")
     for subset in subsets:
         print(subset)
@@ -702,7 +721,8 @@ def build_random_teams(
     while len(subsets) > 0:
         for i, subset in enumerate(subsets):
             if (i, team_name_idx) == id_len:
-                # Teams created firstly will have one more male, teams created lastly will have one more female
+                # Teams created firstly will have one more male
+                # Teams created lastly will have one more female
                 continue
             athlete = subset.sample(n=1, random_state=seed)
             athlete["Team"] = team_names[team_name_idx]
