@@ -631,7 +631,6 @@ def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
     array_df = []
     for _, sex_df in df.groupby("Sex"):
         for _, cat_df in sex_df.groupby("Category"):
-            cat_df = cat_df.drop(columns=["Category"])
             array_df.append(cat_df)
 
     subsets = []
