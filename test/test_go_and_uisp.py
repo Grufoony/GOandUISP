@@ -492,7 +492,7 @@ def test_build_random_teams():
     n_teams = 2
     seed = 42
     teams = GOandUISP.build_random_teams(df, n_teams, seed)
-    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time"]
+    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time", "Category"]
     assert len(teams["Team"].unique()) == n_teams
     assert teams["Team"].value_counts().tolist() == [3, 2]
 
@@ -610,6 +610,6 @@ def test_build_random_teams_with_mixed_sex():
     n_teams = 2
     seed = 42
     teams = GOandUISP.build_random_teams(df, n_teams, seed)
-    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time"]
+    assert teams.columns.tolist() == ["Team", "Name", "Year", "Sex", "Time", "Category"]
     assert len(teams["Team"].unique()) == n_teams
     assert teams["Team"].value_counts().tolist() == [3, 3]
