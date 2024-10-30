@@ -419,12 +419,12 @@ def test_fill_categories(capfd):
         "Sesso": ["M", "F"],
         "Gara": ["100 Dorso", "100 Dorso"],
         "Tempo": ["01'23\"45", "01'23\"45"],
-        "A0": ["Rossi Mario", "Rosi Maria"],
-        "A1": ["Rosi Luigi", "Zazza Alex"],
-        "A2": ["Gialli Fabio", np.nan],
-        "A3": [np.nan, np.nan],
-        "A4": [np.nan, np.nan],
-        "A5": [np.nan, np.nan],
+        "Atleta0": ["Rossi Mario", "Rosi Maria"],
+        "Atleta1": ["Rosi Luigi", "Zazza Alex"],
+        "Atleta2": ["Gialli Fabio", np.nan],
+        "Atleta3": [np.nan, np.nan],
+        "Atleta4": [np.nan, np.nan],
+        "Atleta5": [np.nan, np.nan],
     }
     df = pd.DataFrame(data)
 
