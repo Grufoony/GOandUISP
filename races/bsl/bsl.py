@@ -105,7 +105,7 @@ if __name__ == "__main__":
             "Iserire le gare per iscrizioni staffette "
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
-        df = GOandUISP.generate_random_subscriptions_from_teams(
+        df = GOandUISP.generate_relay_subscriptions_from_teams(
             teams=teams,
             possible_races=[
                 race.strip().upper().replace("X", "x") for race in RESPONSE.split(",")
