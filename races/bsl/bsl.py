@@ -21,7 +21,8 @@ if __name__ == "__main__":
     print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
     # ask for file path with tkinter
     file_name = filedialog.askopenfilename(
-        title="Seleziona il file CSV da cui leggere i dati", filetypes=[("CSV files", "*.csv")]
+        title="Seleziona il file CSV da cui leggere i dati",
+        filetypes=[("CSV files", "*.csv")],
     )
     if not file_name:
         print("Nessun file selezionato, esco.")
@@ -39,9 +40,13 @@ if __name__ == "__main__":
     distance = int(input("Inserisci la distanza (intero): "))
     style = str(input("Inserisci lo stile (stringa compresa in [F, D, R, S, M]): "))
     style = style.upper().strip()
-    print(f"Creo {n_teams} squadre casuali con seed {seed}, distanza {distance} e stile {style}.")
+    print(
+        f"Creo {n_teams} squadre casuali con seed {seed}, distanza {distance} e stile {style}."
+    )
     # build random teams
-    teams = GOandUISP.build_random_teams(df=df, n_teams=n_teams, seed=seed, distance=distance, style=style)
+    teams = GOandUISP.build_random_teams(
+        df=df, n_teams=n_teams, seed=seed, distance=distance, style=style
+    )
     print(teams)
     # save teams to csv
     teams.to_csv("./teams.csv", index=False, header=True)
