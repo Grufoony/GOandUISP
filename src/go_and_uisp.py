@@ -50,7 +50,8 @@ CATEGORY_PRIORITIES = {
     "G": 0,
     "EC": 1,
     "EA": 2,
-    "EB": 4,
+    "EB": 3,
+    "R14": 4,
     "R": 5,
     "J": 6,
     "A": 7,
@@ -110,6 +111,31 @@ GROUPBY_RESUME_COLUMNS = [
     "PuntiTotali",
     "GareDisputate",
     "TempoStile",
+]
+RELAY_SUBSCIPTION_COLUMNS_NO_DUP = [
+    "Codice",
+    "Societa",
+    "Categoria",
+    "Sesso",
+    "Gara",
+    "Tempo",
+    "Atleta0",
+    "Atleta1",
+    "Atleta2",
+    "Atleta3",
+]
+RELAY_SUBSCIPTION_COLUMNS = [
+    "CategoriaVera",
+    "Codice",
+    "Societa",
+    "Categoria",
+    "Sesso",
+    "Gara",
+    "Tempo",
+    "Atleta",
+    "Atleta",
+    "Atleta",
+    "Atleta",
 ]
 
 
@@ -454,7 +480,7 @@ def fill_categories(
     for row in df.itertuples():
         categories = []
         for i in range(4):
-            col = f"A{i}"
+            col = f"Atleta{i}"
             try:
                 athlete = getattr(row, col)
             except AttributeError:
@@ -571,38 +597,13 @@ def find_categories() -> None:
                 )
                 continue
 
-            df.columns = [
-                "Codice",
-                "Societa",
-                "Categoria",
-                "Sesso",
-                "Gara",
-                "Tempo",
-                "A0",
-                "A1",
-                "A2",
-                "A3",
-                "",
-                "",
-            ]
+            df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
 
             df.insert(0, "CategoriaVera", "")
 
             out_df = fill_categories(df, df_data)
 
-            out_df.columns = [
-                "CategoriaVera",
-                "Codice",
-                "Societa",
-                "Categoria",
-                "Sesso",
-                "Gara",
-                "Tempo",
-                "Atleta",
-                "Atleta",
-                "Atleta",
-                "Atleta",
-            ]
+            out_df.columns = RELAY_SUBSCIPTION_COLUMNS
 
             out_df.to_csv(f.replace("-dbmeeting", ""), sep=";", index=False)
             changed_files.append(f)
@@ -787,10 +788,10 @@ def int_to_time(time_int: int) -> str:
 
 def generate_random_subscriptions_from_teams(
     teams: pd.DataFrame,
-    sub_df: pd.DataFrame,
-    n_races: int,
-    seed: int,
     possible_races: list,
+    seed: int = 0,
+    sub_df: pd.DataFrame = None,
+    n_races: int = 0,
 ) -> pd.DataFrame:
     """
     Generates random subscriptions for teams.
@@ -803,6 +804,87 @@ def generate_random_subscriptions_from_teams(
     Returns:
         A pandas DataFrame with the random subscriptions
     """
+
+    if sub_df is None:  # Relay races
+        sub_df = pd.DataFrame(
+            columns=["CategoriaVera"] + RELAY_SUBSCIPTION_COLUMNS_NO_DUP
+        )
+
+        for team_name, team in teams.groupby("Team"):
+            team = team.sort_values("Time")
+            for race in possible_races:
+                n_athletes = int(race.strip().split("x")[0])
+
+                if n_athletes > sub_df.columns.str.contains("Atleta").sum():
+                    sub_df = sub_df.reindex(
+                        columns=sub_df.columns.tolist()
+                        + [
+                            "Atleta{i}"
+                            for i in range(
+                                sub_df.columns.str.contains("Atleta").sum(),
+                                n_athletes + 1,
+                            )
+                        ],
+                        fill_value="",
+                    )
+
+                # Create teams with equal gender distribution
+                male_team = team[team["Sex"].str.strip() == "M"]
+                female_team = team[team["Sex"].str.strip() == "F"]
+
+                df = pd.DataFrame()
+                # Combine male and female teams, alternating genders
+                for i in range(
+                    min(len(male_team) // n_athletes, len(female_team) // n_athletes)
+                ):
+
+                    df = pd.concat(
+                        [
+                            df,
+                            male_team.iloc[i : i + n_athletes // 2],
+                            female_team.iloc[i : i + n_athletes // 2],
+                        ],
+                        ignore_index=True,
+                    )
+                for i in range(len(df) // n_athletes):
+                    # Create a list that will be the row
+                    # find max category in df["Category"].iloc[i * n_athletes : (i + 1) * n_athletes]
+                    row = [
+                        max(
+                            df["Category"].iloc[i * n_athletes : (i + 1) * n_athletes],
+                            key=lambda x: CATEGORY_PRIORITIES[x.strip()],
+                        )
+                    ]
+                    row += ["", team_name, row[0], "X", race]
+                    # tempo
+                    row.append(
+                        int_to_time(
+                            sum(
+                                [
+                                    time_to_int(time)
+                                    for time in df["Time"].iloc[
+                                        i * n_athletes : (i + 1) * n_athletes
+                                    ]
+                                ]
+                            )
+                        )
+                    )
+                    # atleti
+                    row += df.iloc[i * n_athletes : (i + 1) * n_athletes][
+                        "Name"
+                    ].tolist()
+                    if len(row) < len(sub_df.columns):
+                        row += [""] * (len(sub_df.columns) - len(row))
+
+                    print(len(row), len(sub_df.columns))
+                    # append row to sub_df
+                    sub_df.loc[len(sub_df)] = row
+
+        sub_df.columns = RELAY_SUBSCIPTION_COLUMNS + ["Atleta"] * (
+            sub_df.columns.str.contains("Atleta").sum() - 4
+        )
+
+        return sub_df
 
     random.seed(seed)
 
