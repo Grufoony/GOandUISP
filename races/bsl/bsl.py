@@ -3,8 +3,8 @@ This module contains the pipeline useful to manage ISB circuit races.
 """
 
 import sys
-import pandas as pd
 from tkinter import filedialog
+import pandas as pd
 
 sys.path.insert(1, ".")
 # pylint: disable=wrong-import-position
@@ -38,14 +38,13 @@ if __name__ == "__main__":
     n_teams = int(input("Inserisci il numero di squadre (intero): "))
     seed = int(input("Inserisci il seed (intero): "))
     distance = int(input("Inserisci la distanza (intero): "))
-    style = str(input("Inserisci lo stile (stringa compresa in [F, D, R, S, M]): "))
-    style = style.upper().strip()
+    STYLE = str(input("Inserisci lo stile (stringa compresa in [F, D, R, S, M]): ")).upper().strip()
     print(
-        f"Creo {n_teams} squadre casuali con seed {seed}, distanza {distance} e stile {style}."
+        f"Creo {n_teams} squadre casuali con seed {seed}, distanza {distance} e stile {STYLE}."
     )
     # build random teams
     teams = GOandUISP.build_random_teams(
-        df=df, n_teams=n_teams, seed=seed, distance=distance, style=style
+        df=df, n_teams=n_teams, seed=seed, distance=distance, style=STYLE
     )
     print(teams)
     # save teams to csv
