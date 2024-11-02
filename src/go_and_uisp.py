@@ -927,3 +927,31 @@ def generate_relay_subscriptions_from_teams(
     )
 
     return sub_df
+
+
+def assing_random_series_and_lanes(
+    sub_df: pd.DataFrame, n_athletes_per_team: int, n_lower_lane: int = 0
+):
+    """
+    Generates random subscriptions
+
+    """
+    # append columns ["Serie", "Lane"] to sub_df
+    sub_df["Serie", "Lane"] = ""
+
+    n_serie = 0
+    for i in range(n_athletes_per_team):
+        # take the df composed of sub_df[0], sub_df[n_athletes_per_team],
+        # sub_df[2*n_athletes_per_team], ...
+        df = sub_df.iloc[i::n_athletes_per_team]
+        # randomly shuffle the df
+        df = df.sample(frac=1)
+        # assign series and lanes like (0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), ...
+        for j, index in enumerate(df.index):
+            sub_df.at[index, "Serie"] = n_serie
+            sub_df.at[index, "Lane"] = n_lower_lane + j % 4
+            if j % 4 == 3 and not j == len(df) - 1:
+                n_serie += 1
+        n_serie += 1
+
+    return sub_df
