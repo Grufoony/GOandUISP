@@ -930,10 +930,24 @@ def generate_relay_subscriptions_from_teams(
 
 
 def assing_random_series_and_lanes(
-    sub_df: pd.DataFrame, n_athletes_per_team: int, n_lower_lane: int = 0
+    sub_df: pd.DataFrame,
+    n_athletes_per_team: int,
+    n_lower_lane: int = 0,
+    n_serie: int = 0,
 ):
     """
-    Generates random subscriptions
+    Generates random series and lanes for a DataFrame of subscriptions.
+    This is designed for a gara a inseguimento, in which the series are composed of four athletes
+    from different teams, each one competing in a different style (assigned to the lane).
+
+    Args:
+        sub_df: A pandas DataFrame with the subscriptions
+        n_athletes_per_team: The number of athletes per team
+        n_lower_lane: The number of the lower lane
+        n_serie: The number of the first serie
+
+    Returns:
+        sub_df with the columns "Serie" and "Lane" filled with the correct values
 
     """
     # append columns ["Serie", "Lane"] to sub_df
