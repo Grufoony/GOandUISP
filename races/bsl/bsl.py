@@ -13,7 +13,7 @@ from src import go_and_uisp as GOandUISP
 
 # pylint: enable=wrong-import-position
 
-__version__ = "2024.11.30"
+__version__ = "2024.11.03"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -32,6 +32,7 @@ if __name__ == "__main__":
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
+        print("Seleziona il file CSV contenente i risultati dai quali costruire le squadre.")
         RESPONSE = filedialog.askopenfilename(
             title="Seleziona il file CSV da cui leggere i dati",
             filetypes=[("CSV files", "*.csv")],
@@ -71,6 +72,7 @@ if __name__ == "__main__":
             "Vuoi sovrascrivere il file individual_subs.csv? [s/n] "
         ).lower()
     if RESPONSE.lower() == "s":
+        print("Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara.")
         RESPONSE = filedialog.askopenfilename(
             title="Seleziona il file CSV da cui leggere i dati",
             filetypes=[("CSV files", "*.csv")],
