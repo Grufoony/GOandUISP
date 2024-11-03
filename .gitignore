@@ -4,3 +4,7 @@ test.xlsx
 *cpython*
 *riepilogo*
 *prova*
+*.csv
+*.txt
+build/*
+PKG-INFO

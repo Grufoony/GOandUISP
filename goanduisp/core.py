@@ -4,10 +4,6 @@ format.
 
 Attributes
 ----------
-__version__ : tuple
-    The version of the class.
-__author__ : str
-    The author of the class.
 STYLES : dict
     A dictionary containing the styles' names.
 
@@ -41,9 +37,6 @@ from datetime import datetime
 import random
 import pandas as pd
 
-
-__version__ = (1, 5, 4)
-__author__ = "Gregorio Berselli"
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
 CATEGORY_PRIORITIES = {
