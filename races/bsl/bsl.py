@@ -20,6 +20,7 @@ if __name__ == "__main__":
     print(f"BSL by {__author__}, aggiornato al {__version__}")
     print(f"Basato su GOandUISP v{GOandUISP.__version__}\n")
     print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
+    print("Per una breve guida, consulta il file README.md (online: https://github.com/Grufoony/GOandUISP/tree/main/races/bsl).")
 
     SEED = None
     RESPONSE = "n"
