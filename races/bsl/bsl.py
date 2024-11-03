@@ -20,7 +20,10 @@ if __name__ == "__main__":
     print(f"BSL by {__author__}, aggiornato al {__version__}")
     print(f"Basato su GOandUISP v{GOandUISP.__version__}\n")
     print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
-    print("Per una breve guida, consulta il file README.md (online: https://github.com/Grufoony/GOandUISP/tree/main/races/bsl).")
+    print(
+        "Per una breve guida, consulta il file README.md "
+        "(online: https://github.com/Grufoony/GOandUISP/tree/main/races/bsl)."
+    )
 
     SEED = None
     RESPONSE = "n"
@@ -33,7 +36,9 @@ if __name__ == "__main__":
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
-        print("Seleziona il file CSV contenente i risultati dai quali costruire le squadre.")
+        print(
+            "Seleziona il file CSV contenente i risultati dai quali costruire le squadre."
+        )
         RESPONSE = filedialog.askopenfilename(
             title="Seleziona il file CSV da cui leggere i dati",
             filetypes=[("CSV files", "*.csv")],
@@ -73,7 +78,9 @@ if __name__ == "__main__":
             "Vuoi sovrascrivere il file individual_subs.csv? [s/n] "
         ).lower()
     if RESPONSE.lower() == "s":
-        print("Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara.")
+        print(
+            "Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara."
+        )
         RESPONSE = filedialog.askopenfilename(
             title="Seleziona il file CSV da cui leggere i dati",
             filetypes=[("CSV files", "*.csv")],
