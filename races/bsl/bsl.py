@@ -32,7 +32,7 @@ if __name__ == "__main__":
         print("Trovato il file teams.csv nella cartella corrente.")
         RESPONSE = input("Vuoi importare le squadre da questo file? [s/n] ").lower()
         if RESPONSE.lower() == "s":
-            teams = pd.read_csv("teams.csv")
+            teams = pd.read_csv("teams.csv", sep=";")
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         )
         print(teams)
         # save teams to csv
-        teams.to_csv("./teams.csv", index=False, header=True)
+        teams.to_csv("./teams.csv", index=False, header=True, sep=";")
         print("Salvato il file teams.csv nella cartella corrente.")
 
     RESPONSE = "s"
