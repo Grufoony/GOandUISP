@@ -1,24 +1,25 @@
 """
-This module contains the pipeline useful to manage ISB circuit races.
+This module contains the pipeline useful to manage BSL circuit races.
 """
 
 import pathlib
-import sys
 from tkinter import filedialog
 import pandas as pd
-
-sys.path.insert(1, ".")
-# pylint: disable=wrong-import-position
-from src import go_and_uisp as GOandUISP
-
-# pylint: enable=wrong-import-position
+from goanduisp.core import (
+    reformat,
+    build_random_teams,
+    generate_random_subscriptions_from_teams,
+    generate_relay_subscriptions_from_teams,
+)
+from goanduisp.io import get_csv_file_name
+from goanduisp.version import __version_core__, __version_io__
 
 __version__ = "2024.11.03"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
     print(f"BSL by {__author__}, aggiornato al {__version__}")
-    print(f"Basato su GOandUISP v{GOandUISP.__version__}\n")
+    print(f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n")
     print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
     print(
         "Per una breve guida, consulta il file README.md "
@@ -39,17 +40,9 @@ if __name__ == "__main__":
         print(
             "Seleziona il file CSV contenente i risultati dai quali costruire le squadre."
         )
-        RESPONSE = filedialog.askopenfilename(
-            title="Seleziona il file CSV da cui leggere i dati",
-            filetypes=[("CSV files", "*.csv")],
-        )
-        if not RESPONSE:
-            print("Nessun file selezionato, esco.")
-            input("Premi un tasto qualsiasi per chiudere...")
-            sys.exit(0)
         # read csv file prova.csv
-        df = pd.read_csv(RESPONSE, header=None, sep=";")
-        df = GOandUISP.reformat(df)
+        df = pd.read_csv(get_csv_file_name(), header=None, sep=";")
+        df = reformat(df)
         # drop all rows with A into Absent
         df = df[df["Boolean"].str.strip() == "T"]
         df = df.reset_index(drop=True)
@@ -63,7 +56,7 @@ if __name__ == "__main__":
         )
         print(f"Creo {n} squadre casuali con seme {SEED} sul {STYLE}.")
         # build random teams
-        teams = GOandUISP.build_random_teams(
+        teams = build_random_teams(
             df=df, n_teams=n, seed=SEED, distance=distance, style=STYLE
         )
         print(teams)
@@ -93,7 +86,7 @@ if __name__ == "__main__":
             "Iserire le gare per iscrizioni individuali "
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
-        df = GOandUISP.generate_random_subscriptions_from_teams(
+        df = generate_random_subscriptions_from_teams(
             teams=teams,
             seed=SEED,
             possible_races=[race.strip().upper() for race in RESPONSE.split(",")],
@@ -115,7 +108,7 @@ if __name__ == "__main__":
             "Iserire le gare per iscrizioni staffette "
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
-        df = GOandUISP.generate_relay_subscriptions_from_teams(
+        df = generate_relay_subscriptions_from_teams(
             teams=teams,
             possible_races=[
                 race.strip().upper().replace("X", "x") for race in RESPONSE.split(",")
