@@ -2,4 +2,3 @@ pandas
 openpyxl
 xlrd
 setuptools
-tkinter
