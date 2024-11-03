@@ -42,10 +42,7 @@ if __name__ == "__main__":
         )
         # read csv file prova.csv
         df = pd.read_csv(get_csv_file_name(), header=None, sep=";")
-        df = reformat(df)
-        # drop all rows with A into Absent
-        df = df[df["Boolean"].str.strip() == "T"]
-        df = df.reset_index(drop=True)
+        df = reformat(df, keep_valid_times=True)
         n = int(input("Inserisci il numero di squadre (intero): "))
         SEED = int(input("Inserisci il seed (intero): "))
         distance = int(input("Inserisci la distanza (intero): "))
