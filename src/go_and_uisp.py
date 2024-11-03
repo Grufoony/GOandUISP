@@ -219,7 +219,11 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     df = df.drop(df[df[2] == 0].index).reset_index(drop=True)
     # drop relay races names column, if exists
     if len(df.columns) == 21:
-        df.drop(df.columns[1], axis=1, inplace=True)
+        # check if the second column contains years
+        if all(i.is_integer() for i in df[1]):
+            df.drop(df.columns[-1], axis=1, inplace=True)
+        else:
+            df.drop(df.columns[1], axis=1, inplace=True)
 
     df.columns = (
         ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
