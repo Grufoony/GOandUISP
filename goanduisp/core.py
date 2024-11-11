@@ -833,11 +833,13 @@ def generate_random_subscriptions_from_teams(
         athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
         if athlete_id is None:
             print(f"Errore: atleta {athlete['Name']} non trovato.")
+        else:
+            sub_df.at[athlete_id, "Societa"] = athlete["Team"]
         for i, race in enumerate(random.sample(possible_races, n_races)):
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete['Name']} alla gara {race} con tempo {athlete['Time']}."
+                    f"{athlete['Name']} alla gara {race} nella squadra {athlete["Team"]} con tempo {athlete['Time']}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
