@@ -191,7 +191,9 @@ def split_names(full_name: str) -> tuple:
     return name_column[1], name_column[0]
 
 
-def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+def reformat(
+    df: pd.core.frame.DataFrame, keep_valid_times: bool = False
+) -> pd.core.frame.DataFrame:
     """
     This function is the main function of the class.
     It takes a file name as input and returns a pandas dataframe.
@@ -252,6 +254,10 @@ def reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     df["Team"] = df["Team"].str.strip()
     # replace double spaces with single space in names
     df["Name"] = df["Name"].str.replace("  ", " ")
+
+    if keep_valid_times:
+        df = df[df["Boolean"].str.strip() == "T"]
+        df = df.reset_index(drop=True)
 
     return df
 
@@ -759,6 +765,9 @@ def time_to_int(time_str: str) -> int:
     """
     # ensure the string is stripped
     time_str = time_str.strip()
+    # fill the string with 0s if it is too short
+    if len(time_str) < 8:
+        time_str = time_str.zfill(8)
     # get data
     minutes = int(time_str[0:2])
     seconds = int(time_str[3:5])
@@ -824,11 +833,13 @@ def generate_random_subscriptions_from_teams(
         athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
         if athlete_id is None:
             print(f"Errore: atleta {athlete['Name']} non trovato.")
+        else:
+            sub_df.at[athlete_id, "Societa"] = athlete["Team"]
         for i, race in enumerate(random.sample(possible_races, n_races)):
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete['Name']} alla gara {race} con tempo {athlete['Time']}."
+                    f"{athlete['Name']} alla gara {race} nella squadra {athlete["Team"]} con tempo {athlete['Time']}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
@@ -966,3 +977,36 @@ def assing_random_series_and_lanes(
         n_serie += 1
 
     return sub_df
+
+
+def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
+    """
+    Assigns points to athletes based on their race time, using reference tables in CSV format.
+
+    Args:
+        df: A pandas DataFrame with the athletes and their
+        data_folder: The folder containing the CSV files with the reference tables
+
+    Returns:
+        A pandas DataFrame with the athletes and their points
+    """
+    for _, row in df.iterrows():
+        category = row["Category"].strip().upper()
+        distance = row["Distance"]
+        df_data = None
+        if "C" in category or "B1" in category:
+            df_data = pd.read_csv(f"{data_folder}/{distance}_c_b1.csv", sep=";")
+        else:
+            df_data = pd.read_csv(f"{data_folder}/{distance}.csv", sep=";")
+
+        # put in row["Points"] the data_row["Points"] where t_min <= row["Time"] <= t_max
+        for _, data_row in df_data.iterrows():
+            if (
+                time_to_int(data_row["t_min"])
+                <= time_to_int(row["Time"])
+                <= time_to_int(data_row["t_max"])
+            ):
+                df.at[row.name, "Points"] = data_row["points"]
+                break
+
+    return df

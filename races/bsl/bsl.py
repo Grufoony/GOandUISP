@@ -14,7 +14,7 @@ from goanduisp.core import (
 from goanduisp.io import get_csv_file_name
 from goanduisp.version import __version_core__, __version_io__
 
-__version__ = "2024.11.03"
+__version__ = "2024.11.11"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -28,12 +28,13 @@ if __name__ == "__main__":
 
     SEED = None
     RESPONSE = "n"
+    TEAMS = None
     # search in folder . for teams.csv, if found, ask to import it
     if pathlib.Path("./teams.csv").exists():
         print("Trovato il file teams.csv nella cartella corrente.")
         RESPONSE = input("Vuoi importare le squadre da questo file? [s/n] ").lower()
         if RESPONSE.lower() == "s":
-            teams = pd.read_csv("teams.csv", sep=";")
+            TEAMS = pd.read_csv("teams.csv", sep=";")
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
@@ -42,10 +43,7 @@ if __name__ == "__main__":
         )
         # read csv file prova.csv
         df = pd.read_csv(get_csv_file_name(), header=None, sep=";")
-        df = reformat(df)
-        # drop all rows with A into Absent
-        df = df[df["Boolean"].str.strip() == "T"]
-        df = df.reset_index(drop=True)
+        df = reformat(df, keep_valid_times=True)
         n = int(input("Inserisci il numero di squadre (intero): "))
         SEED = int(input("Inserisci il seed (intero): "))
         distance = int(input("Inserisci la distanza (intero): "))
@@ -56,12 +54,12 @@ if __name__ == "__main__":
         )
         print(f"Creo {n} squadre casuali con seme {SEED} sul {STYLE}.")
         # build random teams
-        teams = build_random_teams(
+        TEAMS = build_random_teams(
             df=df, n_teams=n, seed=SEED, distance=distance, style=STYLE
         )
-        print(teams)
+        print(TEAMS)
         # save teams to csv
-        teams.to_csv("./teams.csv", index=False, header=True, sep=";")
+        TEAMS.to_csv("./teams.csv", index=False, header=True, sep=";")
         print("Salvato il file teams.csv nella cartella corrente.")
 
     RESPONSE = "s"
@@ -87,7 +85,7 @@ if __name__ == "__main__":
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
         df = generate_random_subscriptions_from_teams(
-            teams=teams,
+            teams=TEAMS,
             seed=SEED,
             possible_races=[race.strip().upper() for race in RESPONSE.split(",")],
             sub_df=df,
@@ -109,7 +107,7 @@ if __name__ == "__main__":
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
         df = generate_relay_subscriptions_from_teams(
-            teams=teams,
+            teams=TEAMS,
             possible_races=[
                 race.strip().upper().replace("X", "x") for race in RESPONSE.split(",")
             ],
