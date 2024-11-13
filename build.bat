@@ -1,15 +1,14 @@
 @echo off
-set /p buildType="Enter the build type (e.g., BSL): "
+set /p buildType="Enter the build type (bsl - sonopronto - youngchallenge): "
 
 pip install .
 
-if /I "%buildType%"=="BSL" (
+if /I "%buildType%"=="bsl" (
     python -m PyInstaller --onefile .\races\bsl\bsl.py
-) else if /I "%buildType%"=="bsl" (
-    python -m PyInstaller --onefile .\races\bsl\bsl.py
-) 
-if /I "%buildType%"=="sonopronto" (
+) else if /I "%buildType%"=="sonopronto" (
     python -m PyInstaller --onefile .\races\sono_pronto\sono_pronto.py
+) else if /I "%buildType%"=="youngchallenge" (
+    python -m PyInstaller --onefile .\races\young_challenge\young_challenge.py
 ) else (
     echo Unknown build type: %buildType%
 )
