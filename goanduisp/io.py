@@ -10,7 +10,7 @@ import sys
 from tkinter import filedialog
 
 
-def get_csv_file_name():
+def get_file_name(force_csv: bool = False) -> str:
     """
     Ask for a CSV file and return its path or exit if no file is selected.
 
@@ -19,9 +19,13 @@ def get_csv_file_name():
     str
         The path of the selected file.
     """
+    if force_csv:
+        file_types = [("CSV files", "*.csv")]
+    else:
+        file_types = [("Excel and CSV files", "*.xlsx *.csv")]
     file_name = filedialog.askopenfilename(
         title="Seleziona il file CSV da cui leggere i dati",
-        filetypes=[("CSV files", "*.csv")],
+        filetypes=file_types,
     )
     if not file_name:
         print("Nessun file selezionato, esco.")
