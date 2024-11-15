@@ -830,9 +830,12 @@ def generate_random_subscriptions_from_teams(
         sub_df.drop([f"Gara{i}", f"Tempo{i}"], axis=1, inplace=True)
 
     for _, athlete in teams.iterrows():
-        athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
+        try:
+            athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
+        except IndexError:
+            athlete_id = None
         if athlete_id is None:
-            print(f"Errore: atleta {athlete['Name']} non trovato.")
+            print(f"ATTENZIONE: atleta {athlete['Name']} non trovato.")
         else:
             sub_df.at[athlete_id, "Societa"] = athlete["Team"]
         for i, race in enumerate(random.sample(possible_races, n_races)):
