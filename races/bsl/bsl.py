@@ -11,10 +11,10 @@ from goanduisp.core import (
     generate_random_subscriptions_from_teams,
     generate_relay_subscriptions_from_teams,
 )
-from goanduisp.io import get_csv_file_name
+from goanduisp.io import get_file_name
 from goanduisp.version import __version_core__, __version_io__
 
-__version__ = "2024.11.11"
+__version__ = "2024.11.15"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -39,10 +39,14 @@ if __name__ == "__main__":
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
         print(
-            "Seleziona il file CSV contenente i risultati dai quali costruire le squadre."
+            "Seleziona il file contenente i risultati GAS dai quali costruire le squadre."
         )
         # read csv file prova.csv
-        df = pd.read_csv(get_csv_file_name(), header=None, sep=";")
+        RESPONSE = get_file_name()
+        if RESPONSE.endswith(".xlsx"):
+            df = pd.read_excel(RESPONSE, header=None)
+        else:
+            df = pd.read_csv(RESPONSE, header=None, sep=";")
         df = reformat(df, keep_valid_times=True)
         n = int(input("Inserisci il numero di squadre (intero): "))
         SEED = int(input("Inserisci il seed (intero): "))
@@ -72,10 +76,7 @@ if __name__ == "__main__":
         print(
             "Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara."
         )
-        RESPONSE = filedialog.askopenfilename(
-            title="Seleziona il file CSV da cui leggere i dati",
-            filetypes=[("CSV files", "*.csv")],
-        )
+        RESPONSE = get_file_name(force_csv=True)
         df = pd.read_csv(RESPONSE, sep=";")
         if SEED is None:
             SEED = int(input("Inserisci il seed (intero): "))

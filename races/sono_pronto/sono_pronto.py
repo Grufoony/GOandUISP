@@ -5,10 +5,10 @@ This script assign points in Sono Pronto races.
 from tkinter import filedialog
 import pandas as pd
 from goanduisp.core import reformat, assign_points_by_time
-from goanduisp.io import get_csv_file_name
+from goanduisp.io import get_file_name
 from goanduisp.version import __version_core__, __version_io__
 
-__version__ = "2024.11.03"
+__version__ = "2024.11.15"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -16,7 +16,11 @@ if __name__ == "__main__":
     print(f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n")
     print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
     print("Seleziona il file CSV contenente i risultati")
-    df = pd.read_csv(get_csv_file_name(), header=None, sep=";")
+    RESPONSE = get_file_name()
+    if RESPONSE.endswith(".xlsx"):
+        df = pd.read_excel(RESPONSE, header=None)
+    else:
+        df = pd.read_csv(RESPONSE, header=None, sep=";")
     df = reformat(df=df, keep_valid_times=True)
     print("Seleziona la cartella contenente le tabelle tempi/punteggi")
     df = assign_points_by_time(df, filedialog.askdirectory())
