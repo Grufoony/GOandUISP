@@ -11,7 +11,7 @@ from goanduisp.core import (
     generate_random_subscriptions_from_teams,
     generate_relay_subscriptions_from_teams,
 )
-from goanduisp.io import get_file_name
+from goanduisp.io import get_file_name, import_df
 from goanduisp.version import __version_core__, __version_io__
 
 __version__ = "2024.11.15"
@@ -34,19 +34,14 @@ if __name__ == "__main__":
         print("Trovato il file teams.csv nella cartella corrente.")
         RESPONSE = input("Vuoi importare le squadre da questo file? [s/n] ").lower()
         if RESPONSE.lower() == "s":
-            TEAMS = pd.read_csv("teams.csv", sep=";")
+            TEAMS = import_df("teams.csv")
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
         print(
             "Seleziona il file contenente i risultati GAS dai quali costruire le squadre."
         )
-        # read csv file prova.csv
-        RESPONSE = get_file_name()
-        if RESPONSE.endswith(".xlsx"):
-            df = pd.read_excel(RESPONSE, header=None)
-        else:
-            df = pd.read_csv(RESPONSE, header=None, sep=";")
+        df = import_df(get_file_name(), header=None)
         df = reformat(df, keep_valid_times=True)
         n = int(input("Inserisci il numero di squadre (intero): "))
         SEED = int(input("Inserisci il seed (intero): "))
@@ -76,8 +71,7 @@ if __name__ == "__main__":
         print(
             "Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara."
         )
-        RESPONSE = get_file_name(force_csv=True)
-        df = pd.read_csv(RESPONSE, sep=";")
+        df = import_df(get_file_name(force_csv=True))
         if SEED is None:
             SEED = int(input("Inserisci il seed (intero): "))
         n = int(input("Inserisci il numero di gare per atleta (intero): "))
