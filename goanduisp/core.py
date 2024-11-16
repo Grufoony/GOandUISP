@@ -192,7 +192,7 @@ def split_names(full_name: str) -> tuple:
 
 
 def reformat(
-    df: pd.core.frame.DataFrame, keep_valid_times: bool = False
+    df: pd.core.frame.DataFrame, keep_valid_times: bool = False, drop_relay: bool = True
 ) -> pd.core.frame.DataFrame:
     """
     This function is the main function of the class.
@@ -204,42 +204,28 @@ def reformat(
     ----------
     df : pandas.core.frame.DataFrame
         The dataframe to be converted.
+    keep_valid_times : bool, optional
+        If True, the function keeps only the valid times, by default False
+    drop_relay : bool, optional
+        If True, the function drops the relay teams, by default True
 
     Returns
     -------
     pandas.core.frame.DataFrame
         The converted dataframe.
     """
-    # drop relay races rows
-    df = df.drop(df[df[2] == 0].index).reset_index(drop=True)
-    # drop relay races names column, if exists
     if len(df.columns) == 21:
-        # check if the second column contains years
-        if all(i.is_integer() for i in df[1]):
-            df.drop(df.columns[-1], axis=1, inplace=True)
-        else:
-            df.drop(df.columns[1], axis=1, inplace=True)
-
-    df.columns = (
-        ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
-        + [""] * 2
-        + ["SubTime", "Time"]
-        + [""] * 2
-        + ["Boolean", "Absent"]
-        + [""]
-        + ["Points", "Double"]
-        + [""] * 2
-    )
-    # check if style column is correct
-    incorrect_styles = False
-    for style in df.Style.unique():
-        if style.split()[0] not in list(STYLES):
-            incorrect_styles = True
-            break
-
-    if incorrect_styles:
         df.columns = (
-            ["Name", "Year", "Sex", "Category", "Distance", "Team", "Style"]
+            [
+                "Name",
+                "RelayTeam",
+                "Year",
+                "Sex",
+                "Category",
+                "Distance",
+                "Style",
+                "Team",
+            ]
             + [""] * 2
             + ["SubTime", "Time"]
             + [""] * 2
@@ -248,6 +234,36 @@ def reformat(
             + ["Points", "Double"]
             + [""] * 2
         )
+        # df.to_csv("test.csv", index=False, sep=";")
+        # check if the second column contains years
+        # if all(i.is_integer() for i in df[1]):
+        #     df.drop(df.columns[-1], axis=1, inplace=True)
+        # else:
+        #     df.drop(df.columns[1], axis=1, inplace=True)
+        if drop_relay:
+            df = df.drop(df[df["Year"] == 0].index).reset_index(drop=True)
+            df = df.drop(["RelayTeam"], axis=1)
+    else:
+        df.columns = (
+            ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
+            + [""] * 2
+            + ["SubTime", "Time"]
+            + [""] * 2
+            + ["Boolean", "Absent"]
+            + [""]
+            + ["Points", "Double"]
+            + [""] * 2
+        )
+    df.to_csv("test.csv", index=False, sep=";")
+    # check if style column is correct
+    incorrect_styles = False
+    for style in df.Style.unique():
+        if style.split()[0] not in list(STYLES):
+            incorrect_styles = True
+            break
+
+    if incorrect_styles:
+        df = df.rename(columns={"Team": "Style", "Style": "Team"})
 
     # strip spaces in some columns
     df["Name"] = df["Name"].str.strip()
@@ -445,6 +461,65 @@ def groupdata(
         )
 
     return out_df
+
+
+def rank_teams(df: pd.core.frame.DataFrame, nbest: int) -> pd.core.frame.DataFrame:
+    """
+    This function takes a reformatted GAS result dataframe as input and returns the teams ranking.
+
+    Parameters
+    ----------
+    df : pandas.core.frame.DataFrame
+        The dataframe containing results.
+    nbest : int
+        If given, only the first nbest athletes will be counted for each Race, i.e.
+        Distance-Style-Sex-Category combination.
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        The teams ranking dataframe.
+    """
+    df["Style"] = df["Style"].str.strip()
+    # keeping only interesting data
+    df = df[
+        [
+            "Name",
+            "Year",
+            "Sex",
+            "Style",
+            "Distance",
+            "Category",
+            "Time",
+            "Team",
+            "Points",
+            "Double",
+        ]
+    ]
+    # replacing style names
+    df = df.replace({"Style": STYLES})
+    df["Race"] = (
+        df["Distance"].astype(str)
+        + " "
+        + df["Style"]
+        + " "
+        + df["Sex"]
+        + " "
+        + df["Category"]
+    )
+    # drop Style, Distance columns
+    df = df.drop(
+        ["Name", "Year", "Sex", "Style", "Distance", "Category", "Double"], axis=1
+    )
+    df["Time"] = df["Time"].apply(time_to_int)
+    df = df.sort_values(by="Time")
+    df["Time"] = df["Time"].apply(int_to_time)
+    df = df.groupby(["Race", "Team"]).head(nbest)
+    # sum point for team and return classifica
+    df = (
+        df.groupby(["Team"])[["Points"]].sum().sort_values(by="Points", ascending=False)
+    )
+    return df
 
 
 def fill_categories(
@@ -764,7 +839,7 @@ def time_to_int(time_str: str) -> int:
         The time in centiseconds.
     """
     # ensure the string is stripped
-    time_str = time_str.strip()
+    time_str = time_str.strip().replace("'", " ").replace('"', " ")
     # fill the string with 0s if it is too short
     if len(time_str) < 8:
         time_str = time_str.zfill(8)
