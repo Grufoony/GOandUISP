@@ -5,11 +5,13 @@ Methods
 -------
     get_file_name: ask for a file and return its path or exit if no file is selected
     import_df: import a DataFrame from a CSV or xlsx file
+    info: return the info string
 """
 
 import sys
 from tkinter import filedialog
 import pandas as pd
+from .version import __version_core__, __version_io__
 
 
 def get_file_name(force_csv: bool = False) -> str:
@@ -54,3 +56,10 @@ def import_df(file_name: str, header=0, sep=";") -> pd.DataFrame:
         return pd.read_excel(file_name, header=header)
     else:
         return pd.read_csv(file_name, header=header, sep=sep)
+
+
+def info(author: str, version: str) -> str:
+    return (
+        f"BSL by {author}, aggiornato al {version}\n"
+        "Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n"
+    )

@@ -1,30 +1,26 @@
 """
-This module contains the pipeline useful to manage BSL circuit races.
+Questo programma è stato creato per le manifestazioni del circuito BSL.
+Per una breve guida, consulta il file README.md online:
+
+https://github.com/Grufoony/GOandUISP/tree/main/races/bsl
+
 """
 
 import pathlib
-from tkinter import filedialog
-import pandas as pd
 from goanduisp.core import (
     reformat,
     build_random_teams,
     generate_random_subscriptions_from_teams,
     generate_relay_subscriptions_from_teams,
 )
-from goanduisp.io import get_file_name, import_df
-from goanduisp.version import __version_core__, __version_io__
+from goanduisp.io import get_file_name, import_df, info
 
 __version__ = "2024.11.15"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
-    print(f"BSL by {__author__}, aggiornato al {__version__}")
-    print(f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n")
-    print("Questo programma è stato creato per le manifestazioni del circuito BSL.\n")
-    print(
-        "Per una breve guida, consulta il file README.md "
-        "(online: https://github.com/Grufoony/GOandUISP/tree/main/races/bsl)."
-    )
+    print(info(__author__, __version__))
+    print(__doc__)
 
     SEED = None
     RESPONSE = "n"
