@@ -1,11 +1,14 @@
 """
 Questo script crea la classifica delle squadre partecipanti alla manifestazione "BSL".
+
+Ultimo aggiornamento: 21/04/2024
+ - Aggiunta la stampa dei nomi delle squadre nel file di output "classifica.csv"
 """
 
 from goanduisp.core import reformat, rank_teams
 from goanduisp.io import get_file_name, import_df, info
 
-__version__ = "16/04/2024"
+__version__ = "21/04/2024"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -25,4 +28,4 @@ if __name__ == "__main__":
     df_results.to_csv("results.csv", index=False, header=True, sep=";")
     df_results = rank_teams(df=df_results, nbest=2)
     print(df_results)
-    df_results.to_csv("classifica.csv", index=False, sep=";")
+    df_results.to_csv("classifica.csv", index=True, sep=";")
