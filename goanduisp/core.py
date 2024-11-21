@@ -48,6 +48,7 @@ CATEGORY_PRIORITIES = {
     "R": 5,
     "J": 6,
     "A": 7,
+    "S": 7,
 }
 CATEGORIES = {
     "M": {
