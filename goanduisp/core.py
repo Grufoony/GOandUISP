@@ -969,7 +969,10 @@ def generate_relay_subscriptions_from_teams(
             df = pd.DataFrame()
             # Combine male and female teams, alternating genders
             for i in range(
-                min(len(male_team) // n_athletes, len(female_team) // n_athletes)
+                min(
+                    len(male_team) // (n_athletes // 2),
+                    len(female_team) // (n_athletes // 2),
+                )
             ):
 
                 df = pd.concat(
