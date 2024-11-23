@@ -4,6 +4,10 @@ Per una breve guida, consulta il file README.md online:
 
 https://github.com/Grufoony/GOandUISP/tree/main/races/bsl
 
+Ultimo aggiornamento: 23/11/2024
+    - Rinominato il file di output "relay-subs" in "iscrizioni-staffette"
+        NOTA: il file iscrizioni delle staffette DEVE terminare con "-staffette.csv"
+
 """
 
 import pathlib
@@ -12,10 +16,11 @@ from goanduisp.core import (
     build_random_teams,
     generate_random_subscriptions_from_teams,
     generate_relay_subscriptions_from_teams,
+    STYLES,
 )
 from goanduisp.io import get_file_name, import_df, info
 
-__version__ = "2024.11.15"
+__version__ = "2024.11.23"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
@@ -97,13 +102,18 @@ if __name__ == "__main__":
             "Iserire le gare per iscrizioni staffette "
             "(stringa separata da virgole - Stili Possibili [F, D, R, S, M]): "
         )
+        possible_races = [
+            race.strip().upper().replace("X", "x") for race in RESPONSE.split(",")
+        ]
+        possible_races = [
+            f"{race.split()[0]} {STYLES[race.split()[1].upper()]}"
+            for race in possible_races
+        ]
         df = generate_relay_subscriptions_from_teams(
             teams=TEAMS,
-            possible_races=[
-                race.strip().upper().replace("X", "x") for race in RESPONSE.split(",")
-            ],
+            possible_races=possible_races,
         )
-        df.to_csv("./relay_subs.csv", index=False, header=True, sep=";")
-        print("Salvato il file relay_subs.csv nella cartella corrente.")
+        df.to_csv("./iscrizioni-staffette.csv", index=False, header=True, sep=";")
+        print("Salvato il file iscrizioni-staffette.csv nella cartella corrente.")
 
     input("Premi un tasto qualsiasi per chiudere...")

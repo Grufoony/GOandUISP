@@ -1016,6 +1016,9 @@ def generate_relay_subscriptions_from_teams(
         sub_df.columns.str.contains("Atleta").sum() - 4
     )
 
+    sub_df["CategoriaVera"] = sub_df["CategoriaVera"].str.strip()
+    sub_df["Categoria"] = sub_df["Categoria"].str.strip()
+
     return sub_df
 
 
