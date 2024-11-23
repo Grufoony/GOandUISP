@@ -23,6 +23,10 @@ from goanduisp.io import get_file_name, import_df, info
 __version__ = "2024.11.23"
 __author__ = "Gregorio Berselli"
 
+OUT_TEAMS_FILE = "teams.csv"
+OUT_SUBS_FILE = "individual_subs.csv"
+OUT_RELAY_FILE = "iscrizioni-staffette.csv"
+
 if __name__ == "__main__":
     print(info(__author__, __version__))
     print(__doc__)
@@ -30,12 +34,12 @@ if __name__ == "__main__":
     SEED = None
     RESPONSE = "n"
     TEAMS = None
-    # search in folder . for teams.csv, if found, ask to import it
-    if pathlib.Path("./teams.csv").exists():
-        print("Trovato il file teams.csv nella cartella corrente.")
+    # search in folder . for OUT_TEAMS_FILE, if found, ask to import it
+    if pathlib.Path(OUT_TEAMS_FILE).exists():
+        print(f"Trovato il file {OUT_TEAMS_FILE} nella cartella corrente.")
         RESPONSE = input("Vuoi importare le squadre da questo file? [s/n] ").lower()
         if RESPONSE.lower() == "s":
-            TEAMS = import_df("teams.csv")
+            TEAMS = import_df(OUT_TEAMS_FILE)
             print("Squadre importate correttamente.")
     if RESPONSE.lower() == "n":
         # ask for file path with tkinter
@@ -59,15 +63,13 @@ if __name__ == "__main__":
         )
         print(TEAMS)
         # save teams to csv
-        TEAMS.to_csv("./teams.csv", index=False, header=True, sep=";")
-        print("Salvato il file teams.csv nella cartella corrente.")
+        TEAMS.to_csv(OUT_TEAMS_FILE, index=False, header=True, sep=";")
+        print(f"Salvato il file {OUT_TEAMS_FILE} nella cartella corrente.")
 
     RESPONSE = "s"
-    if pathlib.Path("./individual_subs.csv").exists():
-        print("Trovato il file individual_subs.csv nella cartella corrente.")
-        RESPONSE = input(
-            "Vuoi sovrascrivere il file individual_subs.csv? [s/n] "
-        ).lower()
+    if pathlib.Path(OUT_SUBS_FILE).exists():
+        print(f"Trovato il file {OUT_SUBS_FILE} nella cartella corrente.")
+        RESPONSE = input(f"Vuoi sovrascrivere il file {OUT_SUBS_FILE}? [s/n] ").lower()
     if RESPONSE.lower() == "s":
         print(
             "Seleziona il file CSV del portale UISP contenente le iscrizioni alla gara."
@@ -88,13 +90,13 @@ if __name__ == "__main__":
             n_races=n,
         )
 
-        df.to_csv("./individual_subs.csv", index=False, header=True, sep=";")
-        print("Salvato il file individual_subs.csv nella cartella corrente.")
+        df.to_csv(OUT_SUBS_FILE, index=False, header=True, sep=";")
+        print(f"Salvato il file {OUT_SUBS_FILE} nella cartella corrente.")
 
     RESPONSE = "s"
-    if pathlib.Path("./relay_subs.csv").exists():
-        print("Trovato il file relay_subs.csv nella cartella corrente.")
-        RESPONSE = input("Vuoi sovrascrivere il file relay_subs.csv? [s/n] ").lower()
+    if pathlib.Path(OUT_RELAY_FILE).exists():
+        print(f"Trovato il file {OUT_RELAY_FILE} nella cartella corrente.")
+        RESPONSE = input(f"Vuoi sovrascrivere il file {OUT_RELAY_FILE}? [s/n] ").lower()
     if RESPONSE.lower() == "s":
         if SEED is None:
             SEED = int(input("Inserisci il seed (intero): "))
@@ -113,7 +115,7 @@ if __name__ == "__main__":
             teams=TEAMS,
             possible_races=possible_races,
         )
-        df.to_csv("./iscrizioni-staffette.csv", index=False, header=True, sep=";")
-        print("Salvato il file iscrizioni-staffette.csv nella cartella corrente.")
+        df.to_csv(OUT_RELAY_FILE, index=False, header=True, sep=";")
+        print(f"Salvato il file {OUT_RELAY_FILE} nella cartella corrente.")
 
     input("Premi un tasto qualsiasi per chiudere...")
