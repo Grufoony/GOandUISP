@@ -61,5 +61,5 @@ def import_df(file_name: str, header=0, sep=";") -> pd.DataFrame:
 def info(author: str, version: str) -> str:
     return (
         f"BSL by {author}, aggiornato al {version}\n"
-        "Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n"
+        f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n"
     )

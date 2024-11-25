@@ -5,6 +5,7 @@ pip install .
 
 if /I "%buildType%"=="bsl" (
     python -m PyInstaller --onefile .\races\bsl\bsl.py
+    python -m PyInstaller --onefile .\races\bsl\ranker.py
 ) else if /I "%buildType%"=="sonopronto" (
     python -m PyInstaller --onefile .\races\sono_pronto\sono_pronto.py
 ) else if /I "%buildType%"=="youngchallenge" (
