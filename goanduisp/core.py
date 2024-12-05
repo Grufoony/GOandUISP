@@ -29,6 +29,7 @@ import os
 from datetime import datetime
 import random
 import pandas as pd
+import numpy as np
 
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -578,7 +579,7 @@ def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
 
     array_df = []
     for _, sex_df in df.groupby("Sex"):
-        for _, cat_df in sex_df.groupby("Category"):
+        for _, cat_df in sex_df.groupby("CategoryId"):
             array_df.append(cat_df)
 
     subsets = []
@@ -628,16 +629,16 @@ def build_random_teams(
     """
     # filter by distance and style
     df = df[
-        (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
+        (df["Length"].astype(int) == distance) & (df["StyleId"].str.strip() == style)
     ]
     if df.empty:
         return pd.DataFrame()
     # keep only Name Time columns
-    df = df[["Name", "Year", "Sex", "Category", "Time"]]
+    df = df[["Fullname", "BirthYear", "Sex", "CategoryId", "RaceTime"]]
     # transform time column using time_to_int
-    df["Time"] = df["Time"].apply(time_to_int)
-    df = df.sort_values(by="Time")
-    df["Time"] = df["Time"].apply(int_to_time)
+    df["RaceTime"] = df["RaceTime"].apply(time_to_int)
+    df = df.sort_values(by="RaceTime")
+    df["RaceTime"] = df["RaceTime"].apply(int_to_time)
 
     subsets = create_subsets(df, n_teams)
 
@@ -645,7 +646,9 @@ def build_random_teams(
     # for subset in subsets:
     #     print(subset)
     # init teams df
-    teams = pd.DataFrame(columns=["Name", "Year", "Sex", "Time", "Team"])
+    teams = pd.DataFrame(
+        columns=["Fullname", "BirthYear", "Sex", "RaceTime", "ClubName"]
+    )
     # TEAM NAMES CONSTANT (COLORS)
     team_names = [
         "Rosso",
@@ -665,6 +668,10 @@ def build_random_teams(
         if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F":
             id_len = (i, n_teams - len(subset) - 1)
             break
+    # TODO: optimization algorithm:
+    # - create an array to store the sum of times of each team you're creating
+    # - initialize it as subset[0]
+    # - for each subset, add the fastest athlete to the team with the higher sum and so on
     while len(subsets) > 0:
         for i, subset in enumerate(subsets):
             if (i, team_name_idx) == id_len:
@@ -672,7 +679,7 @@ def build_random_teams(
                 # Teams created lastly will have one more female
                 continue
             athlete = subset.sample(n=1, random_state=seed)
-            athlete["Team"] = team_names[team_name_idx]
+            athlete["ClubName"] = team_names[team_name_idx]
             teams = pd.concat([teams, athlete])
 
             # Directly modify the subset in-place
@@ -684,8 +691,8 @@ def build_random_teams(
         team_name_idx += 1
 
     # sort by time and groupby team
-    teams = teams.groupby("Team").apply(
-        lambda x: x.sort_values(by="Time"), include_groups=False
+    teams = teams.groupby("ClubName").apply(
+        lambda x: x.sort_values(by="RaceTime"), include_groups=False
     )
     # reset index without dropping team column
     teams = teams.reset_index(level=1, drop=True)
@@ -763,7 +770,7 @@ def generate_random_subscriptions_from_teams(
     sub_df["Name"] = sub_df["Name"].str.upper().str.strip()
 
     # remove from sub_df all athletes not in teams
-    sub_df = sub_df[sub_df["Name"].isin(teams["Name"])].reset_index(drop=True)
+    sub_df = sub_df[sub_df["Name"].isin(teams["Fullname"])].reset_index(drop=True)
 
     # Empty all columns named Gara1 Tempo1 Gara2 Tempo2 ...
     for i in range(1, n_races + 1):
@@ -774,22 +781,22 @@ def generate_random_subscriptions_from_teams(
 
     for _, athlete in teams.iterrows():
         try:
-            athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
+            athlete_id = sub_df.loc[sub_df["Name"] == athlete["Fullname"]].index[0]
         except IndexError:
             athlete_id = None
         if athlete_id is None:
-            print(f"ATTENZIONE: atleta {athlete['Name']} non trovato.")
+            print(f"ATTENZIONE: atleta {athlete['Fullname']} non trovato.")
         else:
-            sub_df.at[athlete_id, "Societa"] = athlete["Team"]
+            sub_df.at[athlete_id, "Societa"] = athlete["ClubName"]
         for i, race in enumerate(random.sample(possible_races, n_races)):
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete['Name']} alla gara {race} nella squadra {athlete["Team"]} con tempo {athlete['Time']}."
+                    f"{athlete["Fullname"]} alla gara {race} nella squadra {athlete["ClubName"]} con tempo {athlete["RaceTime"]}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
-                sub_df.at[athlete_id, f"Tempo{i + 1}"] = athlete["Time"]
+                sub_df.at[athlete_id, f"Tempo{i + 1}"] = athlete["RaceTime"]
 
     sub_df.drop(["Name"], axis=1, inplace=True)
 
@@ -811,8 +818,8 @@ def generate_relay_subscriptions_from_teams(
     """
     sub_df = pd.DataFrame(columns=["CategoriaVera"] + RELAY_SUBSCIPTION_COLUMNS_NO_DUP)
 
-    for team_name, team in teams.groupby("Team"):
-        team = team.sort_values("Time")
+    for team_name, team in teams.groupby("ClubName"):
+        team = team.sort_values("RaceTime")
         for race in possible_races:
             n_athletes = int(race.strip().split("x")[0])
 
@@ -855,7 +862,7 @@ def generate_relay_subscriptions_from_teams(
                 # find max category
                 row = [
                     max(
-                        df["Category"].iloc[i * n_athletes : (i + 1) * n_athletes],
+                        df["CategoryId"].iloc[i * n_athletes : (i + 1) * n_athletes],
                         key=lambda x: CATEGORY_PRIORITIES[x.strip()],
                     )
                 ]
@@ -865,14 +872,16 @@ def generate_relay_subscriptions_from_teams(
                     int_to_time(
                         sum(
                             time_to_int(time)
-                            for time in df["Time"].iloc[
+                            for time in df["RaceTime"].iloc[
                                 i * n_athletes : (i + 1) * n_athletes
                             ]
                         )
                     )
                 )
                 # atleti
-                row += df.iloc[i * n_athletes : (i + 1) * n_athletes]["Name"].tolist()
+                row += df.iloc[i * n_athletes : (i + 1) * n_athletes][
+                    "Fullname"
+                ].tolist()
                 if len(row) < len(sub_df.columns):
                     row += [""] * (len(sub_df.columns) - len(row))
 
