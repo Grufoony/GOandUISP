@@ -150,9 +150,6 @@ def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
     df["Point2"] = df["Point2"].str.replace(",", ".").astype(float)
     df["Point"] = df["Point"].fillna(0)
     df["Point2"] = df["Point2"].fillna(0)
-
-    df["BirthYear"] = df["BirthYear"].astype(int)
-
     if keep_valid_times:
         # keep only rows with RaceStatus equal to T
         df = df[df["RaceStatus"].str.strip() == "T"]
@@ -301,25 +298,6 @@ def groupdata(
                 if "SL" in str(getattr(row, f"Gara{i}")):
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
-
-        print(
-            out_df.groupby(["Categoria", "Sesso"])[
-                [
-                    "Cognome",
-                    "Nome",
-                    "Societa",
-                    "PuntiTotali",
-                    "GareDisputate",
-                    "TempoStile",
-                ]
-            ]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-                ).head(3)
-            )
-            .droplevel(2)
-        )
 
         return (
             out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
