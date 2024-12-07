@@ -29,7 +29,6 @@ import os
 from datetime import datetime
 import random
 import pandas as pd
-import numpy as np
 
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -151,6 +150,9 @@ def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
     df["Point2"] = df["Point2"].str.replace(",", ".").astype(float)
     df["Point"] = df["Point"].fillna(0)
     df["Point2"] = df["Point2"].fillna(0)
+
+    df["BirthYear"] = df["BirthYear"].astype(int)
+
     if keep_valid_times:
         # keep only rows with RaceStatus equal to T
         df = df[df["RaceStatus"].str.strip() == "T"]
@@ -349,44 +351,25 @@ def rank_teams(df: pd.core.frame.DataFrame, nbest: int) -> pd.core.frame.DataFra
     pandas.core.frame.DataFrame
         The teams ranking dataframe.
     """
-    df["Style"] = df["Style"].str.strip()
     # keeping only interesting data
     df = df[
         [
-            "Name",
-            "Year",
-            "Sex",
-            "Style",
-            "Distance",
-            "Category",
-            "Time",
-            "Team",
-            "Points",
-            "Double",
+            "Description",
+            "RaceTime",
+            "ClubName",
+            "Point",
         ]
     ]
-    # replacing style names
-    df = df.replace({"Style": STYLES})
-    df["Race"] = (
-        df["Distance"].astype(str)
-        + " "
-        + df["Style"]
-        + " "
-        + df["Sex"]
-        + " "
-        + df["Category"]
-    )
     # drop Style, Distance columns
-    df = df.drop(
-        ["Name", "Year", "Sex", "Style", "Distance", "Category", "Double"], axis=1
-    )
-    df["Time"] = df["Time"].apply(time_to_int)
-    df = df.sort_values(by="Time")
-    df["Time"] = df["Time"].apply(int_to_time)
-    df = df.groupby(["Race", "Team"]).head(nbest)
+    df["RaceTime"] = df["RaceTime"].apply(time_to_int)
+    df = df.sort_values(by="RaceTime")
+    df["RaceTime"] = df["RaceTime"].apply(int_to_time)
+    df = df.groupby(["Description", "ClubName"]).head(nbest)
     # sum point for team and return classifica
     df = (
-        df.groupby(["Team"])[["Points"]].sum().sort_values(by="Points", ascending=False)
+        df.groupby(["ClubName"])[["Point"]]
+        .sum()
+        .sort_values(by="Point", ascending=False)
     )
     return df
 
@@ -473,49 +456,6 @@ def fill_categories(
         print("")
 
     return df
-
-
-def accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None:
-    """
-    This function accumulates all suitable files in the current folder.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    None
-    """
-    changed_files = []
-    for f in os.listdir():
-        if (f.endswith(".xlsx") or f.endswith(".xls")) and not "ACCUMULO" in f:
-            df = pd.read_excel(f, header=None)
-            # check if the file has 20 or 21 columns
-            if len(df.columns) < 20 or len(df.columns) > 21:
-                print(
-                    "Il file "
-                    + f
-                    + " non è formattato correttamente per l'accumulo e verrà saltato."
-                )
-                continue
-            df = reformat(df=df)
-            if counts:
-                print_counts(df=df)
-                input("Premi INVIO per continuare...")
-            out = groupdata(df=df)
-            out.to_excel(f"ACCUMULATO_{f}", index=False)
-            if points:
-                out2 = groupdata(df=df, by_points=points, use_jolly=jolly, out_df=out)
-                out2.to_excel(
-                    f'ACCUMULO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=True
-                )
-            changed_files.append(f)
-    if len(changed_files) == 0:
-        print("Non ci sono file da accumulare nella cartella corrente.")
-    else:
-        print("I file accumulati sono: ")
-        for f in changed_files:
-            print(f)
 
 
 def find_categories() -> None:
@@ -642,9 +582,6 @@ def build_random_teams(
 
     subsets = create_subsets(df, n_teams)
 
-    # print("SUBSETS:")
-    # for subset in subsets:
-    #     print(subset)
     # init teams df
     teams = pd.DataFrame(
         columns=["Fullname", "BirthYear", "Sex", "RaceTime", "ClubName"]
@@ -952,8 +889,8 @@ def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
         A pandas DataFrame with the athletes and their points
     """
     for _, row in df.iterrows():
-        category = row["Category"].strip().upper()
-        distance = row["Distance"]
+        category = row["CategoryId"].strip().upper()
+        distance = row["Length"]
         df_data = None
         if "C" in category or "B1" in category:
             df_data = pd.read_csv(f"{data_folder}/{distance}_c_b1.csv", sep=";")
@@ -964,10 +901,10 @@ def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
         for _, data_row in df_data.iterrows():
             if (
                 time_to_int(data_row["t_min"])
-                <= time_to_int(row["Time"])
+                <= time_to_int(row["RaceTime"])
                 <= time_to_int(data_row["t_max"])
             ):
-                df.at[row.name, "Points"] = data_row["points"]
+                df.at[row.name, "Point"] = data_row["Point"]
                 break
 
     return df
