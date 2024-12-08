@@ -12,13 +12,13 @@ Ultimo aggiornamento: 23/11/2024
 
 import pathlib
 from goanduisp.core import (
-    reformat,
+    shrink,
     build_random_teams,
     generate_random_subscriptions_from_teams,
     generate_relay_subscriptions_from_teams,
     STYLES,
 )
-from goanduisp.io import get_file_name, import_df, info
+from goanduisp.io import get_file_name, import_df, print_info
 
 __version__ = "2024.11.23"
 __author__ = "Gregorio Berselli"
@@ -28,7 +28,7 @@ OUT_SUBS_FILE = "individual_subs.csv"
 OUT_RELAY_FILE = "iscrizioni-staffette.csv"
 
 if __name__ == "__main__":
-    print(info(__author__, __version__))
+    print_info("BSL", __author__, __version__)
     print(__doc__)
 
     SEED = None
@@ -46,8 +46,8 @@ if __name__ == "__main__":
         print(
             "Seleziona il file contenente i risultati GAS dai quali costruire le squadre."
         )
-        df = import_df(get_file_name(), header=None)
-        df = reformat(df, keep_valid_times=True)
+        df = import_df(get_file_name())
+        df = shrink(df, keep_valid_times=True)
         n = int(input("Inserisci il numero di squadre (intero): "))
         SEED = int(input("Inserisci il seed (intero): "))
         distance = int(input("Inserisci la distanza (intero): "))

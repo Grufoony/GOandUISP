@@ -11,10 +11,11 @@ Methods
 import sys
 from tkinter import filedialog
 import pandas as pd
+from .core import get_counts
 from .version import __version_core__, __version_io__
 
 
-def get_file_name(force_csv: bool = False) -> str:
+def get_file_name() -> str:
     """
     Ask for a CSV file and return its path or exit if no file is selected.
 
@@ -23,13 +24,9 @@ def get_file_name(force_csv: bool = False) -> str:
     str
         The path of the selected file.
     """
-    if force_csv:
-        file_types = [("CSV files", "*.csv")]
-    else:
-        file_types = [("Excel and CSV files", "*.xlsx *.csv")]
     file_name = filedialog.askopenfilename(
         title="Seleziona il file CSV da cui leggere i dati",
-        filetypes=file_types,
+        filetypes=[("CSV files", "*.csv")],
     )
     if not file_name:
         print("Nessun file selezionato, esco.")
@@ -58,8 +55,42 @@ def import_df(file_name: str, header=0, sep=";") -> pd.DataFrame:
         return pd.read_csv(file_name, header=header, sep=sep)
 
 
-def info(author: str, version: str) -> str:
-    return (
-        f"BSL by {author}, aggiornato al {version}\n"
-        f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}\n"
-    )
+def print_info(script: str, author: str, version: str) -> None:
+    """
+    Print the info string.
+
+    Parameters
+    ----------
+    script : str
+        The name of the script.
+    author : str
+        The name of the author.
+    version : str
+        The version of the script.
+
+    Returns
+    -------
+    None
+    """
+    print(f"{script} by {author}, aggiornato al {version}")
+    print(f"Basato su GOandUISP: core v{__version_core__} - io v{__version_io__}")
+
+
+def print_counts(df: pd.DataFrame) -> None:
+    """
+    Print the the number of present athletes and the total number of athletes.
+    Then, print the DataFrame with the counts of present and total athletes for each team.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame with the athletes data.
+
+    Returns
+    -------
+    None
+    """
+    count_df = get_counts(df)
+    print(f"Totale Presenti: {count_df["Presenti"].sum()}")
+    print(f"Totale Assenti: {count_df["Totali"].sum()}")
+    print(count_df)
