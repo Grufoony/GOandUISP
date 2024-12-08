@@ -13,7 +13,7 @@ with open("LICENSE", encoding="utf-8") as f:
 
 setup(
     name="GOandUISP",
-    version="2024.12.7",
+    version="2024.12.8",
     description="Suite di utilities per GoAndSwim.",
     long_description=readme_file,
     author="Gregorio Berselli",

@@ -19,13 +19,8 @@ fill_categories(df: pd.core.frame.DataFrame, data: pd.core.frame.DataFrame)
         -> pd.core.frame.DataFrame
     This function takes two dataframes as input and returns a new dataframe with the correct
     categories.
-accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None
-    This function accumulates all suitable files in the current folder.
-find_categories() -> None
-    This function finds the categories of all suitable files in the current folder.
 """
 
-import os
 from datetime import datetime
 import random
 import pandas as pd
@@ -373,6 +368,9 @@ def fill_categories(
     pandas.core.frame.DataFrame
         The converted dataframe.
     """
+    df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
+    df.insert(0, "CategoriaVera", "")
+    print(df)
     # drop last two cols
     df = df.drop(df.columns[-2:], axis=1)
 
@@ -433,52 +431,9 @@ def fill_categories(
             print(athlete)
         print("")
 
+    df.columns = RELAY_SUBSCIPTION_COLUMNS
+
     return df
-
-
-def find_categories() -> None:
-    """
-    This function finds the categories of all suitable files in the current folder.
-    It requires two files named "<name>-staffette-dbmeeting.csv" and "<name>-dbmeeting.csv" where
-    "<name>" is the name of the meeting.
-    It will create a new file named "<name>-staffette.csv" with the categories.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    """
-    changed_files = []
-    for f in os.listdir():
-        if "-staffette" in f:
-            df = pd.read_csv(f, sep=";")
-            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
-            # check if the file has 12 columns
-            if len(df.columns) != 12:
-                print(
-                    f'Il file "{f}" non è formattato correttamente per la creazione automatica '
-                    + "delle categorie e verrà saltato."
-                )
-                continue
-
-            df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
-
-            df.insert(0, "CategoriaVera", "")
-
-            out_df = fill_categories(df, df_data)
-
-            out_df.columns = RELAY_SUBSCIPTION_COLUMNS
-
-            out_df.to_csv(f.replace("-dbmeeting", ""), sep=";", index=False)
-            changed_files.append(f)
-
-    if len(changed_files) == 0:
-        print("Non ci sono file in cui creare le categorie nella cartella corrente.")
-    else:
-        print("I file con categorie generate automaticamente sono: ")
-        for f in changed_files:
-            print(f)
 
 
 def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
