@@ -22,6 +22,7 @@ fill_categories(df: pd.core.frame.DataFrame, data: pd.core.frame.DataFrame)
 """
 
 from datetime import datetime
+import logging
 import random
 import pandas as pd
 
@@ -410,13 +411,14 @@ def fill_categories(
             category = get_category(
                 search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
             )
-            categories.append(category)
+            if category != "nan":
+                categories.append(category)
 
         # take the max category given CATEGORIES dict
-        if len(categories) == 0:
-            category = "nan"
-        else:
+        if len(categories) != 0:
             category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
+        else:
+            logging.warning(f"Non è stato possibile assegnare una categoria a {row}")
 
         df.at[row.Index, "CategoriaVera"] = category
 
