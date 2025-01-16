@@ -55,12 +55,6 @@ CATEGORIES = {
         17: "J",
         18: "J",
         19: "A",
-        20: "A",
-        21: "A",
-        22: "A",
-        23: "A",
-        24: "A",
-        25: "A",
     },
     "F": {
         5: "G",
@@ -76,14 +70,6 @@ CATEGORIES = {
         15: "J",
         16: "J",
         17: "A",
-        18: "A",
-        19: "A",
-        20: "A",
-        21: "A",
-        22: "A",
-        23: "A",
-        24: "A",
-        25: "A",
     },
 }
 
@@ -130,14 +116,14 @@ def get_category(sex: str, year: int) -> str:
         age = datetime.now().year + 1 - year
     else:
         age = datetime.now().year - year
-    if sex.upper().strip() == "M":
-        try:
-            return CATEGORIES["M"][age]
-        except KeyError:
-            return "nan"
+    sex = sex.upper().strip()
     try:
-        return CATEGORIES["F"][age]
+        categories = CATEGORIES[sex]
+        return categories[age]
     except KeyError:
+        max_age = max(categories.keys())
+        if age > max_age:
+            return categories[max_age]
         return "nan"
 
 
