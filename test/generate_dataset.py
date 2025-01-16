@@ -1,3 +1,8 @@
+"""
+Script to generate a synthetic dataset for testing purposes. The dataset will
+contain data about athletes participating in swimming competitions.
+"""
+
 import argparse
 import random
 import uuid
@@ -32,9 +37,11 @@ def gen_lane_number():
     return random.randint(1, 8)
 
 
-def gen_athlete(n_races, pool_size):
+def gen_athlete(club, n_races, pool_size):
+    # disable pylint too many local variables
+    # pylint: disable=R0914
     """Generates multiple rows for a single athlete"""
-    club_name = fake.company()
+    club_name = club
     athlete_id = str(uuid.uuid4()).replace("-", "")
     full_name = fake.name().upper()
     sex = random.choice(["M", "F"])
@@ -62,9 +69,9 @@ def gen_athlete(n_races, pool_size):
         race_time = gen_race_time()
         final_position = gen_final_position()
         point = random.randint(0, 100)
-        point2 = random.uniform(0, 100)
-        calculation_flag = random.choices(["A", ""], [0.3, 0.7])
-        race_status = "" if calculation_flag == "A" else "T"
+        point2 = f"{random.uniform(0, 100):.2f}".replace(".", ",")
+        calculation_flag = random.choices(["A", None], [0.3, 0.7])[0]
+        race_status = None if calculation_flag == "A" else "T"
 
         athlete_rows.append(
             [
@@ -129,11 +136,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
     Faker.seed(args.seed)
     random.seed(args.seed)
+    POSSIBLE_CLUBS = [fake.company() for _ in range(args.n_athletes // 10)]
     data = []
 
     # Generate synthetic data
     for _ in trange(args.n_athletes):
-        athletes_rows = gen_athlete(random.randint(1, args.max_n_races), args.pool_size)
+        athletes_rows = gen_athlete(
+            random.choice(POSSIBLE_CLUBS),
+            random.randint(1, args.max_n_races),
+            args.pool_size,
+        )
         data.extend(athletes_rows)
 
     # Create a DataFrame from the data
