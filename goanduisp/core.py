@@ -285,7 +285,8 @@ def groupdata(
             out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
             .apply(
                 lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                    by=["PuntiTotali", "GareDisputate", "TempoStile"],
+                    ascending=[False, False, True],
                 )
             )
             .droplevel(2)
