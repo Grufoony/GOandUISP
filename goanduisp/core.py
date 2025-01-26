@@ -9,13 +9,6 @@ STYLES : dict
 
 Methods
 -------
-_split_names(full_name: str) -> tuple
-    This function splits a full name into name and surname.
-reformat(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame
-    This function is the main function of the class.
-    It takes a file name as input and returns a pandas dataframe.
-    The output dataset has the correct column labels, the correct style names and the correct
-    names format.
 print_counts(df: pd.core.frame.DataFrame) -> None
     This function prints how many athletes are in each team and the total
     (partecipating medals).
@@ -26,14 +19,10 @@ fill_categories(df: pd.core.frame.DataFrame, data: pd.core.frame.DataFrame)
         -> pd.core.frame.DataFrame
     This function takes two dataframes as input and returns a new dataframe with the correct
     categories.
-accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None
-    This function accumulates all suitable files in the current folder.
-find_categories() -> None
-    This function finds the categories of all suitable files in the current folder.
 """
 
-import os
 from datetime import datetime
+import logging
 import random
 import pandas as pd
 
@@ -66,12 +55,6 @@ CATEGORIES = {
         17: "J",
         18: "J",
         19: "A",
-        20: "A",
-        21: "A",
-        22: "A",
-        23: "A",
-        24: "A",
-        25: "A",
     },
     "F": {
         5: "G",
@@ -87,14 +70,6 @@ CATEGORIES = {
         15: "J",
         16: "J",
         17: "A",
-        18: "A",
-        19: "A",
-        20: "A",
-        21: "A",
-        22: "A",
-        23: "A",
-        24: "A",
-        25: "A",
     },
 }
 
@@ -141,182 +116,72 @@ def get_category(sex: str, year: int) -> str:
         age = datetime.now().year + 1 - year
     else:
         age = datetime.now().year - year
-    if sex.upper().strip() == "M":
-        try:
-            return CATEGORIES["M"][age]
-        except KeyError:
-            return "nan"
+    sex = sex.upper().strip()
     try:
-        return CATEGORIES["F"][age]
+        categories = CATEGORIES[sex]
+        return categories[age]
     except KeyError:
+        max_age = max(categories.keys())
+        if age > max_age:
+            return categories[max_age]
         return "nan"
 
 
-def split_names(full_name: str) -> tuple:
-    """
-    This function splits a full name into name and surname.
-    If the full name is composed by more than two words, it asks the user to insert the surname.
-    If the input is void, it takes the first word as surname and the rest as name.
-    If the input consists of only one char, it takes the first two words as surname and the rest.
-
-    Parameters
-    ----------
-    full_name : str
-        The full name to be splitted.
-
-    Returns
-    -------
-    tuple
-        A tuple containing the name and the surname.
-    """
-    full_name = full_name.upper()
-    if len(full_name.split()) > 2:
-        print("Inserisci i dati di " + str(full_name) + ": ")
-        while True:
-            surname = input("Inserisci il COGNOME: ").upper()
-            if len(surname.split()) == 0:
-                surname = full_name.split()[0]
-                name = full_name.replace(surname + " ", "")
-                break
-            if len(surname.split()) == 1 and surname in full_name.split()[0]:
-                surname = f"{full_name.split()[0]} {full_name.split()[1]}"
-                name = full_name.replace(surname + " ", "")
-                break
-            if surname in full_name:
-                name = full_name.replace(surname + " ", "")
-                break
-            print("COGNOME non presente nel nome, riprova: ")
-        return name, surname
-
-    name_column = full_name.split()
-    return name_column[1], name_column[0]
-
-
-def reformat(
-    df: pd.core.frame.DataFrame, keep_valid_times: bool = False, drop_relay: bool = True
-) -> pd.core.frame.DataFrame:
-    """
-    This function is the main function of the class.
-    It takes a file name as input and returns a pandas dataframe.
-    The output dataset has the correct column labels,the correct style names and the correct
-    names format.
-
-    Parameters
-    ----------
-    df : pandas.core.frame.DataFrame
-        The dataframe to be converted.
-    keep_valid_times : bool, optional
-        If True, the function keeps only the valid times, by default False
-    drop_relay : bool, optional
-        If True, the function drops the relay teams, by default True
-
-    Returns
-    -------
-    pandas.core.frame.DataFrame
-        The converted dataframe.
-    """
-    if len(df.columns) == 21:
-        df.columns = (
-            [
-                "Name",
-                "RelayTeam",
-                "Year",
-                "Sex",
-                "Category",
-                "Distance",
-                "Style",
-                "Team",
-            ]
-            + [""] * 2
-            + ["SubTime", "Time"]
-            + [""] * 2
-            + ["Boolean", "Absent"]
-            + [""]
-            + ["Points", "Double"]
-            + [""] * 2
-        )
-        # df.to_csv("test.csv", index=False, sep=";")
-        # check if the second column contains years
-        # if all(i.is_integer() for i in df[1]):
-        #     df.drop(df.columns[-1], axis=1, inplace=True)
-        # else:
-        #     df.drop(df.columns[1], axis=1, inplace=True)
-        if drop_relay:
-            df = df.drop(df[df["Year"] == 0].index).reset_index(drop=True)
-            df = df.drop(["RelayTeam"], axis=1)
-    else:
-        df.columns = (
-            ["Name", "Year", "Sex", "Category", "Distance", "Style", "Team"]
-            + [""] * 2
-            + ["SubTime", "Time"]
-            + [""] * 2
-            + ["Boolean", "Absent"]
-            + [""]
-            + ["Points", "Double"]
-            + [""] * 2
-        )
-    df.to_csv("test.csv", index=False, sep=";")
-    # check if style column is correct
-    incorrect_styles = False
-    for style in df.Style.unique():
-        if style.split()[0] not in list(STYLES):
-            incorrect_styles = True
-            break
-
-    if incorrect_styles:
-        df = df.rename(columns={"Team": "Style", "Style": "Team"})
-
-    # strip spaces in some columns
-    df["Name"] = df["Name"].str.strip()
-    df["Team"] = df["Team"].str.strip()
-    # replace double spaces with single space in names
-    df["Name"] = df["Name"].str.replace("  ", " ")
-
+def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
+    # Transform column Point2 in floats, given that they are numbers like 2,000
+    df["Point2"] = df["Point2"].str.replace(",", ".").astype(float)
+    df["Point"] = df["Point"].fillna(0)
+    df["Point2"] = df["Point2"].fillna(0)
     if keep_valid_times:
-        df = df[df["Boolean"].str.strip() == "T"]
-        df = df.reset_index(drop=True)
+        # keep only rows with RaceStatus equal to T
+        df = df[df["RaceStatus"].str.strip() == "T"]
 
     return df
 
 
-def print_counts(df: pd.core.frame.DataFrame) -> None:
+def get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     """
-    This function prints how many athletes are in each team and the total
-    of the effective athletes (for partecipating medals).
+    This function takes a GAS results dataframe as input and returns a dataframe with two columns:
+    the first one contains the number of present athletes and the second one the total number of subs.
+    Rows are indexed by club names.
 
     Parameters
     ----------
     df : pandas.core.frame.DataFrame
-        The dataframe with the data to be counted.
+        The GAS dataframe containing results.
 
     Returns
     -------
-    None
+    pandas.core.frame.DataFrame
+        The dataframe with the counts.
     """
     # now print how many athletes are in each team and the total (partecipating medals)
-    counter_df = df.drop(df.loc[df["Absent"].str.strip() == "A"].index, inplace=False)
-    counter_df = counter_df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
-    counter_df_total = df.groupby(["Name", "Year", "Sex", "Team"])[["Time"]].agg(list)
-    print("TOTALE ATLETI:\t" + str(len(counter_df_total.index)))
-    print("TOTALE ATLETI PARTECIPANTI:\t" + str(len(counter_df.index)))
+    counter_df = df.drop(
+        df.loc[df["CalculationFlag"].str.strip() == "A"].index, inplace=False
+    )
+    counter_df = counter_df.groupby(["Fullname", "BirthYear", "Sex", "ClubName"])[
+        ["RaceTime"]
+    ].agg(list)
+    counter_df_total = df.groupby(["Fullname", "BirthYear", "Sex", "ClubName"])[
+        ["RaceTime"]
+    ].agg(list)
 
     counter_df = pd.concat(
         [
-            counter_df.index.get_level_values("Team").value_counts(),
-            counter_df_total.index.get_level_values("Team").value_counts(),
+            counter_df.index.get_level_values("ClubName").value_counts(),
+            counter_df_total.index.get_level_values("ClubName").value_counts(),
         ],
         axis=1,
     )
     counter_df.columns = ["Presenti", "Totali"]
 
-    print(counter_df)
+    return counter_df
 
 
 def groupdata(
     df: pd.core.frame.DataFrame,
     by_points: bool = False,
     use_jolly: bool = False,
-    out_df: pd.core.frame.DataFrame = None,
 ) -> pd.core.frame.DataFrame:
     """
     This function takes a dataframe as input and returns a new dataframe with the correct
@@ -331,8 +196,6 @@ def groupdata(
         by default False
     use_jolly : bool, optional
         If True, the function uses the jolly points, by default False
-    out_df : pandas.core.frame.DataFrame, optional
-        A dataframe partially converted, by default None
 
     Returns
     -------
@@ -352,73 +215,59 @@ def groupdata(
         - "PuntiTotali" (if by_points is True)
     """
     # keep only rows with boolean set to T (valid times) and strip spaces in style column
-    df.drop(df.loc[df["Boolean"].str.strip() != "T"].index, inplace=True)
-    df["Style"] = df["Style"].str.strip()
+    df = shrink(df)
     # keeping only interesting data
     df = df[
         [
             "Name",
-            "Year",
+            "Surname",
+            "BirthYear",
             "Sex",
-            "Style",
-            "Distance",
-            "Category",
-            "Time",
-            "Team",
-            "Points",
-            "Double",
+            "StyleId",
+            "Length",
+            "CategoryId",
+            "RaceTime",
+            "ClubName",
+            "Point",
+            "Point2",
         ]
     ]
     # replacing style names
-    df = df.replace({"Style": STYLES})
-    df["Race"] = df["Distance"].astype(str) + " " + df["Style"]
+    df = df.replace({"StyleId": STYLES})
+    df["Race"] = df["Length"].astype(str) + " " + df["StyleId"]
     # groupby races and times, i.e. get unique athletes
-    df = df.groupby(["Name", "Year", "Sex", "Category", "Team"])[
-        ["Race", "Time", "Points", "Double"]
+    df = df.groupby(["Name", "Surname", "BirthYear", "Sex", "CategoryId", "ClubName"])[
+        ["Race", "RaceTime", "Point", "Point2"]
     ].agg(list)
 
-    if out_df is None:
-        # creates empty output database with columns' names
-        out_columns = ["Cognome", "Nome", "Anno", "Sesso"]
-        for i in range(df["Race"].apply(len).max()):
-            out_columns.append("Gara" + str(i + 1))
-            out_columns.append("Tempo" + str(i + 1))
-        out_columns.append("Societa")
-        out_df = pd.DataFrame(columns=out_columns)
+    # creates empty output database with columns' names
+    out_columns = ["Cognome", "Nome", "Anno", "Sesso"]
+    for i in range(df["Race"].apply(len).max()):
+        out_columns.append("Gara" + str(i + 1))
+        out_columns.append("Tempo" + str(i + 1))
+    out_columns.append("Societa")
+    out_df = pd.DataFrame(columns=out_columns)
 
-        out_df["Anno"] = df.index.get_level_values("Year")
-        out_df["Sesso"] = df.index.get_level_values("Sex")
-        out_df["Societa"] = df.index.get_level_values("Team")
+    out_df["Cognome"] = df.index.get_level_values("Surname")
+    out_df["Nome"] = df.index.get_level_values("Name")
+    out_df["Anno"] = df.index.get_level_values("BirthYear")
+    out_df["Sesso"] = df.index.get_level_values("Sex")
+    out_df["Societa"] = df.index.get_level_values("ClubName")
 
-        # split name column into words and ask surname in input if the number of words
-        # is greater than 2
-        print("Se richiesto, inserire i COGNOMI degli atleti mancanti.")
-        print(
-            "Se nessun COGNOME viene inserito, verrà preso il primo nome come COGNOME."
-        )
-        print(
-            "Se il COGNOME è composto da una sola lettera, verranno considerati i primi due nomi."
-        )
-        for index, full_name in enumerate(df.index.get_level_values("Name")):
-            name, surname = split_names(full_name=full_name)
-            out_df.loc[index, "Nome"] = name
-            out_df.loc[index, "Cognome"] = surname
-
-        for athlete_index, row in enumerate(df.itertuples()):
-            for index, race in enumerate(zip(row.Race, row.Time)):
-                out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
-                out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
-            out_df.loc[athlete_index, "GareDisputate"] = index + 1
+    for athlete_index, row in enumerate(df.itertuples()):
+        for index, race in enumerate(zip(row.Race, row.RaceTime)):
+            out_df.loc[athlete_index, "Gara" + str(index + 1)] = race[0]
+            out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
+        out_df.loc[athlete_index, "GareDisputate"] = index + 1
 
     if by_points:
         out_df["PuntiTotali"] = 0
-        out_df["Categoria"] = df.index.get_level_values("Category")
+        out_df["Categoria"] = df.index.get_level_values("CategoryId")
         for athlete_index, row in enumerate(df.itertuples()):
             i = 0
-            for points, double in zip(row.Points, row.Double):
-                double = double.replace(",", ".") if "," in str(double) else double
+            for points, double in zip(row.Point, row.Point2):
                 i += int(points)
-                if use_jolly and int(float(double)) == 2:
+                if use_jolly and int(double) == 2:
                     i += int(points)
             out_df.loc[athlete_index, "PuntiTotali"] = i
 
@@ -427,35 +276,17 @@ def groupdata(
 
         out_df["TempoStile"] = ""
         for row in out_df.itertuples():
-            for i in range(1, df["Race"].apply(len).max() + 1):
+            for i in range(1, df["RaceTime"].apply(len).max() + 1):
                 if "SL" in str(getattr(row, f"Gara{i}")):
                     out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
                     break
-
-        print(
-            out_df.groupby(["Categoria", "Sesso"])[
-                [
-                    "Cognome",
-                    "Nome",
-                    "Societa",
-                    "PuntiTotali",
-                    "GareDisputate",
-                    "TempoStile",
-                ]
-            ]
-            .apply(
-                lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
-                ).head(3)
-            )
-            .droplevel(2)
-        )
 
         return (
             out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
             .apply(
                 lambda x: x.sort_values(
-                    by=["PuntiTotali", "TempoStile"], ascending=[False, True]
+                    by=["GareDisputate", "PuntiTotali", "TempoStile"],
+                    ascending=[False, False, True],
                 )
             )
             .droplevel(2)
@@ -481,44 +312,25 @@ def rank_teams(df: pd.core.frame.DataFrame, nbest: int) -> pd.core.frame.DataFra
     pandas.core.frame.DataFrame
         The teams ranking dataframe.
     """
-    df["Style"] = df["Style"].str.strip()
     # keeping only interesting data
     df = df[
         [
-            "Name",
-            "Year",
-            "Sex",
-            "Style",
-            "Distance",
-            "Category",
-            "Time",
-            "Team",
-            "Points",
-            "Double",
+            "Description",
+            "RaceTime",
+            "ClubName",
+            "Point",
         ]
     ]
-    # replacing style names
-    df = df.replace({"Style": STYLES})
-    df["Race"] = (
-        df["Distance"].astype(str)
-        + " "
-        + df["Style"]
-        + " "
-        + df["Sex"]
-        + " "
-        + df["Category"]
-    )
     # drop Style, Distance columns
-    df = df.drop(
-        ["Name", "Year", "Sex", "Style", "Distance", "Category", "Double"], axis=1
-    )
-    df["Time"] = df["Time"].apply(time_to_int)
-    df = df.sort_values(by="Time")
-    df["Time"] = df["Time"].apply(int_to_time)
-    df = df.groupby(["Race", "Team"]).head(nbest)
+    df["RaceTime"] = df["RaceTime"].apply(time_to_int)
+    df = df.sort_values(by="RaceTime")
+    df["RaceTime"] = df["RaceTime"].apply(int_to_time)
+    df = df.groupby(["Description", "ClubName"]).head(nbest)
     # sum point for team and return classifica
     df = (
-        df.groupby(["Team"])[["Points"]].sum().sort_values(by="Points", ascending=False)
+        df.groupby(["ClubName"])[["Point"]]
+        .sum()
+        .sort_values(by="Point", ascending=False)
     )
     return df
 
@@ -544,6 +356,9 @@ def fill_categories(
     pandas.core.frame.DataFrame
         The converted dataframe.
     """
+    df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
+    df.insert(0, "CategoriaVera", "")
+    print(df)
     # drop last two cols
     df = df.drop(df.columns[-2:], axis=1)
 
@@ -583,13 +398,14 @@ def fill_categories(
             category = get_category(
                 search["Sesso"].values[0].lower().strip(), search["Anno"].values[0]
             )
-            categories.append(category)
+            if category != "nan":
+                categories.append(category)
 
         # take the max category given CATEGORIES dict
-        if len(categories) == 0:
-            category = "nan"
-        else:
+        if len(categories) != 0:
             category = max(categories, key=lambda x: CATEGORY_PRIORITIES[x])
+        else:
+            logging.warning(f"Non è stato possibile assegnare una categoria a {row}")
 
         df.at[row.Index, "CategoriaVera"] = category
 
@@ -604,95 +420,9 @@ def fill_categories(
             print(athlete)
         print("")
 
+    df.columns = RELAY_SUBSCIPTION_COLUMNS
+
     return df
-
-
-def accumulate(counts: bool = True, points: bool = False, jolly: bool = False) -> None:
-    """
-    This function accumulates all suitable files in the current folder.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    None
-    """
-    changed_files = []
-    for f in os.listdir():
-        if (f.endswith(".xlsx") or f.endswith(".xls")) and not "ACCUMULO" in f:
-            df = pd.read_excel(f, header=None)
-            # check if the file has 20 or 21 columns
-            if len(df.columns) < 20 or len(df.columns) > 21:
-                print(
-                    "Il file "
-                    + f
-                    + " non è formattato correttamente per l'accumulo e verrà saltato."
-                )
-                continue
-            df = reformat(df=df)
-            if counts:
-                print_counts(df=df)
-                input("Premi INVIO per continuare...")
-            out = groupdata(df=df)
-            out.to_excel(f"ACCUMULATO_{f}", index=False)
-            if points:
-                out2 = groupdata(df=df, by_points=points, use_jolly=jolly, out_df=out)
-                out2.to_excel(
-                    f'ACCUMULO_{f.replace(".xlsx", "")}_PUNTEGGI.xlsx', index=True
-                )
-            changed_files.append(f)
-    if len(changed_files) == 0:
-        print("Non ci sono file da accumulare nella cartella corrente.")
-    else:
-        print("I file accumulati sono: ")
-        for f in changed_files:
-            print(f)
-
-
-def find_categories() -> None:
-    """
-    This function finds the categories of all suitable files in the current folder.
-    It requires two files named "<name>-staffette-dbmeeting.csv" and "<name>-dbmeeting.csv" where
-    "<name>" is the name of the meeting.
-    It will create a new file named "<name>-staffette.csv" with the categories.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    """
-    changed_files = []
-    for f in os.listdir():
-        if "-staffette" in f:
-            df = pd.read_csv(f, sep=";")
-            df_data = pd.read_csv(f.replace("-staffette", ""), sep=";")
-            # check if the file has 12 columns
-            if len(df.columns) != 12:
-                print(
-                    f'Il file "{f}" non è formattato correttamente per la creazione automatica '
-                    + "delle categorie e verrà saltato."
-                )
-                continue
-
-            df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
-
-            df.insert(0, "CategoriaVera", "")
-
-            out_df = fill_categories(df, df_data)
-
-            out_df.columns = RELAY_SUBSCIPTION_COLUMNS
-
-            out_df.to_csv(f.replace("-dbmeeting", ""), sep=";", index=False)
-            changed_files.append(f)
-
-    if len(changed_files) == 0:
-        print("Non ci sono file in cui creare le categorie nella cartella corrente.")
-    else:
-        print("I file con categorie generate automaticamente sono: ")
-        for f in changed_files:
-            print(f)
 
 
 def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
@@ -711,7 +441,7 @@ def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
 
     array_df = []
     for _, sex_df in df.groupby("Sex"):
-        for _, cat_df in sex_df.groupby("Category"):
+        for _, cat_df in sex_df.groupby("CategoryId"):
             array_df.append(cat_df)
 
     subsets = []
@@ -761,24 +491,23 @@ def build_random_teams(
     """
     # filter by distance and style
     df = df[
-        (df["Distance"].astype(int) == distance) & (df["Style"].str.strip() == style)
+        (df["Length"].astype(int) == distance) & (df["StyleId"].str.strip() == style)
     ]
     if df.empty:
         return pd.DataFrame()
     # keep only Name Time columns
-    df = df[["Name", "Year", "Sex", "Category", "Time"]]
+    df = df[["Fullname", "BirthYear", "Sex", "CategoryId", "RaceTime"]]
     # transform time column using time_to_int
-    df["Time"] = df["Time"].apply(time_to_int)
-    df = df.sort_values(by="Time")
-    df["Time"] = df["Time"].apply(int_to_time)
+    df["RaceTime"] = df["RaceTime"].apply(time_to_int)
+    df = df.sort_values(by="RaceTime")
+    df["RaceTime"] = df["RaceTime"].apply(int_to_time)
 
     subsets = create_subsets(df, n_teams)
 
-    # print("SUBSETS:")
-    # for subset in subsets:
-    #     print(subset)
     # init teams df
-    teams = pd.DataFrame(columns=["Name", "Year", "Sex", "Time", "Team"])
+    teams = pd.DataFrame(
+        columns=["Fullname", "BirthYear", "Sex", "RaceTime", "ClubName"]
+    )
     # TEAM NAMES CONSTANT (COLORS)
     team_names = [
         "Rosso",
@@ -798,6 +527,10 @@ def build_random_teams(
         if len(subset) < n_teams and subset["Sex"].values[0].strip() == "F":
             id_len = (i, n_teams - len(subset) - 1)
             break
+    # TODO: optimization algorithm:
+    # - create an array to store the sum of times of each team you're creating
+    # - initialize it as subset[0]
+    # - for each subset, add the fastest athlete to the team with the higher sum and so on
     while len(subsets) > 0:
         for i, subset in enumerate(subsets):
             if (i, team_name_idx) == id_len:
@@ -805,7 +538,7 @@ def build_random_teams(
                 # Teams created lastly will have one more female
                 continue
             athlete = subset.sample(n=1, random_state=seed)
-            athlete["Team"] = team_names[team_name_idx]
+            athlete["ClubName"] = team_names[team_name_idx]
             teams = pd.concat([teams, athlete])
 
             # Directly modify the subset in-place
@@ -817,8 +550,8 @@ def build_random_teams(
         team_name_idx += 1
 
     # sort by time and groupby team
-    teams = teams.groupby("Team").apply(
-        lambda x: x.sort_values(by="Time"), include_groups=False
+    teams = teams.groupby("ClubName").apply(
+        lambda x: x.sort_values(by="RaceTime"), include_groups=False
     )
     # reset index without dropping team column
     teams = teams.reset_index(level=1, drop=True)
@@ -896,7 +629,7 @@ def generate_random_subscriptions_from_teams(
     sub_df["Name"] = sub_df["Name"].str.upper().str.strip()
 
     # remove from sub_df all athletes not in teams
-    sub_df = sub_df[sub_df["Name"].isin(teams["Name"])].reset_index(drop=True)
+    sub_df = sub_df[sub_df["Name"].isin(teams["Fullname"])].reset_index(drop=True)
 
     # Empty all columns named Gara1 Tempo1 Gara2 Tempo2 ...
     for i in range(1, n_races + 1):
@@ -907,22 +640,22 @@ def generate_random_subscriptions_from_teams(
 
     for _, athlete in teams.iterrows():
         try:
-            athlete_id = sub_df.loc[sub_df["Name"] == athlete["Name"]].index[0]
+            athlete_id = sub_df.loc[sub_df["Name"] == athlete["Fullname"]].index[0]
         except IndexError:
             athlete_id = None
         if athlete_id is None:
-            print(f"ATTENZIONE: atleta {athlete['Name']} non trovato.")
+            print(f"ATTENZIONE: atleta {athlete['Fullname']} non trovato.")
         else:
-            sub_df.at[athlete_id, "Societa"] = athlete["Team"]
+            sub_df.at[athlete_id, "Societa"] = athlete["ClubName"]
         for i, race in enumerate(random.sample(possible_races, n_races)):
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete['Name']} alla gara {race} nella squadra {athlete["Team"]} con tempo {athlete['Time']}."
+                    f"{athlete["Fullname"]} alla gara {race} nella squadra {athlete["ClubName"]} con tempo {athlete["RaceTime"]}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
-                sub_df.at[athlete_id, f"Tempo{i + 1}"] = athlete["Time"]
+                sub_df.at[athlete_id, f"Tempo{i + 1}"] = athlete["RaceTime"]
 
     sub_df.drop(["Name"], axis=1, inplace=True)
 
@@ -944,8 +677,8 @@ def generate_relay_subscriptions_from_teams(
     """
     sub_df = pd.DataFrame(columns=["CategoriaVera"] + RELAY_SUBSCIPTION_COLUMNS_NO_DUP)
 
-    for team_name, team in teams.groupby("Team"):
-        team = team.sort_values("Time")
+    for team_name, team in teams.groupby("ClubName"):
+        team = team.sort_values("RaceTime")
         for race in possible_races:
             n_athletes = int(race.strip().split("x")[0])
 
@@ -988,7 +721,7 @@ def generate_relay_subscriptions_from_teams(
                 # find max category
                 row = [
                     max(
-                        df["Category"].iloc[i * n_athletes : (i + 1) * n_athletes],
+                        df["CategoryId"].iloc[i * n_athletes : (i + 1) * n_athletes],
                         key=lambda x: CATEGORY_PRIORITIES[x.strip()],
                     )
                 ]
@@ -998,14 +731,16 @@ def generate_relay_subscriptions_from_teams(
                     int_to_time(
                         sum(
                             time_to_int(time)
-                            for time in df["Time"].iloc[
+                            for time in df["RaceTime"].iloc[
                                 i * n_athletes : (i + 1) * n_athletes
                             ]
                         )
                     )
                 )
                 # atleti
-                row += df.iloc[i * n_athletes : (i + 1) * n_athletes]["Name"].tolist()
+                row += df.iloc[i * n_athletes : (i + 1) * n_athletes][
+                    "Fullname"
+                ].tolist()
                 if len(row) < len(sub_df.columns):
                     row += [""] * (len(sub_df.columns) - len(row))
 
@@ -1076,8 +811,8 @@ def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
         A pandas DataFrame with the athletes and their points
     """
     for _, row in df.iterrows():
-        category = row["Category"].strip().upper()
-        distance = row["Distance"]
+        category = row["CategoryId"].strip().upper()
+        distance = row["Length"]
         df_data = None
         if "C" in category or "B1" in category:
             df_data = pd.read_csv(f"{data_folder}/{distance}_c_b1.csv", sep=";")
@@ -1088,10 +823,10 @@ def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
         for _, data_row in df_data.iterrows():
             if (
                 time_to_int(data_row["t_min"])
-                <= time_to_int(row["Time"])
+                <= time_to_int(row["RaceTime"])
                 <= time_to_int(data_row["t_max"])
             ):
-                df.at[row.name, "Points"] = data_row["points"]
+                df.at[row.name, "Point"] = data_row["Point"]
                 break
 
     return df
