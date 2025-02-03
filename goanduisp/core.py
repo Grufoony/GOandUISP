@@ -295,7 +295,7 @@ def groupdata(
     return out_df
 
 
-def rank_teams(df: pd.core.frame.DataFrame, nbest: int) -> pd.core.frame.DataFrame:
+def rank_teams(df: pd.core.frame.DataFrame, use_jolly: bool = False, nbest: int = None) -> pd.core.frame.DataFrame:
     """
     This function takes a reformatted GAS result dataframe as input and returns the teams ranking.
 
@@ -319,13 +319,16 @@ def rank_teams(df: pd.core.frame.DataFrame, nbest: int) -> pd.core.frame.DataFra
             "RaceTime",
             "ClubName",
             "Point",
+            "Point2",
         ]
     ]
+    if use_jolly:
+        df.loc[:, "Point"] = df["Point"].astype(int) * (1 + df["Point2"].astype(int))
     # drop Style, Distance columns
-    df["RaceTime"] = df["RaceTime"].apply(time_to_int)
+    df.loc[:, "RaceTime"] = df["RaceTime"].apply(time_to_int)
     df = df.sort_values(by="RaceTime")
-    df["RaceTime"] = df["RaceTime"].apply(int_to_time)
-    df = df.groupby(["Description", "ClubName"]).head(nbest)
+    if nbest is not None:
+        df = df.groupby(["Description", "ClubName"]).head(nbest)
     # sum point for team and return classifica
     df = (
         df.groupby(["ClubName"])[["Point"]]
