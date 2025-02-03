@@ -5,11 +5,11 @@ Questo programma è stato creato per la manifestazione "YOUNG CHALLENGE".
 from goanduisp.core import groupdata
 from goanduisp.io import print_info, print_counts, import_df, get_file_name
 
-__version__ = "2024.12.7"
+__version__ = "2025.2.3"
 __author__ = "Gregorio Berselli"
 
 if __name__ == "__main__":
-    print(print_info("YoungChallenge", __author__, __version__))
+    print_info("YoungChallenge", __author__, __version__)
     print(__doc__)
     # ask for jolly count
     use_jolly = input("Vuoi considerare i jolly? [s/n] ").lower()
