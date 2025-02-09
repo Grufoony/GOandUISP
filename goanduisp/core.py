@@ -295,7 +295,11 @@ def groupdata(
     return out_df
 
 
-def rank_teams(df: pd.core.frame.DataFrame, use_jolly: bool = False, nbest: int = None) -> pd.core.frame.DataFrame:
+def rank_teams(
+    df: pd.core.frame.DataFrame,
+    point_formula=None,
+    nbest: int = None,
+) -> pd.core.frame.DataFrame:
     """
     This function takes a reformatted GAS result dataframe as input and returns the teams ranking.
 
@@ -303,7 +307,11 @@ def rank_teams(df: pd.core.frame.DataFrame, use_jolly: bool = False, nbest: int 
     ----------
     df : pandas.core.frame.DataFrame
         The dataframe containing results.
-    nbest : int
+    point_formula : function
+        A function that takes Point and Point2 columns as input and computes the point value.
+    use_jolly : bool, optional
+        Whether to apply the jolly multiplier.
+    nbest : int, optional
         If given, only the first nbest athletes will be counted for each Race, i.e.
         Distance-Style-Sex-Category combination.
 
@@ -312,29 +320,26 @@ def rank_teams(df: pd.core.frame.DataFrame, use_jolly: bool = False, nbest: int 
     pandas.core.frame.DataFrame
         The teams ranking dataframe.
     """
-    # keeping only interesting data
-    df = df[
-        [
-            "Description",
-            "RaceTime",
-            "ClubName",
-            "Point",
-            "Point2",
-        ]
-    ]
-    if use_jolly:
-        df.loc[:, "Point"] = df["Point"].astype(int) * (1 + df["Point2"].astype(int))
-    # drop Style, Distance columns
+    # Keeping only relevant columns
+    df = df[["Description", "RaceTime", "ClubName", "Point", "Point2"]]
+
+    if point_formula is not None:
+        # Apply point calculation formula
+        df.loc[:, "Point"] = df.apply(
+            lambda row: point_formula(row["Point"], row["Point2"]), axis=1
+        )
+
+    # Convert RaceTime to integer and sort
     df.loc[:, "RaceTime"] = df["RaceTime"].apply(time_to_int)
     df = df.sort_values(by="RaceTime")
+
+    # Keep only top 'nbest' athletes per race and club
     if nbest is not None:
         df = df.groupby(["Description", "ClubName"]).head(nbest)
-    # sum point for team and return classifica
-    df = (
-        df.groupby(["ClubName"])[["Point"]]
-        .sum()
-        .sort_values(by="Point", ascending=False)
-    )
+
+    # Aggregate points per team
+    df = df.groupby("ClubName")["Point"].sum().sort_values(ascending=False)
+
     return df
 
 
