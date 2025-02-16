@@ -834,7 +834,7 @@ def assign_points_by_time(df: pd.DataFrame, data_folder: str) -> pd.DataFrame:
                 <= time_to_int(row["RaceTime"])
                 <= time_to_int(data_row["t_max"])
             ):
-                df.at[row.name, "Point"] = data_row["Point"]
+                df.at[row.name, "Point"] = data_row["points"]
                 break
 
     return df

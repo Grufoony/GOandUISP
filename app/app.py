@@ -81,6 +81,29 @@ def top100():
     messagebox.showinfo("Successo", f"Classifica squadre salvata in '{file_name}'")
 
 
+def sono_pronto():
+    file_path = filedialog.askopenfilename(
+        title="Seleziona il file contenente i risultati"
+    )
+    if not file_path:
+        return
+
+    df = import_df(file_path)
+    df = shrink(df=df, keep_valid_times=True)
+    dir_path = filedialog.askdirectory(
+        title="Seleziona la cartella contenente le tabelle tempi/punteggi"
+    )
+    try:
+        df = assign_points_by_time(df, dir_path)
+    except Exception as e:
+        messagebox.showerror("Errore", f"Errore durante l'assegnazione dei punti: {e}")
+        return
+
+    file_name = "points.csv"
+    df.to_csv(file_name, index=False, header=True, sep=";")
+    messagebox.showinfo("Successo", f"File punteggi salvato in '{file_name}'")
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title(f"Go And UISP - App - v{__version__}@ALPHA")
@@ -113,5 +136,23 @@ if __name__ == "__main__":
         height=2,
     )
     btn_top100.grid(row=1, column=1, padx=20, pady=20)
+
+    # Horizontal line with text
+    label_circuito = tk.Label(frame, text="Circuito SONO PRONTO", font=("Arial", 12))
+    label_circuito.grid(row=2, column=0, sticky="w", padx=20)
+
+    separator = tk.Frame(frame, height=2, width=250, bg="black")
+    separator.grid(row=2, column=1, pady=10)
+
+    # SONO PRONTO button
+    btn_sono_pronto = tk.Button(
+        frame,
+        text="Calcolo Punteggi Individuali",
+        command=sono_pronto,
+        font=("Arial", 12),
+        width=20,
+        height=2,
+    )
+    btn_sono_pronto.grid(row=3, column=0, columnspan=2, padx=20, pady=20)
 
     root.mainloop()
