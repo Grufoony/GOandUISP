@@ -168,12 +168,12 @@ def get_counts(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     counter_df = pd.concat(
         [
-            counter_df.index.get_level_values("ClubName").value_counts(),
             counter_df_total.index.get_level_values("ClubName").value_counts(),
+            counter_df.index.get_level_values("ClubName").value_counts(),
         ],
         axis=1,
     )
-    counter_df.columns = ["Presenti", "Totali"]
+    counter_df.columns = ["Iscritti", "Presenti"]
 
     return counter_df
 
