@@ -56,6 +56,34 @@ def counts():
     df.to_csv(file_name, index=True, sep=";")
     messagebox.showinfo("Successo", f"Conteggi salvati in '{file_name}'")
 
+def categorie_staffette():
+    relay_file_path = filedialog.askopenfilename(
+        title="Selezionare il file (portale) delle iscrizioni delle staffette."
+    )
+    if not relay_file_path:
+        return
+    individual_file_path = filedialog.askopenfilename(
+        title="Selezionare il file (portale) delle iscrizioni individuali."
+    )
+    if not individual_file_path:
+        return
+    
+    df_relay = import_df(relay_file_path)
+    df_individual = import_df(individual_file_path)
+
+    try:
+        df_relay, missing_athletes = fill_categories(df_relay, df_individual)
+        if missing_athletes:
+            messagebox.showwarning("Atleti mancanti", f"Non sono state trovate le seguenti iscrizioni individuali:\n{"\n".join([f"\n{team}:\n  " + "\n  ".join(athletes) for team, athletes in missing_athletes.items()])}")
+    except Exception as e:
+        messagebox.showerror("Errore", f"Errore durante il calcolo delle categorie: {e}")
+        return
+    
+    file_name = "iscrizioni-staffette.csv"
+    df_relay.to_csv(file_name, index=False, sep=";")
+    messagebox.showinfo("Successo", f"Iscrizioni staffette salvate in '{file_name}'")
+
+
 
 def top100():
     file_path = filedialog.askopenfilename(
@@ -127,6 +155,23 @@ if __name__ == "__main__":
     )
     btn_rank.grid(row=1, column=0, padx=20, pady=20)
 
+    btn_categorie_staffette = tk.Button(
+        frame,
+        text="Assegna Categorie Staffette",
+        command=categorie_staffette,
+        font=("Arial", 12),
+        width=20,
+        height=2,
+    )
+    btn_categorie_staffette.grid(row=1, column=1, padx=20, pady=20)
+
+    # Horizontal line with text
+    label_yc = tk.Label(frame, text="Circuito YOUNG CHALLENGE", font=("Arial", 12))
+    label_yc.grid(row=2, column=0, sticky="w", padx=20)
+
+    separator = tk.Frame(frame, height=2, width=250, bg="black")
+    separator.grid(row=2, column=1, pady=10)
+
     btn_top100 = tk.Button(
         frame,
         text="Classifica TOP 100",
@@ -135,14 +180,14 @@ if __name__ == "__main__":
         width=20,
         height=2,
     )
-    btn_top100.grid(row=1, column=1, padx=20, pady=20)
+    btn_top100.grid(row=3, column=0, columnspan=2, padx=20, pady=20)
 
     # Horizontal line with text
     label_circuito = tk.Label(frame, text="Circuito SONO PRONTO", font=("Arial", 12))
-    label_circuito.grid(row=2, column=0, sticky="w", padx=20)
+    label_circuito.grid(row=4, column=0, sticky="w", padx=20)
 
     separator = tk.Frame(frame, height=2, width=250, bg="black")
-    separator.grid(row=2, column=1, pady=10)
+    separator.grid(row=4, column=1, pady=10)
 
     # SONO PRONTO button
     btn_sono_pronto = tk.Button(
@@ -150,9 +195,9 @@ if __name__ == "__main__":
         text="Calcolo Punteggi Individuali",
         command=sono_pronto,
         font=("Arial", 12),
-        width=20,
+        width=25,
         height=2,
     )
-    btn_sono_pronto.grid(row=3, column=0, columnspan=2, padx=20, pady=20)
+    btn_sono_pronto.grid(row=5, column=0, columnspan=2, padx=20, pady=20)
 
     root.mainloop()

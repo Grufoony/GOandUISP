@@ -363,6 +363,8 @@ def fill_categories(
     -------
     pandas.core.frame.DataFrame
         The converted dataframe.
+    dict:
+        A dictionary containing the athletes that do not compete in individual race for each team.
     """
     df.columns = RELAY_SUBSCIPTION_COLUMNS_NO_DUP + [""] * 2
     df.insert(0, "CategoriaVera", "")
@@ -377,7 +379,7 @@ def fill_categories(
     data["Nome"] = data["Nome"].str.strip()
 
     # create a count dict with CodSocieta as keys
-    count_dict = {}
+    missing_dict = {}
     counted = []
     for row in df.itertuples():
         categories = []
@@ -398,9 +400,9 @@ def fill_categories(
             if search.empty:
                 if athlete not in counted:
                     try:
-                        count_dict[row.Societa] += 1
+                        missing_dict[row.Societa].append(athlete)
                     except KeyError:
-                        count_dict[row.Societa] = 1
+                        missing_dict[row.Societa] = [athlete]
                     counted.append(athlete)
                 continue
             category = get_category(
@@ -417,10 +419,10 @@ def fill_categories(
 
         df.at[row.Index, "CategoriaVera"] = category
 
-    if len(count_dict) > 0:
-        for team, count in count_dict.items():
+    if len(missing_dict) > 0:
+        for team, count in missing_dict.items():
             print(
-                f"ATTENZIONE: la società {team} ha {count} "
+                f"ATTENZIONE: la società {team} ha {len(count)} "
                 + "atleti che non gareggiano in gare individuali."
             )
         print("\nIn particolare, gli atleti sono:")
@@ -430,7 +432,7 @@ def fill_categories(
 
     df.columns = RELAY_SUBSCIPTION_COLUMNS
 
-    return df
+    return df, missing_dict
 
 
 def create_subsets(df: pd.DataFrame, n_teams: int) -> list:
