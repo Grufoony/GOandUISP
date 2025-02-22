@@ -233,7 +233,7 @@ if __name__ == "__main__":
     # Combinata button
     btn_combinata = tk.Button(
         frame,
-        text="Calcolo Combinata",
+        text="Crea iscrizioni finali",
         command=combinata,
         font=("Arial", 12),
         width=25,
