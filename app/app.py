@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
+import pathlib
 from goanduisp.core import *
 from goanduisp.io import import_df
 
@@ -131,6 +132,29 @@ def sono_pronto():
     df.to_csv(file_name, index=False, header=True, sep=";")
     messagebox.showinfo("Successo", f"File punteggi salvato in '{file_name}'")
 
+def combinata():
+    dir_path = filedialog.askdirectory(
+        title="Seleziona la cartella contenente i risultati della combinata"
+    )
+    if not dir_path:
+        return
+    # Concat all dataframes in the directory
+    df = pd.DataFrame()
+    for file_path in pathlib.Path(dir_path).iterdir():
+        if file_path.suffix == ".csv":
+            temp_df = import_df(file_path.as_posix())
+            df = pd.concat([df, temp_df], ignore_index=True)
+    try:
+        df = groupdata(df)
+        df["Gara1"] = "100 M"
+        df.insert(0, "CodSocieta", "")
+        df["Regione"] = ""
+    except Exception as e:
+        messagebox.showerror("Errore", f"Errore durante il calcolo della combinata: {e}")
+        return
+    df.to_csv("iscrizioni-combinata.csv", index=False, sep=";")
+    messagebox.showinfo("Successo", "Classifica combinata salvata in 'iscrizioni-combinata..csv'")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -199,5 +223,23 @@ if __name__ == "__main__":
         height=2,
     )
     btn_sono_pronto.grid(row=5, column=0, columnspan=2, padx=20, pady=20)
+
+    # Horizontal line with text
+    label_circuito = tk.Label(frame, text="Combinata degli Stili", font=("Arial", 12))
+    label_circuito.grid(row=6, column=0, sticky="w", padx=20)
+
+    separator = tk.Frame(frame, height=2, width=250, bg="black")
+    separator.grid(row=6, column=1, pady=10)
+
+    # Combinata button
+    btn_combinata = tk.Button(
+        frame,
+        text="Calcolo Combinata",
+        command=combinata,
+        font=("Arial", 12),
+        width=25,
+        height=2,
+    )
+    btn_combinata.grid(row=7, column=0, columnspan=2, padx=20, pady=20)
 
     root.mainloop()

@@ -45,10 +45,10 @@ CATEGORIES = {
         7: "G",
         8: "G",
         9: "EC",
-        10: "EB",
-        11: "EB",
-        12: "EA",
-        13: "EA",
+        10: "EB1",
+        11: "EB2",
+        12: "EA1",
+        13: "EA2",
         14: "R",
         15: "R",
         16: "R",
@@ -61,10 +61,10 @@ CATEGORIES = {
         6: "G",
         7: "G",
         8: "EC",
-        9: "EB",
-        10: "EB",
-        11: "EA",
-        12: "EA",
+        9: "EB1",
+        10: "EB2",
+        11: "EA1",
+        12: "EA2",
         13: "R",
         14: "R",
         15: "J",
@@ -135,6 +135,7 @@ def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
     if keep_valid_times:
         # keep only rows with RaceStatus equal to T
         df = df[df["RaceStatus"].str.strip() == "T"]
+    df["CategoryId"] = df.apply(lambda x: get_category(x["Sex"], int(x["BirthYear"])), axis=1)
 
     return df
 
@@ -291,6 +292,14 @@ def groupdata(
             )
             .droplevel(2)
         )
+    else:
+        # groupby category and sort by time
+        out_df["Categoria"] = df.index.get_level_values("CategoryId")
+        return out_df.groupby(["Categoria", "Sesso"])[
+            ["Cognome", "Nome", "Anno", "Sesso", "Categoria", "Gara1", "Tempo1", "Societa"]
+        ].apply(
+            lambda x: x.sort_values(by="Tempo1")
+        ).droplevel(2)
 
     return out_df
 
