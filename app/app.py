@@ -159,7 +159,6 @@ def combinata():
 if __name__ == "__main__":
     root = tk.Tk()
     root.title(f"Go And UISP - App - v{__version__}@ALPHA")
-    root.geometry("640x480")
 
     frame = tk.Frame(root)
     frame.pack(expand=True)
