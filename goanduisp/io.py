@@ -95,6 +95,7 @@ def print_counts(df: pd.DataFrame) -> None:
     print(f"Totale presenti: {count_df["Presenti"].sum()}")
     print(count_df)
 
+
 def to_dbmeeting_subs(df: pd.DataFrame, file_name: str) -> None:
     """
     Save the DataFrame with the subscriptions to the DBMeeting format.

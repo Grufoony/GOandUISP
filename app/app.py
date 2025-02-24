@@ -4,7 +4,7 @@ import pathlib
 from goanduisp.core import *
 from goanduisp.io import import_df
 
-__version__ = "2025.2.16"
+__version__ = "2025.2.24"
 __author__ = "Gregorio Berselli"
 
 
@@ -57,6 +57,7 @@ def counts():
     df.to_csv(file_name, index=True, sep=";")
     messagebox.showinfo("Successo", f"Conteggi salvati in '{file_name}'")
 
+
 def categorie_staffette():
     relay_file_path = filedialog.askopenfilename(
         title="Selezionare il file (portale) delle iscrizioni delle staffette."
@@ -68,22 +69,26 @@ def categorie_staffette():
     )
     if not individual_file_path:
         return
-    
+
     df_relay = import_df(relay_file_path)
     df_individual = import_df(individual_file_path)
 
     try:
         df_relay, missing_athletes = fill_categories(df_relay, df_individual)
         if missing_athletes:
-            messagebox.showwarning("Atleti mancanti", f"Non sono state trovate le seguenti iscrizioni individuali:\n{"\n".join([f"\n{team}:\n  " + "\n  ".join(athletes) for team, athletes in missing_athletes.items()])}")
+            messagebox.showwarning(
+                "Atleti mancanti",
+                f"Non sono state trovate le seguenti iscrizioni individuali:\n{"\n".join([f"\n{team}:\n  " + "\n  ".join(athletes) for team, athletes in missing_athletes.items()])}",
+            )
     except Exception as e:
-        messagebox.showerror("Errore", f"Errore durante il calcolo delle categorie: {e}")
+        messagebox.showerror(
+            "Errore", f"Errore durante il calcolo delle categorie: {e}"
+        )
         return
-    
+
     file_name = "iscrizioni-staffette.csv"
     df_relay.to_csv(file_name, index=False, sep=";")
     messagebox.showinfo("Successo", f"Iscrizioni staffette salvate in '{file_name}'")
-
 
 
 def top100():
@@ -132,6 +137,7 @@ def sono_pronto():
     df.to_csv(file_name, index=False, header=True, sep=";")
     messagebox.showinfo("Successo", f"File punteggi salvato in '{file_name}'")
 
+
 def combinata():
     dir_path = filedialog.askdirectory(
         title="Seleziona la cartella contenente i risultati della combinata"
@@ -145,20 +151,27 @@ def combinata():
             temp_df = import_df(file_path.as_posix())
             df = pd.concat([df, temp_df], ignore_index=True)
     try:
-        df = groupdata(df)
-        df["Gara1"] = "100 M"
-        df.insert(0, "CodSocieta", "")
-        df["Regione"] = ""
+        df = groupdata(df, filterRace=" C")
+        if len(df.columns) < 8:
+            df["Gara1"] = "100 M"
+            df.insert(0, "CodSocieta", "")
+            df["Regione"] = ""
+        else:
+            df = df[df["GareDisputate"] >= 5]
     except Exception as e:
-        messagebox.showerror("Errore", f"Errore durante il calcolo della combinata: {e}")
+        messagebox.showerror(
+            "Errore", f"Errore durante il calcolo della combinata: {e}"
+        )
         return
     df.to_csv("iscrizioni-combinata.csv", index=False, sep=";")
-    messagebox.showinfo("Successo", "Classifica combinata salvata in 'iscrizioni-combinata..csv'")
+    messagebox.showinfo(
+        "Successo", "Classifica combinata salvata in 'iscrizioni-combinata..csv'"
+    )
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title(f"Go And UISP - App - v{__version__}@ALPHA")
+    root.title(f"Go And UISP - App - v{__version__}@BETA")
 
     frame = tk.Frame(root)
     frame.pack(expand=True)
