@@ -152,20 +152,23 @@ def combinata():
             df = pd.concat([df, temp_df], ignore_index=True)
     try:
         df = groupdata(df, filterRace=" C")
-        if len(df.columns) < 8:
+        # Check if only one col name contains "Gara"
+        if len([col for col in df.columns if "Gara" in col]) == 1:
             df["Gara1"] = "100 M"
             df.insert(0, "CodSocieta", "")
             df["Regione"] = ""
+            file_name = "iscrizioni-combinata"
         else:
             df = df[df["GareDisputate"] >= 5]
+            file_name = "accumulo"
     except Exception as e:
         messagebox.showerror(
             "Errore", f"Errore durante il calcolo della combinata: {e}"
         )
         return
-    df.to_csv("iscrizioni-combinata.csv", index=False, sep=";")
+    df.to_csv(f"{file_name}.csv", index=False, sep=";")
     messagebox.showinfo(
-        "Successo", "Classifica combinata salvata in 'iscrizioni-combinata..csv'"
+        "Successo", f"Classifica combinata salvata in '{file_name}.csv'"
     )
 
 
