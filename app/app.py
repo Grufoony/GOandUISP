@@ -152,21 +152,48 @@ def combinata():
             df = pd.concat([df, temp_df], ignore_index=True)
     try:
         df = groupdata(df, filterRace=" C")
-        # Check if only one col name contains "Gara"
-        if len([col for col in df.columns if "Gara" in col]) == 1:
-            df["Gara1"] = "100 M"
-            df.insert(0, "CodSocieta", "")
-            df["Regione"] = ""
-            file_name = "iscrizioni-combinata"
-        else:
-            df = df[df["GareDisputate"] >= 5]
-            file_name = "accumulo"
+        df = df[df["GareDisputate"] >= 5]
+        file_name = "accumulo"
+        # Check that the time in TempoFiltro is 2* the time of other Tempoi columns
+        for _, row in df.iterrows():
+            # sum all the times with Tempo in the column name
+            sum_time = sum(
+                [time_to_int(row[col]) for col in df.columns if "Tempo" in col and "Filtro" not in col]
+            )
+            # check if the sum is equal to the time in TempoFiltro
+            if sum_time != time_to_int(row["TempoFiltro"]) * 2:
+                print(f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro'])*2)}")
+                # Replace the time in TempoFiltro with the sum of the other times
+                df.at[_, "TempoFiltro"] = int_to_time(sum_time - max([time_to_int(row[col]) for col in df.columns if "Tempo" in col and "Filtro" not in col]))
+        df_subs = df.copy()
+        # Set Gara1 as 100 M
+        df_subs["Gara1"] = "100 M"
+        df_subs["Tempo1"] = df_subs["TempoFiltro"]
+        df_subs.insert(0, "CodSocieta", "")
+        df_subs["Regione"] = ""
+        # Keep only the columns needed
+        df_subs = df_subs[
+            [
+                "CodSocieta",
+                "Cognome",
+                "Nome",
+                "Anno",
+                "Sesso",
+                "Gara1",
+                "Tempo1",
+                "Societa",
+                "Regione",
+            ]
+        ]
+
+        
     except Exception as e:
         messagebox.showerror(
             "Errore", f"Errore durante il calcolo della combinata: {e}"
         )
         return
-    df.to_csv(f"{file_name}.csv", index=False, sep=";")
+    df.to_csv(f"accumulo.csv", index=False, sep=";")
+    df_subs.to_csv(f"iscrizioni-combinata.csv", index=False, sep=";")
     messagebox.showinfo(
         "Successo", f"Classifica combinata salvata in '{file_name}.csv'"
     )
