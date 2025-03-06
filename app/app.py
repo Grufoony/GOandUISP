@@ -158,13 +158,28 @@ def combinata():
         for _, row in df.iterrows():
             # sum all the times with Tempo in the column name
             sum_time = sum(
-                [time_to_int(row[col]) for col in df.columns if "Tempo" in col and "Filtro" not in col]
+                [
+                    time_to_int(row[col])
+                    for col in df.columns
+                    if "Tempo" in col and "Filtro" not in col
+                ]
             )
             # check if the sum is equal to the time in TempoFiltro
             if sum_time != time_to_int(row["TempoFiltro"]) * 2:
-                print(f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro'])*2)}")
+                print(
+                    f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro'])*2)}"
+                )
                 # Replace the time in TempoFiltro with the sum of the other times
-                df.at[_, "TempoFiltro"] = int_to_time(sum_time - max([time_to_int(row[col]) for col in df.columns if "Tempo" in col and "Filtro" not in col]))
+                df.at[_, "TempoFiltro"] = int_to_time(
+                    sum_time
+                    - max(
+                        [
+                            time_to_int(row[col])
+                            for col in df.columns
+                            if "Tempo" in col and "Filtro" not in col
+                        ]
+                    )
+                )
         df_subs = df.copy()
         # Set Gara1 as 100 M
         df_subs["Gara1"] = "100 M"
@@ -186,7 +201,6 @@ def combinata():
             ]
         ]
 
-        
     except Exception as e:
         messagebox.showerror(
             "Errore", f"Errore durante il calcolo della combinata: {e}"

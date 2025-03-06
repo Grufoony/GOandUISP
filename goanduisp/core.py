@@ -136,7 +136,8 @@ def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
     df.loc[:, "Point2"] = df["Point2"].str.replace(",", ".").astype(float)
     df.loc[:, "Point"] = df["Point"].infer_objects(copy=False).fillna(0).astype(int)
     df.loc[:, "Point2"] = df["Point2"].infer_objects(copy=False).fillna(0).astype(int)
-    df.loc[:, "CategoryId"] = df.apply(
+    mask = df["Sex"].notna() & df["BirthYear"].notna()
+    df.loc[mask, "CategoryId"] = df.loc[mask].apply(
         lambda x: get_category(x["Sex"], int(x["BirthYear"])), axis=1
     )
 
