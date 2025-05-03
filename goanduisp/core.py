@@ -128,18 +128,39 @@ def get_category(sex: str, year: int) -> str:
 
 
 def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
-    # Transform column Point2 in floats, given that they are numbers like 2,000
+    """
+    This function takes a dataframe as input and returns a new dataframe with the correct
+    format.
+
+    Parameters
+    ----------
+    df : pandas.core.frame.DataFrame
+        The dataframe to be converted.
+    keep_valid_times : bool, optional
+        If True, the function keeps only the rows with RaceStatus equal to T,
+        by default True
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        The converted dataframe.
+    """
     if keep_valid_times:
         # keep only rows with RaceStatus equal to T
         df = df[df["RaceStatus"].str.strip() == "T"]
 
-    df.loc[:, "Point2"] = df["Point2"].str.replace(",", ".").astype(float)
-    df.loc[:, "Point"] = df["Point"].infer_objects(copy=False).fillna(0).astype(int)
-    df.loc[:, "Point2"] = df["Point2"].infer_objects(copy=False).fillna(0).astype(int)
-    mask = df["Sex"].notna() & df["BirthYear"].notna()
-    df.loc[mask, "CategoryId"] = df.loc[mask].apply(
-        lambda x: get_category(x["Sex"], int(x["BirthYear"])), axis=1
+    df["Point"] = pd.to_numeric(df["Point"], errors="coerce").fillna(0).astype(int)
+    df["Point2"] = (
+        pd.to_numeric(
+            df["Point2"].astype(str).str.replace(",", ".", regex=False), errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
     )
+    # mask = df["Sex"].notna() & df["BirthYear"].notna()
+    # df.loc[mask, "CategoryId"] = df.loc[mask].apply(
+    #     lambda x: get_category(x["Sex"], int(x["BirthYear"])), axis=1
+    # )
 
     return df
 
