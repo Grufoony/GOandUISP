@@ -24,8 +24,8 @@ def test_get_category_male():
     assert get_category("M", current_year - 18) == "J"
     assert get_category("M", current_year - 16) == "R"
     assert get_category("M", current_year - 14) == "R"
-    assert get_category("M", current_year - 12) == "EA"
-    assert get_category("M", current_year - 10) == "EB"
+    assert get_category("M", current_year - 12) == "EA1"
+    assert get_category("M", current_year - 10) == "EB1"
     assert get_category("M", current_year - 9) == "EC"
     assert get_category("M", current_year - 8) == "G"
     assert get_category("M", current_year - 4) == "nan"
@@ -43,8 +43,8 @@ def test_get_category_female():
     assert get_category("F", current_year - 18) == "A"
     assert get_category("F", current_year - 16) == "J"
     assert get_category("F", current_year - 14) == "R"
-    assert get_category("F", current_year - 12) == "EA"
-    assert get_category("F", current_year - 9) == "EB"
+    assert get_category("F", current_year - 12) == "EA2"
+    assert get_category("F", current_year - 9) == "EB1"
     assert get_category("F", current_year - 8) == "EC"
     assert get_category("F", current_year - 7) == "G"
     assert get_category("F", current_year - 3) == "nan"
@@ -71,5 +71,5 @@ def test_get_counts():
     """
     df_counts = get_counts(INPUT_DATASET)
     assert df_counts["Presenti"].tolist() == [9, 9, 7]
-    assert df_counts["Totali"].tolist() == [11, 10, 9]
-    assert df_counts["Totali"].sum() == 30
+    assert df_counts["Iscritti"].tolist() == [11, 10, 9]
+    assert df_counts["Iscritti"].sum() == 30

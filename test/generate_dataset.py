@@ -9,6 +9,7 @@ import uuid
 import pandas as pd
 from faker import Faker
 from tqdm import trange
+from pathlib import Path
 from goanduisp.core import STYLES, get_category
 
 POSSIBLE_STYLES = list(STYLES.keys())
@@ -185,6 +186,8 @@ if __name__ == "__main__":
     df = pd.DataFrame(data, columns=COLUMNS)
 
     # Save to CSV (semicolon separated)
-    df.to_csv("synthetic_race_data.csv", sep=";", index=False)
+    script_dir = Path(__file__).parent
+    output_path = script_dir / "synthetic_race_data.csv"
+    df.to_csv(output_path, sep=";", index=False)
 
-    print("Synthetic dataset generated and saved as 'synthetic_race_data.csv'.")
+    print(f"Synthetic dataset generated and saved as '{output_path}'.")
