@@ -694,7 +694,7 @@ def generate_random_subscriptions_from_teams(
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete["Fullname"]} alla gara {race} nella squadra {athlete["ClubName"]} con tempo {athlete["RaceTime"]}."
+                    f"{athlete['Fullname']} alla gara {race} nella squadra {athlete['ClubName']} con tempo {athlete['RaceTime']}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
@@ -750,7 +750,6 @@ def generate_relay_subscriptions_from_teams(
                     len(female_team) // (n_athletes // 2),
                 )
             ):
-
                 df = pd.concat(
                     [
                         df,

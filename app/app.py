@@ -1,7 +1,19 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 import pathlib
-from goanduisp.core import *
+
+import pandas as pd
+
+from goanduisp.core import (
+    shrink,
+    rank_teams,
+    groupdata,
+    fill_categories,
+    assign_points_by_time,
+    get_counts,
+    time_to_int,
+    int_to_time,
+)
 from goanduisp.io import import_df
 
 __version__ = "2025.2.24"
@@ -78,7 +90,7 @@ def categorie_staffette():
         if missing_athletes:
             messagebox.showwarning(
                 "Atleti mancanti",
-                f"Non sono state trovate le seguenti iscrizioni individuali:\n{"\n".join([f"\n{team}:\n  " + "\n  ".join(athletes) for team, athletes in missing_athletes.items()])}",
+                f"Non sono state trovate le seguenti iscrizioni individuali:\n{'\n'.join([f'\n{team}:\n  ' + '\n  '.join(athletes) for team, athletes in missing_athletes.items()])}",
             )
     except Exception as e:
         messagebox.showerror(
@@ -167,7 +179,7 @@ def combinata():
             # check if the sum is equal to the time in TempoFiltro
             if sum_time != time_to_int(row["TempoFiltro"]) * 2:
                 print(
-                    f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro'])*2)}"
+                    f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro']) * 2)}"
                 )
                 # Replace the time in TempoFiltro with the sum of the other times
                 df.at[_, "TempoFiltro"] = int_to_time(
@@ -206,8 +218,8 @@ def combinata():
             "Errore", f"Errore durante il calcolo della combinata: {e}"
         )
         return
-    df.to_csv(f"accumulo.csv", index=False, sep=";")
-    df_subs.to_csv(f"iscrizioni-combinata.csv", index=False, sep=";")
+    df.to_csv("accumulo.csv", index=False, sep=";")
+    df_subs.to_csv("iscrizioni-combinata.csv", index=False, sep=";")
     messagebox.showinfo(
         "Successo", f"Classifica combinata salvata in '{file_name}.csv'"
     )

@@ -4,8 +4,7 @@ This file contains the tests for the go_and_uisp.py module.
 
 from datetime import datetime
 import pandas as pd
-import numpy as np
-from goanduisp.core import *
+from goanduisp.core import get_category, shrink, get_counts
 
 NOW = datetime.now()
 if NOW.month > 9:

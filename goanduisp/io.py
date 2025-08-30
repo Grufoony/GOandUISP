@@ -91,8 +91,8 @@ def print_counts(df: pd.DataFrame) -> None:
     None
     """
     count_df = get_counts(df)
-    print(f"Totale iscritti: {count_df["Totali"].sum()}")
-    print(f"Totale presenti: {count_df["Presenti"].sum()}")
+    print(f"Totale iscritti: {count_df['Totali'].sum()}")
+    print(f"Totale presenti: {count_df['Presenti'].sum()}")
     print(count_df)
 
 

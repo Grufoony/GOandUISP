@@ -24,6 +24,6 @@ if __name__ == "__main__":
         df = rank_teams(df, point_formula=point_formula)
     else:
         df = rank_teams(df)
-    file_name = f"team_ranking{"_jolly" if use_jolly else ""}.csv"
+    file_name = f"team_ranking{'_jolly' if use_jolly else ''}.csv"
     df.to_csv(file_name, index=True, sep=";")
     print(f"Classifica squadre salvata in '{file_name}'")
