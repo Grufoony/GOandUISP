@@ -25,15 +25,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install .
+          pip install pyinstaller
 
       - name: Build executable
         run: |
-          python -m PyInstaller --noconsole --onefile .\app\app.py
+          pyinstaller --noconsole --onefile --name goanduisp .\app\app.py
 
       - name: Archive artifacts
         run: |
           mkdir dist_out
-          powershell Compress-Archive dist/ytd.exe dist_out/ytd-windows.zip
+          powershell Compress-Archive dist/goanduisp.exe dist_out/goanduisp-windows.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -58,8 +59,15 @@ jobs:
         id: get_version
         run: |
           $content = Get-Content app/app.py
-          $version = ($content | Select-String -Pattern '__version__\s*=\s*["\']([\d\.]+)["\']').Matches.Groups[1].Value
-          echo "version=$version" >> $env:GITHUB_OUTPUT
+          $pattern = '__version__\s*=\s*["\'']([\d\.]+)["\'']'
+          $match = $content | Select-String -Pattern $pattern
+          if ($match) {
+            $version = $match.Matches[0].Groups[1].Value
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "Version not found"
+            exit 1
+          }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
