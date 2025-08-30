@@ -45,10 +45,10 @@ CATEGORIES = {
         7: "G",
         8: "G",
         9: "EC",
-        10: "EB",
-        11: "EB",
-        12: "EA",
-        13: "EA",
+        10: "EB1",
+        11: "EB2",
+        12: "EA1",
+        13: "EA2",
         14: "R",
         15: "R",
         16: "R",
@@ -61,10 +61,10 @@ CATEGORIES = {
         6: "G",
         7: "G",
         8: "EC",
-        9: "EB",
-        10: "EB",
-        11: "EA",
-        12: "EA",
+        9: "EB1",
+        10: "EB2",
+        11: "EA1",
+        12: "EA2",
         13: "R",
         14: "R",
         15: "J",
@@ -79,7 +79,7 @@ GROUPBY_RESUME_COLUMNS = [
     "Societa",
     "PuntiTotali",
     "GareDisputate",
-    "TempoStile",
+    "TempoFiltro",
 ]
 RELAY_SUBSCIPTION_COLUMNS_NO_DUP = [
     "Codice",
@@ -128,13 +128,39 @@ def get_category(sex: str, year: int) -> str:
 
 
 def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
-    # Transform column Point2 in floats, given that they are numbers like 2,000
-    df["Point2"] = df["Point2"].str.replace(",", ".").astype(float)
-    df["Point"] = df["Point"].fillna(0)
-    df["Point2"] = df["Point2"].fillna(0)
+    """
+    This function takes a dataframe as input and returns a new dataframe with the correct
+    format.
+
+    Parameters
+    ----------
+    df : pandas.core.frame.DataFrame
+        The dataframe to be converted.
+    keep_valid_times : bool, optional
+        If True, the function keeps only the rows with RaceStatus equal to T,
+        by default True
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        The converted dataframe.
+    """
     if keep_valid_times:
         # keep only rows with RaceStatus equal to T
         df = df[df["RaceStatus"].str.strip() == "T"]
+
+    df["Point"] = pd.to_numeric(df["Point"], errors="coerce").fillna(0).astype(int)
+    df["Point2"] = (
+        pd.to_numeric(
+            df["Point2"].astype(str).str.replace(",", ".", regex=False), errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
+    )
+    # mask = df["Sex"].notna() & df["BirthYear"].notna()
+    # df.loc[mask, "CategoryId"] = df.loc[mask].apply(
+    #     lambda x: get_category(x["Sex"], int(x["BirthYear"])), axis=1
+    # )
 
     return df
 
@@ -182,6 +208,7 @@ def groupdata(
     df: pd.core.frame.DataFrame,
     by_points: bool = False,
     use_jolly: bool = False,
+    filterRace: str = None,
 ) -> pd.core.frame.DataFrame:
     """
     This function takes a dataframe as input and returns a new dataframe with the correct
@@ -253,6 +280,7 @@ def groupdata(
     out_df["Anno"] = df.index.get_level_values("BirthYear")
     out_df["Sesso"] = df.index.get_level_values("Sex")
     out_df["Societa"] = df.index.get_level_values("ClubName")
+    out_df["Categoria"] = df.index.get_level_values("CategoryId")
 
     for athlete_index, row in enumerate(df.itertuples()):
         for index, race in enumerate(zip(row.Race, row.RaceTime)):
@@ -260,9 +288,16 @@ def groupdata(
             out_df.loc[athlete_index, "Tempo" + str(index + 1)] = race[1]
         out_df.loc[athlete_index, "GareDisputate"] = index + 1
 
+    if filterRace is not None:
+        out_df["TempoFiltro"] = ""
+        for row in out_df.itertuples():
+            for i in range(1, df["RaceTime"].apply(len).max() + 1):
+                if filterRace in str(getattr(row, f"Gara{i}")):
+                    out_df.at[row.Index, "TempoFiltro"] = getattr(row, f"Tempo{i}")
+                    break
+
     if by_points:
         out_df["PuntiTotali"] = 0
-        out_df["Categoria"] = df.index.get_level_values("CategoryId")
         for athlete_index, row in enumerate(df.itertuples()):
             i = 0
             for points, double in zip(row.Point, row.Point2):
@@ -274,24 +309,22 @@ def groupdata(
         # print athlete with more points for each category and sex
         # if there are more than one athlete with the same points, print the one with lowest SL time
 
-        out_df["TempoStile"] = ""
-        for row in out_df.itertuples():
-            for i in range(1, df["RaceTime"].apply(len).max() + 1):
-                if "SL" in str(getattr(row, f"Gara{i}")):
-                    out_df.at[row.Index, "TempoStile"] = getattr(row, f"Tempo{i}")
-                    break
-
         return (
             out_df.groupby(["Categoria", "Sesso"])[GROUPBY_RESUME_COLUMNS]
             .apply(
                 lambda x: x.sort_values(
-                    by=["GareDisputate", "PuntiTotali", "TempoStile"],
+                    by=["GareDisputate", "PuntiTotali", "TempoFiltro"],
                     ascending=[False, False, True],
                 )
             )
             .droplevel(2)
         )
 
+    if filterRace is not None:
+        # print whole df sorting by TempoFiltro column
+        return out_df.groupby(["Categoria", "Sesso"]).apply(
+            lambda x: x.sort_values(by="TempoFiltro")
+        )
     return out_df
 
 
@@ -661,7 +694,7 @@ def generate_random_subscriptions_from_teams(
             if athlete_id is None:
                 print(
                     "Inserire maualmente l'iscrizione di "
-                    f"{athlete["Fullname"]} alla gara {race} nella squadra {athlete["ClubName"]} con tempo {athlete["RaceTime"]}."
+                    f"{athlete['Fullname']} alla gara {race} nella squadra {athlete['ClubName']} con tempo {athlete['RaceTime']}."
                 )
             else:
                 sub_df.at[athlete_id, f"Gara{i + 1}"] = race
@@ -717,7 +750,6 @@ def generate_relay_subscriptions_from_teams(
                     len(female_team) // (n_athletes // 2),
                 )
             ):
-
                 df = pd.concat(
                     [
                         df,

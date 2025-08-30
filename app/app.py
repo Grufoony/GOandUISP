@@ -1,9 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
-from goanduisp.core import *
+import pathlib
+
+import pandas as pd
+
+from goanduisp.core import (
+    shrink,
+    rank_teams,
+    groupdata,
+    fill_categories,
+    assign_points_by_time,
+    get_counts,
+    time_to_int,
+    int_to_time,
+)
 from goanduisp.io import import_df
 
-__version__ = "2025.2.16"
+__version__ = "2025.2.24"
 __author__ = "Gregorio Berselli"
 
 
@@ -56,6 +69,7 @@ def counts():
     df.to_csv(file_name, index=True, sep=";")
     messagebox.showinfo("Successo", f"Conteggi salvati in '{file_name}'")
 
+
 def categorie_staffette():
     relay_file_path = filedialog.askopenfilename(
         title="Selezionare il file (portale) delle iscrizioni delle staffette."
@@ -67,22 +81,26 @@ def categorie_staffette():
     )
     if not individual_file_path:
         return
-    
+
     df_relay = import_df(relay_file_path)
     df_individual = import_df(individual_file_path)
 
     try:
         df_relay, missing_athletes = fill_categories(df_relay, df_individual)
         if missing_athletes:
-            messagebox.showwarning("Atleti mancanti", f"Non sono state trovate le seguenti iscrizioni individuali:\n{"\n".join([f"\n{team}:\n  " + "\n  ".join(athletes) for team, athletes in missing_athletes.items()])}")
+            messagebox.showwarning(
+                "Atleti mancanti",
+                f"Non sono state trovate le seguenti iscrizioni individuali:\n{'\n'.join([f'\n{team}:\n  ' + '\n  '.join(athletes) for team, athletes in missing_athletes.items()])}",
+            )
     except Exception as e:
-        messagebox.showerror("Errore", f"Errore durante il calcolo delle categorie: {e}")
+        messagebox.showerror(
+            "Errore", f"Errore durante il calcolo delle categorie: {e}"
+        )
         return
-    
+
     file_name = "iscrizioni-staffette.csv"
     df_relay.to_csv(file_name, index=False, sep=";")
     messagebox.showinfo("Successo", f"Iscrizioni staffette salvate in '{file_name}'")
-
 
 
 def top100():
@@ -132,10 +150,84 @@ def sono_pronto():
     messagebox.showinfo("Successo", f"File punteggi salvato in '{file_name}'")
 
 
+def combinata():
+    dir_path = filedialog.askdirectory(
+        title="Seleziona la cartella contenente i risultati della combinata"
+    )
+    if not dir_path:
+        return
+    # Concat all dataframes in the directory
+    df = pd.DataFrame()
+    for file_path in pathlib.Path(dir_path).iterdir():
+        if file_path.suffix == ".csv":
+            temp_df = import_df(file_path.as_posix())
+            df = pd.concat([df, temp_df], ignore_index=True)
+    try:
+        df = groupdata(df, filterRace=" C")
+        df = df[df["GareDisputate"] >= 5]
+        file_name = "accumulo"
+        # Check that the time in TempoFiltro is 2* the time of other Tempoi columns
+        for _, row in df.iterrows():
+            # sum all the times with Tempo in the column name
+            sum_time = sum(
+                [
+                    time_to_int(row[col])
+                    for col in df.columns
+                    if "Tempo" in col and "Filtro" not in col
+                ]
+            )
+            # check if the sum is equal to the time in TempoFiltro
+            if sum_time != time_to_int(row["TempoFiltro"]) * 2:
+                print(
+                    f"Errore: {row['Nome']} {row['Cognome']} {row['Societa']} {abs(sum_time - time_to_int(row['TempoFiltro']) * 2)}"
+                )
+                # Replace the time in TempoFiltro with the sum of the other times
+                df.at[_, "TempoFiltro"] = int_to_time(
+                    sum_time
+                    - max(
+                        [
+                            time_to_int(row[col])
+                            for col in df.columns
+                            if "Tempo" in col and "Filtro" not in col
+                        ]
+                    )
+                )
+        df_subs = df.copy()
+        # Set Gara1 as 100 M
+        df_subs["Gara1"] = "100 M"
+        df_subs["Tempo1"] = df_subs["TempoFiltro"]
+        df_subs.insert(0, "CodSocieta", "")
+        df_subs["Regione"] = ""
+        # Keep only the columns needed
+        df_subs = df_subs[
+            [
+                "CodSocieta",
+                "Cognome",
+                "Nome",
+                "Anno",
+                "Sesso",
+                "Gara1",
+                "Tempo1",
+                "Societa",
+                "Regione",
+            ]
+        ]
+
+    except Exception as e:
+        messagebox.showerror(
+            "Errore", f"Errore durante il calcolo della combinata: {e}"
+        )
+        return
+    df.to_csv("accumulo.csv", index=False, sep=";")
+    df_subs.to_csv("iscrizioni-combinata.csv", index=False, sep=";")
+    messagebox.showinfo(
+        "Successo", f"Classifica combinata salvata in '{file_name}.csv'"
+    )
+
+
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title(f"Go And UISP - App - v{__version__}@ALPHA")
-    root.geometry("640x480")
+    root.title(f"Go And UISP - App - v{__version__}@BETA")
 
     frame = tk.Frame(root)
     frame.pack(expand=True)
@@ -199,5 +291,23 @@ if __name__ == "__main__":
         height=2,
     )
     btn_sono_pronto.grid(row=5, column=0, columnspan=2, padx=20, pady=20)
+
+    # Horizontal line with text
+    label_circuito = tk.Label(frame, text="Combinata degli Stili", font=("Arial", 12))
+    label_circuito.grid(row=6, column=0, sticky="w", padx=20)
+
+    separator = tk.Frame(frame, height=2, width=250, bg="black")
+    separator.grid(row=6, column=1, pady=10)
+
+    # Combinata button
+    btn_combinata = tk.Button(
+        frame,
+        text="Crea iscrizioni finali",
+        command=combinata,
+        font=("Arial", 12),
+        width=25,
+        height=2,
+    )
+    btn_combinata.grid(row=7, column=0, columnspan=2, padx=20, pady=20)
 
     root.mainloop()

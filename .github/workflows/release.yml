@@ -1,0 +1,72 @@
+
+name: Build and Release (Windows)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install .
+
+      - name: Build executable
+        run: |
+          python -m PyInstaller --noconsole --onefile .\app\app.py
+
+      - name: Archive artifacts
+        run: |
+          mkdir dist_out
+          powershell Compress-Archive dist/ytd.exe dist_out/ytd-windows.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows
+          path: dist_out/*
+
+  release:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist_all
+
+      - name: Extract version from app/app.py
+        id: get_version
+        run: |
+          $content = Get-Content app/app.py
+          $version = ($content | Select-String -Pattern '__version__\s*=\s*["\']([\d\.]+)["\']').Matches.Groups[1].Value
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: "Release ${{ steps.get_version.outputs.version }}"
+          files: dist_all/**/*
+          update_existing: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

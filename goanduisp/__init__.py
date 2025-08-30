@@ -7,3 +7,8 @@ The package is divided into two main modules:
 """
 
 from .version import __version_core__, __version_io__
+
+__all__ = [
+    "__version_core__",
+    "__version_io__",
+]
