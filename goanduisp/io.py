@@ -11,6 +11,7 @@ Methods
 import sys
 from tkinter import filedialog
 import pandas as pd
+import polars as pl
 from .core import get_counts
 from .version import __version_core__, __version_io__
 
@@ -35,7 +36,9 @@ def get_file_name() -> str:
     return file_name
 
 
-def import_df(file_name: str, header=0, sep=";") -> pd.DataFrame:
+def import_df(
+    file_name: str, header=0, sep=";", engine="pandas"
+) -> pd.DataFrame | pl.DataFrame:
     """
     Import a DataFrame from a CSV or xslx file.
 
@@ -49,10 +52,13 @@ def import_df(file_name: str, header=0, sep=";") -> pd.DataFrame:
     pd.DataFrame
         The imported DataFrame.
     """
-    if file_name.endswith(".xlsx"):
-        return pd.read_excel(file_name, header=header)
-    else:
-        return pd.read_csv(file_name, header=header, sep=sep)
+    if engine == "pandas":
+        if file_name.endswith(".xlsx"):
+            return pd.read_excel(file_name, header=header)
+        else:
+            return pd.read_csv(file_name, header=header, sep=sep)
+    elif engine == "polars":
+        return pl.read_csv(file_name, has_header=header is not None, separator=sep)
 
 
 def print_info(script: str, author: str, version: str) -> None:

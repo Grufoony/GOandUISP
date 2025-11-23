@@ -1,10 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 import pathlib
+import re
 
 import pandas as pd
+import polars as pl
 
 from goanduisp.core import (
+    compute_prices_individual,
     shrink,
     rank_teams,
     groupdata,
@@ -22,6 +25,101 @@ __author__ = "Gregorio Berselli"
 
 def point_formula(point: int, jolly: int) -> int:
     return point * jolly if jolly > 0 else point
+
+
+def get_price_per_race_dialog():
+    """
+    Opens a dialog to configure prices per number of races.
+    Returns a dictionary {num_races: price} or None if cancelled.
+    """
+    # Create a dialog to input prices per race
+    price_dialog = tk.Toplevel()
+    price_dialog.title("Configurazione Prezzi")
+    price_dialog.geometry("400x450")
+
+    tk.Label(
+        price_dialog, text="Inserisci i prezzi per numero di gare:", font=("Arial", 12)
+    ).pack(pady=10)
+
+    # Container frame for canvas and scrollbar
+    container = tk.Frame(price_dialog)
+    container.pack(fill="both", expand=True, padx=10, pady=5)
+
+    # Frame for price entries with scrollbar
+    canvas = tk.Canvas(container, height=200)
+    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    entries_frame = tk.Frame(canvas)
+
+    entries_frame.bind(
+        "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=entries_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    price_entries = {}
+    num_entries = [
+        3
+    ]  # Start with 3 entries, wrapped in list to allow modification in nested function
+
+    def add_entry(num_races):
+        row_frame = tk.Frame(entries_frame)
+        row_frame.pack(pady=5)
+        tk.Label(row_frame, text=f"{num_races} gara/e:", width=10).pack(side=tk.LEFT)
+        entry = tk.Entry(row_frame, width=10)
+        entry.insert(0, "0")  # Default values
+        entry.pack(side=tk.LEFT)
+        price_entries[num_races] = entry
+
+    # Initialize with 3 entries
+    for i in range(1, 4):
+        add_entry(i)
+
+    def add_more_entries():
+        num_entries[0] += 1
+        add_entry(num_entries[0])
+
+    price_per_race = {}
+
+    def confirm_prices():
+        nonlocal price_per_race
+        try:
+            for num_races, entry in price_entries.items():
+                price_per_race[num_races] = float(entry.get())
+            price_dialog.destroy()
+        except ValueError:
+            messagebox.showerror(
+                "Errore", "Inserisci valori numerici validi per i prezzi"
+            )
+
+    def cancel_prices():
+        price_dialog.destroy()
+
+    # Button to add more entries
+    add_btn_frame = tk.Frame(price_dialog)
+    add_btn_frame.pack(pady=10)
+    tk.Button(
+        add_btn_frame, text="Aggiungi altra fascia", command=add_more_entries, width=15
+    ).pack()
+
+    btn_frame = tk.Frame(price_dialog)
+    btn_frame.pack(pady=10)
+
+    tk.Button(btn_frame, text="Conferma", command=confirm_prices, width=10).pack(
+        side=tk.LEFT, padx=5
+    )
+    tk.Button(btn_frame, text="Annulla", command=cancel_prices, width=10).pack(
+        side=tk.LEFT, padx=5
+    )
+
+    price_dialog.transient()
+    price_dialog.grab_set()
+    price_dialog.wait_window()
+
+    return price_per_race if price_per_race else None
 
 
 def rank_teams_gui():
@@ -225,6 +323,54 @@ def combinata():
     )
 
 
+def individual_prices():
+    file_path = filedialog.askopenfilename(
+        title="Seleziona il file contenente le iscrizioni individuali"
+    )
+    if not file_path:
+        return
+
+    # Extract the number in the file name
+    match = re.search(r"\d+", file_path)
+    if match:
+        number = int(match.group())
+    else:
+        number = None
+
+    df = import_df(file_path, engine="polars")
+    # Assert that CodSocietà, Cognome, Nome, Anno, Sesso, Societa, Regione are in df columns
+    assert all(
+        col in df.columns
+        for col in [
+            "CodSocietà",
+            "Cognome",
+            "Nome",
+            "Anno",
+            "Sesso",
+            "Societa",
+            "Regione",
+        ]
+    ), "Missing required columns in dataframe"
+
+    price_per_race = get_price_per_race_dialog()
+
+    if not price_per_race:
+        return
+
+    try:
+        df = compute_prices_individual(df, price_per_race)
+    except Exception as e:
+        messagebox.showerror("Errore", f"Errore durante il calcolo dei prezzi: {e}")
+        return
+    file_name = (
+        f"{number}-riepilogo-pagamenti-dettaglio-individuali.csv"
+        if number is not None
+        else "riepilogo-pagamenti-dettaglio-individuali.csv"
+    )
+    df.write_csv(file_name, separator=";")
+    messagebox.showinfo("Successo", f"Riepilogo pagamenti salvato in '{file_name}'")
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title(f"Go And UISP - App - v{__version__}@BETA")
@@ -309,5 +455,23 @@ if __name__ == "__main__":
         height=2,
     )
     btn_combinata.grid(row=7, column=0, columnspan=2, padx=20, pady=20)
+
+    # Horizontal line with text
+    label_pagamenti = tk.Label(frame, text="Pagamenti", font=("Arial", 12))
+    label_pagamenti.grid(row=8, column=0, sticky="w", padx=20)
+
+    separator = tk.Frame(frame, height=2, width=250, bg="black")
+    separator.grid(row=8, column=1, pady=10)
+
+    # Individual prices button
+    btn_individual_prices = tk.Button(
+        frame,
+        text="Calcolo costi individuali",
+        command=individual_prices,
+        font=("Arial", 12),
+        width=25,
+        height=2,
+    )
+    btn_individual_prices.grid(row=9, column=0, columnspan=2, padx=20, pady=20)
 
     root.mainloop()

@@ -25,6 +25,7 @@ from datetime import datetime
 import logging
 import random
 import pandas as pd
+import polars as pl
 
 # races dictionary: GoAndSwim -> dbMeeting
 STYLES = {"F": "Delfino", "D": "Dorso", "R": "Rana", "S": "SL", "M": "M"}
@@ -125,6 +126,56 @@ def get_category(sex: str, year: int) -> str:
         if age > max_age:
             return categories[max_age]
         return "nan"
+
+
+def compute_prices_individual(df: pl.DataFrame, price_per_race: dict) -> pl.DataFrame:
+    """
+    This function computes the total price for each athlete in the dataframe.
+
+    Parameters
+    ----------
+    df : polars.DataFrame
+        The dataframe containing the athletes' data.
+    price_per_race : dict
+        A dictionary containing the price per number of race.
+
+    Returns
+    -------
+    polars.DataFrame
+        The dataframe with the computed prices.
+    """
+    df_grouped = df.select(["CodSocietà", "Societa"]).unique().to_dict(as_series=False)
+    SOCIETA_CODE_TO_NAME = dict(zip(df_grouped["CodSocietà"], df_grouped["Societa"]))
+    N_GARE = (len(df.columns) - 7) // 2  # Subtract non-Gara columns
+    # Groupby società and count the number of races for each athlete (Cognome, Nome, Anno, Sesso)
+    df_grouped = (
+        df.group_by(["CodSocietà", "Cognome", "Nome", "Anno", "Sesso"])
+        # Compute the nGare as the count of non-null Gara{i} columns
+        .agg(
+            pl.sum_horizontal(
+                *[pl.col(f"Gara{i}").is_not_null() for i in range(1, N_GARE + 1)]
+            )
+            .sum()
+            .alias("nGare")
+        )
+        .with_columns(
+            pl.col("nGare")
+            .map_elements(lambda x: price_per_race.get(x), return_dtype=pl.Float32)
+            .alias("Totale Atleta"),
+            pl.col("CodSocietà")
+            .map_elements(
+                lambda x: SOCIETA_CODE_TO_NAME.get(x, x), return_dtype=pl.Utf8
+            )
+            .alias("Società"),
+        )
+    )
+    # Reorder columns to swap positions
+    df_grouped = df_grouped.select(
+        ["Società", "CodSocietà"]
+        + [col for col in df_grouped.columns if col not in ["Società", "CodSocietà"]]
+    )
+
+    return df_grouped
 
 
 def shrink(df: pd.core.frame.DataFrame, keep_valid_times: bool = True):
